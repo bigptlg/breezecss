@@ -1,8 +1,7 @@
-// BreezeCSS v1.0 — Biblioteca de classes dinâmicas em português
+// BreezeCSS v1.1 — Biblioteca de classes dinâmicas em português
 // Autor: Pedro de Oliveira
 
 const configPadrao = {
-    // Classes fixas (sem colchetes) - estilo Tailwind
     classesFixas: {
         // Display
         'block': 'display: block',
