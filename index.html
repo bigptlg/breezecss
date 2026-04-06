@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="pt" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BreezeCSS v2 — Documentação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+
+<style>
+/* === CSS VARIABLES - DARK THEME (Deep Blue) === */
+:root,
+[data-theme="dark"] {
+  /* Backgrounds */
+  --bg-primary: #0a1628;
+  --bg-secondary: #0f1d33;
+  --bg-card: #142238;
+  --bg-elevated: #1a2a45;
+  --bg-hover: #1e3050;
+  
+  /* Text */
+  --text-primary: #e8edf5;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-dim: #475569;
+  
+  /* Accent Colors */
+  --accent-primary: #00d4ff;
+  --accent-secondary: #0099cc;
+  --accent-glow: rgba(0, 212, 255, 0.15);
+  --accent-orange: #ff7b42;
+  --accent-purple: #a78bfa;
+  --accent-green: #34d399;
+  --accent-pink: #f472b6;
+  
+  /* Borders */
+  --border-subtle: rgba(148, 163, 184, 0.08);
+  --border-default: rgba(148, 163, 184, 0.15);
+  --border-strong: rgba(148, 163, 184, 0.25);
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 40px var(--accent-glow);
+  
+  /* Nav */
+  --nav-bg: rgba(10, 22, 40, 0.92);
+}
+
+/* === CSS VARIABLES - LIGHT THEME === */
+[data-theme="light"] {
+  /* Backgrounds */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-hover: #f1f5f9;
+  
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-dim: #cbd5e1;
+  
+  /* Accent Colors */
+  --accent-primary: #0891b2;
+  --accent-secondary: #0e7490;
+  --accent-glow: rgba(8, 145, 178, 0.12);
+  --accent-orange: #ea580c;
+  --accent-purple: #7c3aed;
+  --accent-green: #059669;
+  --accent-pink: #db2777;
+  
+  /* Borders */
+  --border-subtle: rgba(15, 23, 42, 0.06);
+  --border-default: rgba(15, 23, 42, 0.12);
+  --border-strong: rgba(15, 23, 42, 0.2);
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 30px var(--accent-glow);
+  
+  /* Nav */
+  --nav-bg: rgba(248, 250, 252, 0.88);
+}
+
+/* === RESET & BASE === */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  font-size: 16px;
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+::selection {
+  background: var(--accent-primary);
+  color: var(--bg-primary);
+}
+
+/* === CONTAINER === */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* === TYPOGRAPHY === */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+h1 { font-size: clamp(2.5rem, 6vw, 4rem); }
+h2 { 
+  font-size: clamp(2rem, 4vw, 3rem); 
+  margin-bottom: 1rem;
+}
+h3 { font-size: 1.5rem; }
+
+p {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+code {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.9em;
+  background: var(--bg-elevated);
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  color: var(--accent-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* === THEME TOGGLE === */
+.theme-toggle {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.theme-toggle-track {
+  position: absolute;
+  inset: 3px;
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="light"] .theme-toggle-thumb {
+  transform: translateX(24px);
+}
+
+.theme-toggle-icon {
+  width: 14px;
+  height: 14px;
+  position: relative;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+.theme-toggle-icon.sun { opacity: 0.4; }
+.theme-toggle-icon.moon { opacity: 0.4; }
+
+[data-theme="dark"] .theme-toggle-icon.moon { opacity: 1; }
+[data-theme="light"] .theme-toggle-icon.sun { opacity: 1; }
+
+/* === NAVIGATION === */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: var(--nav-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.nav-logo span:first-child {
+  color: var(--accent-primary);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 8px;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-links a:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.nav-links a:last-child {
+  color: var(--accent-primary);
+}
+
+.nav-links a:last-child:hover {
+  background: var(--accent-glow);
+}
+
+/* === HERO SECTION === */
+#hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding-top: 72px;
+  overflow: hidden;
+}
+
+.hero-bg-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, var(--accent-glow) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(167, 139, 250, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+  animation: heroFloat 8s ease-in-out infinite;
+}
+
+@keyframes heroFloat {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  margin-bottom: 2rem;
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(10px);
+}
+
+#hero h1 {
+  margin-bottom: 1.5rem;
+  max-width: 800px;
+}
+
+.accent {
+  color: var(--accent-primary);
+  position: relative;
+}
+
+.hero-desc {
+  font-size: 1.2rem;
+  max-width: 650px;
+  color: var(--text-secondary);
+  margin-bottom: 2.5rem;
+  line-height: 1.8;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px var(--accent-glow);
+  font-family: 'DM Sans', sans-serif;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px var(--accent-glow);
+  filter: brightness(1.1);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  border-radius: 12px;
+  border: 1px solid var(--border-default);
+  transition: all 0.3s ease;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+}
+
+.btn-ghost:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+.hero-meta {
+  display: flex;
+  gap: 48px;
+  flex-wrap: wrap;
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hero-stat-num {
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.03em;
+}
+
+.hero-stat-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 500;
+}
+
+/* === SECTIONS === */
+section {
+  padding: 120px 0;
+  position: relative;
+}
+
+.section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.section-desc {
+  font-size: 1.1rem;
+  max-width: 700px;
+  margin-bottom: 3rem;
+  color: var(--text-secondary);
+}
+
+.sub {
+  font-size: 1.25rem;
+  margin: 2.5rem 0 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.count-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--accent-glow);
+  color: var(--accent-primary);
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* === GRID LAYOUTS === */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === CARDS === */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 32px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--border-default);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.card h3 {
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.card p {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin-bottom: 0;
+}
+
+/* === CODE BLOCKS === */
+.code-block {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  overflow: hidden;
+  margin: 1.5rem 0;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-family: 'Space Mono', monospace;
+}
+
+.code-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.code-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--border-default);
+}
+
+.code-dots span:nth-child(1) { background: #ff5f57; }
+.code-dots span:nth-child(2) { background: #febc2e; }
+.code-dots span:nth-child(3) { background: #28c840; }
+
+.code-block pre {
+  padding: 24px;
+  overflow-x: auto;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+
+.code-block pre .tag { color: var(--accent-orange); }
+.code-block pre .attr { color: var(--accent-primary); }
+.code-block pre .str { color: var(--accent-green); }
+.code-block pre .cm { color: var(--text-muted); font-style: italic; }
+.code-block pre .kw { color: var(--accent-purple); }
+.code-block pre .fn { color: var(--accent-primary); }
+
+/* === TABS === */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 2rem;
+  background: var(--bg-elevated);
+  padding: 6px;
+  border-radius: 12px;
+  width: fit-content;
+  border: 1px solid var(--border-subtle);
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.tab-btn.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.tab-btn:hover:not(.active) {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.tab-panel {
+  display: none;
+}
+
+.tab-panel.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === CALLOUTS === */
+.callout {
+  background: var(--bg-elevated);
+  border-left: 4px solid var(--accent-primary);
+  padding: 20px 24px;
+  border-radius: 0 12px 12px 0;
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.callout-warn {
+  border-left-color: var(--accent-orange);
+}
+
+.callout strong {
+  color: var(--accent-primary);
+}
+
+.callout-warn strong {
+  color: var(--accent-orange);
+}
+
+/* === TABLE === */
+.search-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.search-wrapper input {
+  width: 100%;
+  max-width: 400px;
+  padding: 14px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.search-wrapper input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.search-wrapper input::placeholder {
+  color: var(--text-muted);
+}
+
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.filter-btn:hover {
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.filter-btn.active {
+  background: var(--accent-primary);
+  color: white;
+  border-color: var(--accent-primary);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--bg-card);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+thead {
+  background: var(--bg-elevated);
+}
+
+th {
+  padding: 16px 20px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+td {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+tbody tr {
+  transition: background 0.2s ease;
+}
+
+tbody tr:hover {
+  background: var(--bg-hover);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tag-cat {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: 'Space Mono', monospace;
+}
+
+.tag-spacing { background: rgba(0, 212, 255, 0.12); color: var(--accent-primary); }
+.tag-layout { background: rgba(167, 139, 250, 0.12); color: var(--accent-purple); }
+.tag-color { background: rgba(52, 211, 153, 0.12); color: var(--accent-green); }
+.tag-fx { background: rgba(255, 123, 66, 0.12); color: var(--accent-orange); }
+.tag-transform { background: rgba(244, 114, 182, 0.12); color: var(--accent-pink); }
+.tag-grid { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
+.tag-anim { background: rgba(251, 191, 36, 0.12); color: #fbbf24; }
+.tag-misc { background: rgba(148, 163, 184, 0.12); color: #94a3b8; }
+
+/* === PILL GRID (Breakpoints & Variants) === */
+.pill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.pill:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-hover);
+}
+
+.pill-key {
+  font-family: 'Space Mono', monospace;
+  font-weight: 700;
+  color: var(--accent-primary);
+  font-size: 0.85rem;
+}
+
+.pill-arrow {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.pill-val {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* === FLAG GRID (Fixed Classes) === */
+.flag-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.flag-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.flag-item:hover {
+  border-color: var(--border-default);
+  transform: translateX(4px);
+}
+
+.flag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  flex-shrink: 0;
+}
+
+.flag-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* === API METHODS === */
+.api-method {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.api-method:hover {
+  border-color: var(--border-default);
+}
+
+.api-name {
+  display: block;
+  font-family: 'Space Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  margin-bottom: 6px;
+}
+
+.api-sig {
+  display: block;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.api-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+
+/* === AUTHOR CARD === */
+.author-card {
+  display: flex;
+  gap: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 40px;
+  align-items: flex-start;
+}
+
+.author-avatar {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: white;
+  flex-shrink: 0;
+}
+
+.author-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+
+.author-title {
+  color: var(--accent-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.author-bio {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.social-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.social-link svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.social-link:hover {
+  border-color: var(--border-default);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.social-link.github:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* === FOOTER === */
+footer {
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-subtle);
+  padding: 60px 0;
+  text-align: center;
+}
+
+footer p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+footer a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+footer a:hover {
+  color: var(--accent-primary);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 1024px) {
+  nav {
+    padding: 0 20px;
+  }
+  
+  .nav-links {
+    display: none;
+  }
+  
+  section {
+    padding: 80px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --nav-height: 64px;
+  }
+  
+  .container {
+    padding: 0 16px;
+  }
+  
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.8rem; }
+  
+  .hero-meta {
+    gap: 32px;
+  }
+  
+  .hero-stat-num {
+    font-size: 1.5rem;
+  }
+  
+  .hero-actions {
+    flex-direction: column;
+  }
+  
+  .btn-primary,
+  .btn-ghost {
+    justify-content: center;
+  }
+  
+  .author-card {
+    flex-direction: column;
+    padding: 24px;
+  }
+  
+  .pill-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .flag-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .tabs {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .tab-btn {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .filter-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+  }
+  
+  footer {
+    padding: 40px 0;
+  }
+  
+  .nav-right {
+    gap: 16px;
+  }
+}
+
+/* === SCROLL REVEAL ANIMATION === */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* === CUSTOM SCROLLBAR === */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* === UTILITY CLASSES FOR DEMO === */
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-16 { gap: 16px; }
+.font-bold { font-weight: 700; }
+.uppercase { text-transform: uppercase; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rounded-lg { border-radius: 12px; }
+.cursor-pointer { cursor: pointer; }
+.transition { transition: all 0.3s ease; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+</style>
+
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">Breeze<span>CSS</span> <span style="color:var(--text-muted);font-size:0.65rem">v2.0</span></a>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="#instalacao">Instalar</a></li>
+      <li><a href="#prefixos">Prefixos</a></li>
+      <li><a href="#variantes">Variantes</a></li>
+      <li><a href="#api">API</a></li>
+      <li><a href="#plugins">Plugins</a></li>
+      <li><a href="#autor">Autor</a></li>
+      <li><a href="https://github.com/bigptlg/breezecss" target="_blank">GitHub ↗</a></li>
+    </ul>
+    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Alternar tema">
+      <div class="theme-toggle-track">
+        <svg class="theme-toggle-icon moon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+        <svg class="theme-toggle-icon sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </div>
+      <div class="theme-toggle-thumb"></div>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg-pattern"></div>
+  <div class="container">
+    <div class="hero-badge">v2.0.0 — Stable</div>
+    <h1>Utility CSS<br><span class="accent">sem build.</span></h1>
+    <p class="hero-desc">
+      BreezeCSS é uma biblioteca de classes utilitárias em runtime puro — sem compiladores, sem PostCSS, sem configuração. Apenas inclua um ficheiro e escreva HTML.
+    </p>
+    <div class="hero-actions">
+      <a href="#instalacao" class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Começar agora
+      </a>
+      <a href="https://github.com/bigptlg/breezecss" target="_blank" class="btn-ghost">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+        GitHub
+      </a>
+    </div>
+    <div class="hero-meta">
+      <div class="hero-stat"><span class="hero-stat-num">0kb</span><span class="hero-stat-label">Build step</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">100+</span><span class="hero-stat-label">Classes fixas</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">60+</span><span class="hero-stat-label">Prefixos</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">∞</span><span class="hero-stat-label">Valores arbitrários</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMO FUNCIONA -->
+<section id="como-funciona">
+  <div class="container">
+    <div class="section-label">O conceito</div>
+    <h2>CSS em runtime,<br>sem surpresas.</h2>
+    <p class="section-desc">
+      O BreezeCSS observa o DOM com um <code>MutationObserver</code> e gera regras CSS a pedido, inserindo-as numa <code>&lt;style&gt;</code> gerida automaticamente. Sem pré-compilação.
+    </p>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <h3>Runtime puro</h3>
+        <p>Nenhuma etapa de build. O motor lê as classes do HTML e gera o CSS correspondente directamente no browser, com cache inteligente para evitar re-processamento.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔭</div>
+        <h3>MutationObserver</h3>
+        <p>Detecta automaticamente novos elementos adicionados ao DOM (via JS, frameworks, etc.) e aplica os estilos correspondentes sem que seja necessário chamar nada manualmente.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <h3>Valores arbitrários</h3>
+        <p>Qualquer valor CSS é válido: <code>p[23px]</code>, <code>bg[#ff0]</code>, <code>text-size[clamp(1rem,2vw,2rem)]</code>. Sem lista pré-definida de valores.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔌</div>
+        <h3>Extensível via plugins</h3>
+        <p>Adicione prefixos, variantes, breakpoints e processadores personalizados através de uma API clara de plugins, sem alterar o core da biblioteca.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INSTALAÇÃO -->
+<section id="instalacao">
+  <div class="container">
+    <div class="section-label">Instalação</div>
+    <h2>Dois métodos,<br>zero complexidade.</h2>
+    <p class="section-desc">Escolha entre incluir o bundle directamente via <code>&lt;script&gt;</code> ou usar módulos ES para integrações mais avançadas.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(event,'cdn')">Bundle (CDN / Ficheiro)</button>
+      <button class="tab-btn" onclick="switchTab(event,'esm')">Módulos ES</button>
+    </div>
+
+    <!-- TAB CDN -->
+    <div class="tab-panel active" id="tab-cdn">
+
+      <h3 class="sub">Método 1 — Script directo <span class="count-badge">Recomendado</span></h3>
+      <p style="color:var(--text-dim);margin-bottom:1rem;font-size:0.9rem;">
+        Inclua o <code>breeze.bundle.js</code> no seu HTML. A biblioteca inicializa-se automaticamente quando o DOM estiver pronto.
+      </p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span>index.html</span>
+        </div>
+        <pre><span class="tag">&lt;!DOCTYPE html&gt;</span>
+<span class="tag">&lt;html</span> <span class="attr">lang</span>=<span class="str">"pt"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;head&gt;</span>
+  <span class="tag">&lt;meta</span> <span class="attr">charset</span>=<span class="str">"UTF-8"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;title&gt;</span>A minha app<span class="tag">&lt;/title&gt;</span>
+
+  <span class="cm">&lt;!-- Incluir BreezeCSS bundle --&gt;</span>
+  <span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="str">"breeze.bundle.js"</span><span class="tag">&gt;&lt;/script&gt;</span>
+<span class="tag">&lt;/head&gt;</span>
+<span class="tag">&lt;body&gt;</span>
+
+  <span class="cm">&lt;!-- As classes são aplicadas automaticamente --&gt;</span>
+  <span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"flex items-center justify-between p[24px] bg[#111]"</span><span class="tag">&gt;</span>
+    <span class="tag">&lt;h1</span> <span class="attr">class</span>=<span class="str">"text-size[2rem] font-bold text[white]"</span><span class="tag">&gt;</span>Olá!<span class="tag">&lt;/h1&gt;</span>
+    <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="str">"px[20px] py[10px] bg[#00ff88] rounded-lg cursor-pointer hover:bg[#00cc6a] transition"</span><span class="tag">&gt;</span>
+      Clicar
+    <span class="tag">&lt;/button&gt;</span>
+  <span class="tag">&lt;/div&gt;</span>
+
+<span class="tag">&lt;/body&gt;</span>
+<span class="tag">&lt;/html&gt;</span></pre>
+      </div>
+
+      <div class="callout">
+        <strong>Auto-init:</strong> Ao incluir o bundle via <code>&lt;script&gt;</code>, a biblioteca inicializa-se automaticamente. Para desactivar, adicione o atributo <code>data-no-auto-init</code> à tag script.
+      </div>
+
+      <h3 class="sub">Configuração inline (opcional)</h3>
+      <p style="color:var(--text-dim);margin-bottom:1rem;font-size:0.9rem;">
+        Defina <code>window.BreezeConfig</code> <strong>antes</strong> do script para personalizar o tema, breakpoints e mais.
+      </p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span>config inline</span>
+        </div>
+        <pre><span class="tag">&lt;script&gt;</span>
+<span class="cm">  // Definir ANTES de carregar o bundle</span>
+  <span class="kw">window</span>.<span class="fn">BreezeConfig</span> = {
+    debug: <span class="kw">false</span>,
+    tema: {
+      cores: {
+        primario: <span class="str">'#00ff88'</span>,
+        secundario: <span class="str">'#1a1a2e'</span>,
+        accent: <span class="str">'rgb(255,100,0)'</span>
+      },
+      espacamento: {
+        sm: <span class="str">'8px'</span>,
+        md: <span class="str">'16px'</span>,
+        lg: <span class="str">'32px'</span>
+      }
+    },
+    breakpoints: {
+      tablet: <span class="str">'900px'</span>,  <span class="cm">// breakpoint extra</span>
+    }
+  };
+<span class="tag">&lt;/script&gt;</span>
+<span class="tag">&lt;script</span> <span class="attr">src</span>=<span class="str">"breeze.bundle.js"</span><span class="tag">&gt;&lt;/script&gt;</span></pre>
+      </div>
+    </div>
+
+    <!-- TAB ESM -->
+    <div class="tab-panel" id="tab-esm">
+
+      <h3 class="sub">Método 2 — Módulos ES</h3>
+      <p style="color:var(--text-dim);margin-bottom:1rem;font-size:0.9rem;">
+        Para projetos que usam bundlers (Vite, Webpack, Rollup) ou queiram controlo total sobre a inicialização.
+      </p>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span>main.js — import básico</span>
+        </div>
+        <pre><span class="cm">// Importar a biblioteca (auto-init via DOM load)</span>
+<span class="kw">import</span> <span class="str">'./breeze.js'</span>;</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span>main.js — import com configuração avançada</span>
+        </div>
+        <pre><span class="kw">import</span> BreezeCSS <span class="kw">from</span> <span class="str">'./breeze.js'</span>;
+
+<span class="cm">// Desactivar auto-init e inicializar manualmente</span>
+BreezeCSS.<span class="fn">init</span>({
+  debug: <span class="kw">true</span>,
+  reset: <span class="kw">true</span>,
+  tema: {
+    cores: {
+      primario: <span class="str">'#00ff88'</span>,
+      bg: <span class="str">'#0a0d0f'</span>
+    },
+    espacamento: {
+      base: <span class="str">'16px'</span>,
+      xl: <span class="str">'48px'</span>
+    }
+  },
+  breakpoints: {
+    xxl: <span class="str">'1800px'</span>  <span class="cm">// adicionar ao topo dos existentes</span>
+  },
+  plugins: [meuPlugin]
+});</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <div class="code-dots"><span></span><span></span><span></span></div>
+          <span>estrutura de ficheiros — módulos</span>
+        </div>
+        <pre>projeto/
+├── <span class="str">breeze.js</span>           <span class="cm"># ponto de entrada</span>
+└── core/
+    ├── <span class="str">engine.js</span>       <span class="cm"># motor principal</span>
+    ├── <span class="str">parser.js</span>       <span class="cm"># interpretação de classes</span>
+    ├── <span class="str">renderer.js</span>     <span class="cm"># geração e injecção de CSS</span>
+    ├── <span class="str">cache.js</span>        <span class="cm"># cache inteligente</span>
+    ├── <span class="str">observer.js</span>     <span class="cm"># MutationObserver</span>
+    └── <span class="str">logger.js</span>       <span class="cm"># sistema de logging</span></pre>
+      </div>
+
+      <div class="callout callout-warn">
+        <strong>Nota:</strong> O ficheiro <code>breeze.js</code> contém o atributo <code>data-no-auto-init</code> para desactivar a inicialização automática quando for necessário controlo manual.
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SINTAXE -->
+<section id="sintaxe">
+  <div class="container">
+    <div class="section-label">Sintaxe</div>
+    <h2>Como escrever classes.</h2>
+    <p class="section-desc">O BreezeCSS usa uma sintaxe expressiva com suporte a breakpoints, variantes e valores arbitrários.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <div class="code-dots"><span></span><span></span><span></span></div>
+        <span>anatomia de uma classe</span>
+      </div>
+      <pre><span class="cm">  [breakpoint:]  [variante:]  prefixo[valor]
+       md:          hover:      bg[#00ff88]
+
+  Exemplos:
+</span>
+  p<span class="str">[20px]</span>                  <span class="cm">→ padding: 20px</span>
+  hover:bg<span class="str">[red]</span>             <span class="cm">→ background-color: red on :hover</span>
+  md:text-size<span class="str">[1.5rem]</span>     <span class="cm">→ font-size: 1.5rem at ≥768px</span>
+  md:hover:border<span class="str">[2px]</span>    <span class="cm">→ border-width: 2px at ≥768px on :hover</span>
+  bg<span class="str">[to_right,red,blue]</span>    <span class="cm">→ underscores viram espaços</span>
+  text<span class="str">[primario]</span>           <span class="cm">→ resolve alias do tema</span></pre>
+    </div>
+
+    <div class="grid-2" style="margin-top:2rem">
+      <div class="code-block" style="margin:0">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span>classes fixas</span></div>
+        <pre><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"flex items-center gap[16px]"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;span</span> <span class="attr">class</span>=<span class="str">"font-bold uppercase truncate"</span><span class="tag">&gt;</span>
+    Título
+  <span class="tag">&lt;/span&gt;</span>
+<span class="tag">&lt;/div&gt;</span></pre>
+      </div>
+      <div class="code-block" style="margin:0">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span>valores arbitrários</span></div>
+        <pre><span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"w[min(100%,480px)]
+       bg[oklch(60%_0.2_240)]
+       text-size[clamp(1rem,3vw,2rem)]"</span><span class="tag">&gt;</span>
+  Conteúdo
+<span class="tag">&lt;/div&gt;</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PREFIXOS -->
+<section id="prefixos">
+  <div class="container">
+    <div class="section-label">Referência</div>
+    <h2>Todos os prefixos. <span class="count-badge">60+</span></h2>
+    <p class="section-desc">Todos os prefixos disponíveis que mapeiam para propriedades CSS. Use com qualquer valor arbitrário: <code>prefixo[valor]</code>.</p>
+
+    <div class="search-wrapper">
+      <input type="text" id="tableSearch" placeholder="Filtrar prefixos..." oninput="filterTable(this.value)">
+    </div>
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCategory(this,'all')">Todos</button>
+      <button class="filter-btn" onclick="filterCategory(this,'spacing')">Espaçamento</button>
+      <button class="filter-btn" onclick="filterCategory(this,'color')">Cor / BG</button>
+      <button class="filter-btn" onclick="filterCategory(this,'layout')">Layout / Dim.</button>
+      <button class="filter-btn" onclick="filterCategory(this,'fx')">Efeitos</button>
+      <button class="filter-btn" onclick="filterCategory(this,'transform')">Transforms</button>
+      <button class="filter-btn" onclick="filterCategory(this,'grid')">Grid</button>
+      <button class="filter-btn" onclick="filterCategory(this,'anim')">Animações</button>
+      <button class="filter-btn" onclick="filterCategory(this,'misc')">Misc</button>
+    </div>
+    <div class="table-wrapper">
+      <table id="prefixTable">
+        <thead>
+          <tr>
+            <th>Prefixo</th>
+            <th>Propriedade CSS</th>
+            <th>Categoria</th>
+            <th>Exemplo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- ESPAÇAMENTO -->
+          <tr data-cat="spacing"><td>m</td><td>margin</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>m[16px]</td></tr>
+          <tr data-cat="spacing"><td>mt</td><td>margin-top</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>mt[8px]</td></tr>
+          <tr data-cat="spacing"><td>mr</td><td>margin-right</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>mr[4px]</td></tr>
+          <tr data-cat="spacing"><td>mb</td><td>margin-bottom</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>mb[24px]</td></tr>
+          <tr data-cat="spacing"><td>ml</td><td>margin-left</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>ml[auto]</td></tr>
+          <tr data-cat="spacing"><td>mx</td><td>margin-inline</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>mx[auto]</td></tr>
+          <tr data-cat="spacing"><td>my</td><td>margin-block</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>my[32px]</td></tr>
+          <tr data-cat="spacing"><td>p</td><td>padding</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>p[20px]</td></tr>
+          <tr data-cat="spacing"><td>pt</td><td>padding-top</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>pt[12px]</td></tr>
+          <tr data-cat="spacing"><td>pr</td><td>padding-right</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>pr[8px]</td></tr>
+          <tr data-cat="spacing"><td>pb</td><td>padding-bottom</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>pb[12px]</td></tr>
+          <tr data-cat="spacing"><td>pl</td><td>padding-left</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>pl[8px]</td></tr>
+          <tr data-cat="spacing"><td>px</td><td>padding-inline</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>px[16px]</td></tr>
+          <tr data-cat="spacing"><td>py</td><td>padding-block</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>py[8px]</td></tr>
+          <tr data-cat="spacing"><td>gap</td><td>gap</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>gap[16px]</td></tr>
+          <tr data-cat="spacing"><td>gap-x</td><td>column-gap</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>gap-x[24px]</td></tr>
+          <tr data-cat="spacing"><td>gap-y</td><td>row-gap</td><td><span class="tag-cat tag-spacing">Espaçamento</span></td><td>gap-y[8px]</td></tr>
+          <!-- LAYOUT / DIM -->
+          <tr data-cat="layout"><td>w</td><td>width</td><td><span class="tag-cat tag-layout">Layout</span></td><td>w[100%]</td></tr>
+          <tr data-cat="layout"><td>h</td><td>height</td><td><span class="tag-cat tag-layout">Layout</span></td><td>h[60px]</td></tr>
+          <tr data-cat="layout"><td>min-w</td><td>min-width</td><td><span class="tag-cat tag-layout">Layout</span></td><td>min-w[320px]</td></tr>
+          <tr data-cat="layout"><td>min-h</td><td>min-height</td><td><span class="tag-cat tag-layout">Layout</span></td><td>min-h[100vh]</td></tr>
+          <tr data-cat="layout"><td>max-w</td><td>max-width</td><td><span class="tag-cat tag-layout">Layout</span></td><td>max-w[1200px]</td></tr>
+          <tr data-cat="layout"><td>max-h</td><td>max-height</td><td><span class="tag-cat tag-layout">Layout</span></td><td>max-h[80vh]</td></tr>
+          <tr data-cat="layout"><td>size</td><td>width; height</td><td><span class="tag-cat tag-layout">Layout</span></td><td>size[48px]</td></tr>
+          <tr data-cat="layout"><td>top</td><td>top</td><td><span class="tag-cat tag-layout">Layout</span></td><td>top[0]</td></tr>
+          <tr data-cat="layout"><td>right</td><td>right</td><td><span class="tag-cat tag-layout">Layout</span></td><td>right[16px]</td></tr>
+          <tr data-cat="layout"><td>bottom</td><td>bottom</td><td><span class="tag-cat tag-layout">Layout</span></td><td>bottom[0]</td></tr>
+          <tr data-cat="layout"><td>left</td><td>left</td><td><span class="tag-cat tag-layout">Layout</span></td><td>left[0]</td></tr>
+          <tr data-cat="layout"><td>z</td><td>z-index</td><td><span class="tag-cat tag-layout">Layout</span></td><td>z[10]</td></tr>
+          <tr data-cat="layout"><td>inset</td><td>inset</td><td><span class="tag-cat tag-layout">Layout</span></td><td>inset[0]</td></tr>
+          <!-- COR / BG -->
+          <tr data-cat="color"><td>bg</td><td>background-color</td><td><span class="tag-cat tag-color">Cor</span></td><td>bg[#222]</td></tr>
+          <tr data-cat="color"><td>text</td><td>color</td><td><span class="tag-cat tag-color">Cor</span></td><td>text[white]</td></tr>
+          <tr data-cat="color"><td>border-color</td><td>border-color</td><td><span class="tag-cat tag-color">Cor</span></td><td>border-color[#eee]</td></tr>
+          <tr data-cat="color"><td>outline-color</td><td>outline-color</td><td><span class="tag-cat tag-color">Cor</span></td><td>outline-color[blue]</td></tr>
+          <tr data-cat="color"><td>bg-gradient</td><td>background-image</td><td><span class="tag-cat tag-color">Cor</span></td><td>bg-gradient[to_right,red,blue]</td></tr>
+          <tr data-cat="color"><td>bg-image</td><td>background-image</td><td><span class="tag-cat tag-color">Cor</span></td><td>bg-image[url(img.jpg)]</td></tr>
+          <tr data-cat="color"><td>bg-size</td><td>background-size</td><td><span class="tag-cat tag-color">Cor</span></td><td>bg-size[cover]</td></tr>
+          <tr data-cat="color"><td>bg-pos</td><td>background-position</td><td><span class="tag-cat tag-color">Cor</span></td><td>bg-pos[center]</td></tr>
+          <tr data-cat="color"><td>bg-repeat</td><td>background-repeat</td><td><span class="tag-cat tag-color">Cor</span></td><td>bg-repeat[no-repeat]</td></tr>
+          <!-- TIPOGRAFIA -->
+          <tr data-cat="misc"><td>text-size</td><td>font-size</td><td><span class="tag-cat tag-misc">Tipografia</span></td><td>text-size[1.5rem]</td></tr>
+          <tr data-cat="misc"><td>font-size</td><td>font-size</td><td><span class="tag-cat tag-misc">Tipografia</span></td><td>font-size[14px]</td></tr>
+          <tr data-cat="misc"><td>leading</td><td>line-height</td><td><span class="tag-cat tag-misc">Tipografia</span></td><td>leading[1.6]</td></tr>
+          <tr data-cat="misc"><td>tracking</td><td>letter-spacing</td><td><span class="tag-cat tag-misc">Tipografia</span></td><td>tracking[0.05em]</td></tr>
+          <tr data-cat="misc"><td>font-family</td><td>font-family</td><td><span class="tag-cat tag-misc">Tipografia</span></td><td>font-family[Inter,sans-serif]</td></tr>
+          <!-- BORDAS -->
+          <tr data-cat="misc"><td>border</td><td>border-width</td><td><span class="tag-cat tag-misc">Bordas</span></td><td>border[1px]</td></tr>
+          <tr data-cat="misc"><td>border-t</td><td>border-top-width</td><td><span class="tag-cat tag-misc">Bordas</span></td><td>border-t[2px]</td></tr>
+          <tr data-cat="misc"><td>border-r</td><td>border-right-width</td><td><span class="tag-cat tag-misc">Bordas</span></td><td>border-r[1px]</td></tr>
+          <tr data-cat="misc"><td>border-b</td><td>border-bottom-width</td><td><span class="tag-cat tag-misc">Bordas</span></td><td>border-b[2px]</td></tr>
+          <tr data-cat="misc"><td>border-l</td><td>border-left-width</td><td><span class="tag-cat tag-misc">Bordas</span></td><td>border-l[1px]</td></tr>
+          <tr data-cat="misc"><td>rounded</td><td>border-radius</td><td><span class="tag-cat tag-misc">Bordas</span></td><td>rounded[8px]</td></tr>
+          <!-- EFEITOS -->
+          <tr data-cat="fx"><td>opacity</td><td>opacity</td><td><span class="tag-cat tag-fx">Efeitos</span></td><td>opacity[0.5]</td></tr>
+          <tr data-cat="fx"><td>shadow</td><td>box-shadow</td><td><span class="tag-cat tag-fx">Efeitos</span></td><td>shadow[0_4px_12px_rgba(0,0,0,0.3)]</td></tr>
+          <tr data-cat="fx"><td>blur</td><td>filter: blur()</td><td><span class="tag-cat tag-fx">Efeitos</span></td><td>blur[8px]</td></tr>
+          <tr data-car="fx"><td>brightness</td><td>filter: brightness()</td><td><span class="tag-cat tag-fx">Efeitos</span></td><td>brightness[1.2]</td></tr>
+          <tr data-cat="fx"><td>contrast</td><td>filter: contrast()</td><td><span class="tag-cat tag-fx">Efeitos</span></td><td>contrast[1.1]</td></tr>
+          <tr data-cat="fx"><td>grayscale</td><td>filter: grayscale()</td><td><span class="tag-cat tag-fx">Efeitos</span></td><td>grayscale[100%]</td></tr>
+          <tr data-cat="fx"><td>saturate</td><td>filter: saturate()</td><td><span class="tag-cat tag-fx">Efeitos</span></td><td>saturate[1.5]</td></tr>
+          <tr data-cat="fx"><td>drop-shadow</td><td>filter: drop-shadow()</td><td><span class="tag-cat tag-fx">Efeitos</span></td><td>drop-shadow[0_4px_6px_#0004]</td></tr>
+          <tr data-cat="fx"><td>backdrop-blur</td><td>backdrop-filter: blur()</td><td><span class="tag-cat tag-fx">Efeitos</span></td><td>backdrop-blur[12px]</td></tr>
+          <tr data-cat="fx"><td>ring</td><td>box-shadow (ring)</td><td><span class="tag-cat tag-fx">Efeitos</span></td><td>ring[3px]</td></tr>
+          <!-- TRANSFORMS -->
+          <tr data-cat="transform"><td>rotate</td><td>transform: rotate()</td><td><span class="tag-cat tag-transform">Transform</span></td><td>rotate[45deg]</td></tr>
+          <tr data-cat="transform"><td>scale</td><td>transform: scale()</td><td><span class="tag-cat tag-transform">Transform</span></td><td>scale[1.1]</td></tr>
+          <tr data-cat="transform"><td>scale-x</td><td>transform: scaleX()</td><td><span class="tag-cat tag-transform">Transform</span></td><td>scale-x[0.8]</td></tr>
+          <tr data-cat="transform"><td>scale-y</td><td>transform: scaleY()</td><td><span class="tag-cat tag-transform">Transform</span></td><td>scale-y[1.2]</td></tr>
+          <tr data-cat="transform"><td>translate-x</td><td>transform: translateX()</td><td><span class="tag-cat tag-transform">Transform</span></td><td>translate-x[10px]</td></tr>
+          <tr data-cat="transform"><td>translate-y</td><td>transform: translateY()</td><td><span class="tag-cat tag-transform">Transform</span></td><td>translate-y[-50%]</td></tr>
+          <tr data-cat="transform"><td>skew-x</td><td>transform: skewX()</td><td><span class="tag-cat tag-transform">Transform</span></td><td>skew-x[5deg]</td></tr>
+          <tr data-cat="transform"><td>skew-y</td><td>transform: skewY()</td><td><span class="tag-cat tag-transform">Transform</span></td><td>skew-y[3deg]</td></tr>
+          <!-- GRID -->
+          <tr data-cat="grid"><td>cols</td><td>grid-template-columns</td><td><span class="tag-cat tag-grid">Grid</span></td><td>cols[3] ou cols[1fr_2fr]</td></tr>
+          <tr data-cat="grid"><td>rows</td><td>grid-template-rows</td><td><span class="tag-cat tag-grid">Grid</span></td><td>rows[auto_1fr]</td></tr>
+          <tr data-cat="grid"><td>col-span</td><td>grid-column</td><td><span class="tag-cat tag-grid">Grid</span></td><td>col-span[2]</td></tr>
+          <tr data-cat="grid"><td>row-span</td><td>grid-row</td><td><span class="tag-cat tag-grid">Grid</span></td><td>row-span[3]</td></tr>
+          <!-- ANIMAÇÕES -->
+          <tr data-cat="anim"><td>duration</td><td>transition-duration</td><td><span class="tag-cat tag-anim">Animação</span></td><td>duration[300ms]</td></tr>
+          <tr data-cat="anim"><td>delay</td><td>transition-delay</td><td><span class="tag-cat tag-anim">Animação</span></td><td>delay[150ms]</td></tr>
+          <tr data-cat="anim"><td>ease</td><td>transition-timing-function</td><td><span class="tag-cat tag-anim">Animação</span></td><td>ease[ease-in-out]</td></tr>
+          <tr data-cat="anim"><td>animate</td><td>animation</td><td><span class="tag-cat tag-anim">Animação</span></td><td>animate[mySpin_1s_infinite]</td></tr>
+          <!-- MISC -->
+          <tr data-cat="misc"><td>content</td><td>content</td><td><span class="tag-cat tag-misc">Misc</span></td><td>before:content['★']</td></tr>
+          <tr data-cat="misc"><td>cursor</td><td>cursor</td><td><span class="tag-cat tag-misc">Misc</span></td><td>cursor[crosshair]</td></tr>
+          <tr data-cat="misc"><td>outline</td><td>outline</td><td><span class="tag-cat tag-misc">Misc</span></td><td>outline[2px_solid_red]</td></tr>
+          <tr data-cat="misc"><td>aspect</td><td>aspect-ratio</td><td><span class="tag-cat tag-misc">Misc</span></td><td>aspect[video] / aspect[16/9]</td></tr>
+          <tr data-cat="misc"><td>columns</td><td>columns</td><td><span class="tag-cat tag-misc">Misc</span></td><td>columns[3]</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout" style="margin-top:1.5rem">
+      <strong>Processadores especiais:</strong> Os prefixos <code>blur</code>, <code>brightness</code>, <code>contrast</code>, <code>grayscale</code>, <code>saturate</code>, <code>drop-shadow</code>, <code>backdrop-blur</code>, <code>bg-gradient</code>, <code>cols</code>, <code>col-span</code>, <code>row-span</code>, <code>ring</code> e <code>aspect</code> têm processadores que transformam automaticamente o valor antes de o aplicar (ex: <code>cols[3]</code> → <code>repeat(3, 1fr)</code>).
+    </div>
+  </div>
+</section>
+
+<!-- VARIANTES E BREAKPOINTS -->
+<section id="variantes">
+  <div class="container">
+    <div class="section-label">Variantes &amp; Breakpoints</div>
+    <h2>Pseudo-classes e responsividade.</h2>
+    <p class="section-desc">Combine qualquer prefixo com variantes e breakpoints. A ordem é sempre: <code>breakpoint:variante:classe</code>.</p>
+
+    <div class="grid-2">
+      <div>
+        <h3 class="sub">Breakpoints padrão</h3>
+        <div class="pill-grid">
+          <div class="pill"><span class="pill-key">sm</span><span class="pill-arrow">→</span><span class="pill-val">≥ 640px</span></div>
+          <div class="pill"><span class="pill-key">md</span><span class="pill-arrow">→</span><span class="pill-val">≥ 768px</span></div>
+          <div class="pill"><span class="pill-key">lg</span><span class="pill-arrow">→</span><span class="pill-val">≥ 1024px</span></div>
+          <div class="pill"><span class="pill-key">xl</span><span class="pill-arrow">→</span><span class="pill-val">≥ 1280px</span></div>
+          <div class="pill"><span class="pill-key">2xl</span><span class="pill-arrow">→</span><span class="pill-val">≥ 1536px</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 class="sub">Variantes padrão</h3>
+        <div class="pill-grid">
+          <div class="pill"><span class="pill-key">hover</span><span class="pill-arrow">→</span><span class="pill-val">:hover</span></div>
+          <div class="pill"><span class="pill-key">active</span><span class="pill-arrow">→</span><span class="pill-val">:active</span></div>
+          <div class="pill"><span class="pill-key">focus</span><span class="pill-arrow">→</span><span class="pill-val">:focus</span></div>
+          <div class="pill"><span class="pill-key">focus-visible</span><span class="pill-arrow">→</span><span class="pill-val">:focus-visible</span></div>
+          <div class="pill"><span class="pill-key">visited</span><span class="pill-arrow">→</span><span class="pill-val">:visited</span></div>
+          <div class="pill"><span class="pill-key">disabled</span><span class="pill-arrow">→</span><span class="pill-val">:disabled</span></div>
+          <div class="pill"><span class="pill-key">checked</span><span class="pill-arrow">→</span><span class="pill-val">:checked</span></div>
+          <div class="pill"><span class="pill-key">first</span><span class="pill-arrow">→</span><span class="pill-val">:first-child</span></div>
+          <div class="pill"><span class="pill-key">last</span><span class="pill-arrow">→</span><span class="pill-val">:last-child</span></div>
+          <div class="pill"><span class="pill-key">even</span><span class="pill-arrow">→</span><span class="pill-val">:nth-child(even)</span></div>
+          <div class="pill"><span class="pill-key">odd</span><span class="pill-arrow">→</span><span class="pill-val">:nth-child(odd)</span></div>
+          <div class="pill"><span class="pill-key">placeholder</span><span class="pill-arrow">→</span><span class="pill-val">::placeholder</span></div>
+          <div class="pill"><span class="pill-key">before</span><span class="pill-arrow">→</span><span class="pill-val">::before</span></div>
+          <div class="pill"><span class="pill-key">after</span><span class="pill-arrow">→</span><span class="pill-val">::after</span></div>
+          <div class="pill"><span class="pill-key">dark</span><span class="pill-arrow">→</span><span class="pill-val">.dark &amp;</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block" style="margin-top:2rem">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span>exemplos combinados</span></div>
+      <pre><span class="cm">&lt;!-- Responsivo: esconder em mobile, mostrar em md --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"hidden md:block"</span><span class="tag">&gt;</span>Apenas desktop<span class="tag">&lt;/div&gt;</span>
+
+<span class="cm">&lt;!-- Hover com transição --&gt;</span>
+<span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="str">"bg[#222] hover:bg[#00ff88] hover:text[black] transition duration[200ms]"</span><span class="tag">&gt;</span>
+  Botão
+<span class="tag">&lt;/button&gt;</span>
+
+<span class="cm">&lt;!-- Dark mode via classe .dark no html --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"bg[white] text[black] dark:bg[#111] dark:text[white]"</span><span class="tag">&gt;</span>
+  Adapta-se ao modo escuro
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="cm">&lt;!-- Pseudo-elementos --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"relative before:content[''] before:absolute before:inset[0]"</span><span class="tag">&gt;</span>
+  Com pseudo-elemento
+<span class="tag">&lt;/div&gt;</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- CLASSES FIXAS -->
+<section id="classes-fixas">
+  <div class="container">
+    <div class="section-label">Classes sem valor</div>
+    <h2>Classes fixas. <span class="count-badge">100+</span></h2>
+    <p class="section-desc">Classes pré-definidas sem valor arbitrário — comportamentos comuns prontos a usar.</p>
+
+    <div class="grid-2">
+      <div>
+        <h3 class="sub">Display &amp; Flex</h3>
+        <div class="flag-grid">
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">flex</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">inline-flex</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">grid</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">block</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">hidden</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">contents</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">flex-row</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">flex-col</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">flex-wrap</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">flex-1</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">flex-grow</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">flex-none</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 class="sub">Alinhamento</h3>
+        <div class="flag-grid">
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">justify-center</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">justify-between</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">justify-end</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">items-center</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">items-start</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">items-stretch</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">self-center</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">place-center</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 class="sub">Posição &amp; Overflow</h3>
+        <div class="flag-grid">
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">relative</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">absolute</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">fixed</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">sticky</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">overflow-hidden</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">overflow-auto</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 class="sub">Tipografia</h3>
+        <div class="flag-grid">
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">font-bold</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">font-medium</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">italic</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">uppercase</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">truncate</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">antialiased</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">underline</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">text-center</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 class="sub">Bordas &amp; Sombras</h3>
+        <div class="flag-grid">
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">rounded-sm</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">rounded-md</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">rounded-lg</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">rounded-xl</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">rounded-full</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">shadow-sm</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">shadow-md</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">shadow-xl</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 class="sub">Animações pré-definidas</h3>
+        <div class="flag-grid">
+          <div class="flag-item"><div class="flag-dot" style="background:var(--accent-orange)"></div><span class="flag-name">animate-spin</span></div>
+          <div class="flag-item"><div class="flag-dot" style="background:var(--accent-orange)"></div><span class="flag-name">animate-pulse</span></div>
+          <div class="flag-item"><div class="flag-dot" style="background:var(--accent-orange)"></div><span class="flag-name">animate-bounce</span></div>
+          <div class="flag-item"><div class="flag-dot" style="background:var(--accent-orange)"></div><span class="flag-name">animate-ping</span></div>
+          <div class="flag-item"><div class="flag-dot" style="background:var(--accent-orange)"></div><span class="flag-name">animate-fade-in</span></div>
+          <div class="flag-item"><div class="flag-dot" style="background:var(--accent-orange)"></div><span class="flag-name">animate-slide-in</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 class="sub">Transições</h3>
+        <div class="flag-grid">
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">transition</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">transition-colors</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">transition-opacity</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">transition-transform</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">transition-shadow</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">transition-none</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 class="sub">Cursor &amp; Interaction</h3>
+        <div class="flag-grid">
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">cursor-pointer</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">cursor-not-allowed</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">cursor-grab</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">select-none</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">pointer-events-none</span></div>
+          <div class="flag-item"><div class="flag-dot"></div><span class="flag-name">outline-none</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- API -->
+<section id="api">
+  <div class="container">
+    <div class="section-label">API pública</div>
+    <h2>Controlo total em runtime.</h2>
+    <p class="section-desc">Todos os métodos disponíveis no objecto <code>BreezeCSS</code> (global) ou via import ES.</p>
+
+    <div class="api-method">
+      <span class="api-name">BreezeCSS.init()</span>
+      <span class="api-sig">(config?: Object) → void</span>
+      <span></span>
+      <p class="api-desc">Inicializa a biblioteca com configuração opcional. Aceita <code>tema</code>, <code>breakpoints</code>, <code>variantes</code>, <code>plugins</code>, <code>debug</code>, <code>reset</code> e <code>log</code>.</p>
+    </div>
+
+    <div class="api-method">
+      <span class="api-name">BreezeCSS.processar()</span>
+      <span class="api-sig">() → void</span>
+      <span></span>
+      <p class="api-desc">Processa manualmente todos os elementos do DOM actual. Útil após injecção dinâmica de HTML quando o MutationObserver não é suficiente.</p>
+    </div>
+
+    <div class="api-method">
+      <span class="api-name">BreezeCSS.build()</span>
+      <span class="api-sig">(htmlString: string, opcoes?: { minificar: boolean }) → string</span>
+      <span></span>
+      <p class="api-desc">Modo build: recebe uma string HTML, processa todas as classes offline (sem tocar no DOM) e retorna o CSS gerado como string. Ideal para pipelines de build estático.</p>
+    </div>
+
+    <div class="api-method">
+      <span class="api-name">BreezeCSS.use()</span>
+      <span class="api-sig">(plugin: { nome: string, setup: Function }) → void</span>
+      <span></span>
+      <p class="api-desc">Carrega e aplica um plugin. O plugin recebe um contexto <code>ctx</code> com acesso a <code>addMapping</code>, <code>addFixedClass</code>, <code>addVariant</code>, <code>addBreakpoint</code> e <code>addProcessor</code>.</p>
+    </div>
+
+    <div class="api-method">
+      <span class="api-name">BreezeCSS.addMapping()</span>
+      <span class="api-sig">(prefixo: string, propriedade: string) → void</span>
+      <span></span>
+      <p class="api-desc">Adiciona em runtime um mapeamento prefixo → propriedade CSS. Ex: <code>addMapping('my-prop', 'my-css-property')</code>.</p>
+    </div>
+
+    <div class="api-method">
+      <span class="api-name">BreezeCSS.addVariant()</span>
+      <span class="api-sig">(nome: string, pseudo: string) → void</span>
+      <span></span>
+      <p class="api-desc">Adiciona uma variante personalizada. Ex: <code>addVariant('group-hover', '.group:hover &amp;')</code>.</p>
+    </div>
+
+    <div class="api-method">
+      <span class="api-name">BreezeCSS.addBreakpoint()</span>
+      <span class="api-sig">(nome: string, tamanho: string) → void</span>
+      <span></span>
+      <p class="api-desc">Adiciona um breakpoint personalizado. Ex: <code>addBreakpoint('tablet', '900px')</code>.</p>
+    </div>
+
+    <div class="api-method">
+      <span class="api-name">BreezeCSS.addComponent()</span>
+      <span class="api-sig">(nome: string, classes: string[]) → void</span>
+      <span></span>
+      <p class="api-desc">Regista um componente como atalho para múltiplas classes. Ex: <code>addComponent('btn', ['px[16px]', 'py[8px]', 'rounded-md'])</code>. Depois use <code>class="btn"</code>.</p>
+    </div>
+
+    <div class="api-method">
+      <span class="api-name">BreezeCSS.addFixedClass()</span>
+      <span class="api-sig">(nome: string, estilo: string) → void</span>
+      <span></span>
+      <p class="api-desc">Adiciona uma classe fixa (sem valor arbitrário) com estilos CSS directos. Ex: <code>addFixedClass('glass', 'backdrop-filter: blur(10px)')</code>.</p>
+    </div>
+
+    <div class="api-method">
+      <span class="api-name">BreezeCSS.addProcessor()</span>
+      <span class="api-sig">(prefixo: string, fn: (valor: string) => string) → void</span>
+      <span></span>
+      <p class="api-desc">Adiciona um processador personalizado que transforma o valor antes de aplicar. Ex: para <code>blur[8px]</code> → <code>blur(8px)</code>.</p>
+    </div>
+
+    <div class="api-method">
+      <span class="api-name">BreezeCSS.stats()</span>
+      <span class="api-sig">() → Object</span>
+      <span></span>
+      <p class="api-desc">Retorna estatísticas de cache (hits, misses, taxa de acerto) e informações da configuração actual (breakpoints, variantes, classes fixas, mapeamentos).</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- PLUGINS -->
+<section id="plugins">
+  <div class="container">
+    <div class="section-label">Extensão</div>
+    <h2>Criar um plugin.</h2>
+    <p class="section-desc">Um plugin é um objecto com um nome e uma função <code>setup(ctx)</code> que recebe o contexto da biblioteca.</p>
+
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span>exemplo de plugin completo</span></div>
+      <pre><span class="kw">const</span> meuPlugin = {
+  nome: <span class="str">'meu-plugin'</span>,
+
+  <span class="fn">setup</span>(ctx) {
+
+    <span class="cm">// 1. Novo prefixo → propriedade CSS</span>
+    ctx.<span class="fn">addMapping</span>(<span class="str">'filter2'</span>, <span class="str">'filter'</span>);
+
+    <span class="cm">// 2. Classe fixa sem valor</span>
+    ctx.<span class="fn">addFixedClass</span>(<span class="str">'glass'</span>,
+      <span class="str">'backdrop-filter: blur(10px); background: rgba(255,255,255,0.05)'</span>
+    );
+
+    <span class="cm">// 3. Nova variante pseudo-classe</span>
+    ctx.<span class="fn">addVariant</span>(<span class="str">'group-hover'</span>, <span class="str">'.group:hover &amp;'</span>);
+
+    <span class="cm">// 4. Novo breakpoint</span>
+    ctx.<span class="fn">addBreakpoint</span>(<span class="str">'xxl'</span>, <span class="str">'1800px'</span>);
+
+    <span class="cm">// 5. Processador de valor personalizado</span>
+    ctx.<span class="fn">addProcessor</span>(<span class="str">'filter2'</span>, v => <span class="str">`blur(${v}) saturate(1.5)`</span>);
+  }
+};
+
+<span class="cm">// Usar antes ou depois do init</span>
+BreezeCSS.<span class="fn">use</span>(meuPlugin);
+
+<span class="cm">// Ou passar no init:</span>
+BreezeCSS.<span class="fn">init</span>({ plugins: [meuPlugin] });</pre>
+    </div>
+
+    <h3 class="sub">Componentes reutilizáveis</h3>
+    <div class="code-block">
+      <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span>componentes como atalhos</span></div>
+      <pre><span class="cm">// Registar</span>
+BreezeCSS.<span class="fn">addComponent</span>(<span class="str">'btn-primary'</span>, [
+  <span class="str">'px[20px]'</span>, <span class="str">'py[10px]'</span>, <span class="str">'bg[#00ff88]'</span>,
+  <span class="str">'text[black]'</span>, <span class="str">'rounded-lg'</span>, <span class="str">'font-medium'</span>,
+  <span class="str">'cursor-pointer'</span>, <span class="str">'transition'</span>
+]);
+
+<span class="cm">// Usar no HTML</span></pre>
+      <pre style="border-top:1px solid var(--border-subtle);margin-top:0;padding-top:1rem"><span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="str">"btn-primary hover:opacity[0.9]"</span><span class="tag">&gt;</span>
+  Clique aqui
+<span class="tag">&lt;/button&gt;</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- TEMAS -->
+<section id="temas">
+  <div class="container">
+    <div class="section-label">Sistema de temas</div>
+    <h2>Tokens de design centralizados.</h2>
+    <p class="section-desc">Defina cores, espaçamentos e fontes no tema e use os seus aliases directamente nas classes.</p>
+
+    <div class="grid-2">
+      <div class="code-block" style="margin:0">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span>definir tema</span></div>
+        <pre>BreezeCSS.<span class="fn">init</span>({
+  tema: {
+    cores: {
+      primario:   <span class="str">'#00ff88'</span>,
+      secundario: <span class="str">'#1a1a2e'</span>,
+      accent:     <span class="str">'rgb(255,100,0)'</span>,
+      muted:      <span class="str">'rgba(255,255,255,0.4)'</span>
+    },
+    espacamento: {
+      xs:  <span class="str">'4px'</span>,
+      sm:  <span class="str">'8px'</span>,
+      md:  <span class="str">'16px'</span>,
+      lg:  <span class="str">'32px'</span>,
+      xl:  <span class="str">'64px'</span>
+    },
+    fontes: {
+      mono: <span class="str">'Space Mono, monospace'</span>,
+      sans: <span class="str">'DM Sans, sans-serif'</span>
+    }
+  }
+});</pre>
+      </div>
+      <div class="code-block" style="margin:0">
+        <div class="code-header"><div class="code-dots"><span></span><span></span><span></span></div><span>usar aliases no HTML</span></div>
+        <pre><span class="cm">&lt;!-- Usar alias do tema directamente --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"bg[secundario] p[lg]"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;h1</span> <span class="attr">class</span>=<span class="str">"text[primario] font-family[mono]"</span><span class="tag">&gt;</span>
+    Título
+  <span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;p</span> <span class="attr">class</span>=<span class="str">"text[muted] mt[sm]"</span><span class="tag">&gt;</span>
+    Texto secundário
+  <span class="tag">&lt;/p&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">class</span>=<span class="str">"bg[primario] px[md] py[sm]
+           hover:bg[accent] transition"</span><span class="tag">&gt;</span>
+    CTA
+  <span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="cm">&lt;!-- CSS variables geradas automaticamente --&gt;</span>
+<span class="cm">&lt;!-- :root { --breeze-primario: #00ff88; ... } --&gt;</span></pre>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:1.5rem">
+      <strong>CSS Variables:</strong> O BreezeCSS gera automaticamente variáveis CSS no <code>:root</code> para todos os tokens do tema (ex: <code>--breeze-primario</code>, <code>--breeze-spacing-md</code>, <code>--breeze-font-mono</code>), que podem ser usadas noutros estilos.
+    </div>
+  </div>
+</section>
+
+<!-- AUTOR -->
+<section id="autor">
+  <div class="container">
+    <div class="section-label">O criador</div>
+    <h2>Por detrás do Breeze.</h2>
+
+    <div class="author-card">
+      <div>
+        <div class="author-avatar">P</div>
+      </div>
+      <div>
+        <div class="author-name">Pedro de Oliveira</div>
+        <div class="author-title">Desenvolvedor Web · Criador do BreezeCSS</div>
+        <p class="author-bio">
+          Programador angolano apaixonado por desenvolvimento web e experiências de utilizador refinadas. Criou o BreezeCSS v2 com o objectivo de trazer a simplicidade das utility classes para qualquer projecto — sem ferramentas de build, sem configuração complexa, apenas HTML e um ficheiro JS. O seu trabalho foca-se em criar ferramentas práticas e elegantes para a comunidade de desenvolvimento.
+        </p>
+        <div class="social-links">
+          <a href="https://github.com/bigptlg/breezecss" target="_blank" class="social-link github">
+            <svg viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub — bigptlg/breezecss
+          </a>
+          <a href="https://www.facebook.com/pedrodeoliveirapo" target="_blank" class="social-link">
+            <svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            Facebook
+          </a>
+          <a href="https://www.instagram.com/pedro_oliveira.po" target="_blank" class="social-link">
+            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            Instagram
+          </a>
+          <a href="https://www.https://www.linkedin.com/in/pedro-oliveira-po" target="_blank" class="social-link">
+            <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>
+      BreezeCSS v2.0.0 — criado por <a href="https://github.com/bigptlg" target="_blank">Pedro de Oliveira</a> ·
+      <a href="https://github.com/bigptlg/breezecss" target="_blank">github.com/bigptlg/breezecss</a>
+    </p>
+    <p style="margin-top:0.5rem;font-size:0.65rem;opacity:0.4;">Documentação gerada com ❤ — Utility CSS sem build para todos.</p>
+  </div>
+</footer>
+
+<script>
+  function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    html.setAttribute('data-theme', newTheme);
+    localStorage.setItem('breeze-theme', newTheme);
+  }
+
+  function initTheme() {
+    const savedTheme = localStorage.getItem('breeze-theme');
+    
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    }
+  }
+
+  initTheme();
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('breeze-theme')) {
+      document.documentElement.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+    }
+  });
+
+  function switchTab(e, id) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  }
+
+  function filterTable(q) {
+    const rows = document.querySelectorAll('#prefixTable tbody tr');
+    q = q.toLowerCase();
+    rows.forEach(r => {
+      r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+
+  let currentCat = 'all';
+  function filterCategory(btn, cat) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCat = cat;
+    const rows = document.querySelectorAll('#prefixTable tbody tr');
+    rows.forEach(r => {
+      if (cat === 'all') r.style.display = '';
+      else r.style.display = r.dataset.cat === cat ? '' : 'none';
+    });
+  }
+
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => io.observe(r));
+
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let cur = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) cur = s.id; });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + cur ? 'var(--accent-primary)' : '';
+    });
+  }, { passive: true });
+</script>
+</body>
+</html>
