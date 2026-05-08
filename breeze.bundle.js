@@ -2,6 +2,7 @@
  * BreezeCSS v2.1.0 — breeze.bundle.js
  * Bundle sem módulos ES — compatível com <script src="...">
  * Autor: Pedro de Oliveira
+ * (Atualizado com border-*-color, border-*-style e classe fixa 'solid')
  */
 
 (function (global) {
@@ -719,7 +720,13 @@
                     'max-w': 'max-width', 'max-h': 'max-height',
                     'size': 'width; height',
                     bg: 'background-color', text: 'color',
-                    'border-color': 'border-color', 'outline-color': 'outline-color',
+                    'border-color': 'border-color',
+                    'border-t-color': 'border-top-color', 'border-r-color': 'border-right-color',
+                    'border-b-color': 'border-bottom-color', 'border-l-color': 'border-left-color',
+                    'border-style': 'border-style',
+                    'border-t-style': 'border-top-style', 'border-r-style': 'border-right-style',
+                    'border-b-style': 'border-bottom-style', 'border-l-style': 'border-left-style',
+                    'outline-color': 'outline-color',
                     'text-size': 'font-size', 'font-size': 'font-size',
                     'leading': 'line-height', 'tracking': 'letter-spacing',
                     'font-family': 'font-family',
@@ -876,6 +883,7 @@
                     'animate-bounce': 'animation: breeze-bounce 1s infinite',
                     'animate-fade-in': 'animation: breeze-fade-in 0.3s ease-in-out',
                     'animate-slide-in': 'animation: breeze-slide-in 0.3s ease-out',
+                    solid: 'border-style: solid',
                 },
             };
         }
