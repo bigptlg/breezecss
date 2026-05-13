@@ -1,14 +1,20 @@
 /**
- * BreezeCSS v2.1.0 — breeze.bundle.js
+ * BreezeCSS v2.2.0 — breeze.bundle.js
  * Bundle sem módulos ES — compatível com <script src="...">
  * Autor: Pedro de Oliveira
- * (Atualizado com border-*-color, border-*-style e classe fixa 'solid')
+ *
+ * Novidades v2.2.0:
+ *  • border[solid_1px_#fff]     — shorthand completo (style? width? color?)
+ *  • border-t/r/b/l[...]        — shorthand por lado (ex: border-t[2px_solid_red])
+ *  • font-weight[100] / fw[700] — peso de fonte arbitrário
+ *  • text-shadow[...]           — sombra de texto
+ *  • transition[prop_dur_ease]  — transição arbitrária
+ *  • Fixes: border-color/style já incluíam prefixos; melhor fallback de parse
  */
 
 (function (global) {
     'use strict';
 
-    // Fallback robusto para CSS.escape
     const cssEscape = (typeof CSS !== 'undefined' && typeof CSS.escape === 'function')
         ? CSS.escape
         : s => s.replace(/([[\]{}()*+?.,\\^$|#\s:])/g, '\\$1');
@@ -55,10 +61,10 @@
     // CACHE
     // ═══════════════════════════════════════════════════════════════════════
     const Cache = (() => {
-        const regrasCSS       = new Set();
+        const regrasCSS         = new Set();
         const classesResolvidas = new Map();
-        const transformsPorChave = new Map(); // chave composta (seletor::bp|variantes)
-        const componentes     = new Map();
+        const transformsPorChave = new Map();
+        const componentes       = new Map();
         const stats = { hits: 0, misses: 0, total: 0 };
 
         function temRegra(r)      { stats.total++; if (regrasCSS.has(r)) { stats.hits++; return true; } stats.misses++; return false; }
@@ -171,9 +177,6 @@
             });
         }
 
-        /**
-         * Suporte a múltiplas propriedades separadas por ';' (ex: size → 'width; height').
-         */
         function _renderizarRegular(r, classeOriginal) {
             const seletor = _construirSeletor(classeOriginal, r.variantes);
             const props = r.propriedade.split(';').map(p => p.trim()).filter(Boolean);
@@ -193,7 +196,6 @@
                 if (breezeId) {
                     chaveTransform = `elem:${breezeId}::${chaveContexto}`;
                     seletorRegra = `[data-breeze-id="${breezeId}"]`;
-                    // Adicionar pseudo-classes simples (não estruturais) ao seletor
                     if (r.variantes && r.variantes.length > 0) {
                         const pseudos = r.variantes
                             .map(v => _config.variantes[v])
@@ -204,7 +206,6 @@
                 }
             }
 
-            // Fallback: modo build ou sem ID
             if (!chaveTransform) {
                 const seletorClasse = _construirSeletor(classeOriginal, r.variantes);
                 chaveTransform = `cls:${seletorClasse}::${chaveContexto}`;
@@ -215,7 +216,6 @@
             const transformCombinado = Cache.construirTransform(chaveTransform);
             if (!transformCombinado) return;
 
-            // Remover regra anterior do mesmo seletor
             if (!_modoOffline && _sheet) {
                 const rules = Array.from(_sheet.cssRules);
                 for (let i = rules.length - 1; i >= 0; i--) {
@@ -266,7 +266,7 @@
                     Cache.registarRegra(kf);
                     if (!_modoOffline) {
                         try { _obterSheet().insertRule(kf, _obterSheet().cssRules.length); }
-                        catch (e) { /* ignorar em contextos que não suportam @keyframes via insertRule */ }
+                        catch (e) { /* ignorar */ }
                     } else { _regrasOffline.push(kf); }
                 }
             });
@@ -288,11 +288,104 @@
     })();
 
     // ═══════════════════════════════════════════════════════════════════════
+    // BORDER SHORTHAND PARSER
+    // ═══════════════════════════════════════════════════════════════════════
+    /**
+     * Parseia um valor de border shorthand como "solid_1px_#f0f0ff"
+     * Suporta qualquer ordem de: style | width | color
+     *
+     * Retorna um array de declarações CSS:
+     *   [{ prop: 'border-style', val: 'solid' }, { prop: 'border-width', val: '1px' }, ...]
+     *
+     * @param {string} valor  — valor com underscores já convertidos para espaços
+     * @param {string} lado   — '' | '-top' | '-right' | '-bottom' | '-left'
+     */
+    const ESTILOS_BORDA = new Set([
+        'none','hidden','dotted','dashed','solid','double',
+        'groove','ridge','inset','outset','initial','inherit','unset',
+    ]);
+
+    const REGEX_LARGURA_BORDA = /^(\d+(\.\d+)?(px|em|rem|%|vw|vh|pt|cm|mm)|thin|medium|thick)$/i;
+
+    // Simples heurística de cor: hex, rgb(...), hsl(...), named keywords comuns ou var(...)
+    function _parece_cor(v) {
+        return /^#[0-9a-fA-F]{3,8}$/.test(v)
+            || /^rgba?\(/.test(v)
+            || /^hsla?\(/.test(v)
+            || /^var\(/.test(v)
+            || /^(transparent|currentColor|black|white|red|green|blue|yellow|orange|purple|pink|gray|grey|inherit|initial|unset)$/i.test(v);
+    }
+
+    function parsearBorderShorthand(valorBruto, lado = '') {
+        // Repor espaços internos de funções como rgba(0,_0,_0)
+        const valor = valorBruto.replace(/_/g, ' ');
+
+        // Se não tem espaço, pode ser apenas um dos componentes — tratar como largura genérica
+        // mas tentamos classificar mesmo assim
+        const partes = _splitRespeitandoParenteses(valor);
+
+        const resultado = [];
+        const propStyle = `border${lado}-style`;
+        const propWidth = `border${lado}-width`;
+        const propColor = `border${lado}-color`;
+
+        let temStyle = false, temWidth = false, temColor = false;
+
+        for (const parte of partes) {
+            if (!temStyle && ESTILOS_BORDA.has(parte.toLowerCase())) {
+                resultado.push({ prop: propStyle, val: parte });
+                temStyle = true;
+            } else if (!temWidth && REGEX_LARGURA_BORDA.test(parte)) {
+                resultado.push({ prop: propWidth, val: parte });
+                temWidth = true;
+            } else if (!temColor && _parece_cor(parte)) {
+                resultado.push({ prop: propColor, val: parte });
+                temColor = true;
+            } else {
+                // Desconhecido — emitir aviso e tentar usar como largura se ainda não tiver
+                Logger.aviso(`border shorthand: parte não reconhecida "${parte}", usando como largura`);
+                if (!temWidth) { resultado.push({ prop: propWidth, val: parte }); temWidth = true; }
+            }
+        }
+
+        return resultado;
+    }
+
+    /** Divide uma string por espaços, respeitando parênteses (ex: rgba(0, 0, 0, 0.5)) */
+    function _splitRespeitandoParenteses(str) {
+        const partes = [];
+        let atual = '', profundidade = 0;
+        for (const c of str) {
+            if (c === '(') { profundidade++; atual += c; }
+            else if (c === ')') { profundidade--; atual += c; }
+            else if (c === ' ' && profundidade === 0) {
+                if (atual) { partes.push(atual); atual = ''; }
+            } else { atual += c; }
+        }
+        if (atual) partes.push(atual);
+        return partes;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
     // PARSER
     // ═══════════════════════════════════════════════════════════════════════
     const Parser = (() => {
         let _config = null;
         const REGEX_ARBITRARIO = /^(?<prefixo>[a-zA-Z-]+(?:-[a-zA-Z-]+)*)\[(?<valor>[^\]]+)\]$/;
+
+        // Prefixos de border shorthand que precisam tratamento especial
+        const BORDER_SHORTHAND_PREFIXOS = new Set([
+            'border', 'border-t', 'border-r', 'border-b', 'border-l',
+        ]);
+
+        // Mapa de prefixo → lado CSS
+        const BORDER_LADO_MAP = {
+            'border':   '',
+            'border-t': '-top',
+            'border-r': '-right',
+            'border-b': '-bottom',
+            'border-l': '-left',
+        };
 
         function inicializar(config) { _config = config; }
 
@@ -363,6 +456,35 @@
             const match = classeBase.match(REGEX_ARBITRARIO);
             if (!match) return null;
             let { prefixo, valor } = match.groups;
+
+            // ── BORDER SHORTHAND ──────────────────────────────────────────
+            // Detecta se o valor contém múltiplos tokens (estilo, largura, cor)
+            // Um border simples como border[1px] ou border-t[2px] continua a
+            // funcionar como antes (mapeia diretamente à propriedade do mapaPropriedades).
+            // Se o valor tiver espaço (após substituir _) OU contiver um estilo de borda,
+            // activamos o modo shorthand.
+            if (BORDER_SHORTHAND_PREFIXOS.has(prefixo)) {
+                const valorComEspacos = valor.replace(/_/g, ' ');
+                const partes = _splitRespeitandoParenteses(valorComEspacos);
+                const temEstilo = partes.some(p => ESTILOS_BORDA.has(p.toLowerCase()));
+                const temCor    = partes.some(p => _parece_cor(p));
+                // Usar shorthand se tiver mais de 1 parte, ou se tiver estilo/cor
+                if (partes.length > 1 || temEstilo || temCor) {
+                    const lado = BORDER_LADO_MAP[prefixo];
+                    const declaracoes = parsearBorderShorthand(valor, lado);
+                    if (declaracoes.length > 0) {
+                        return declaracoes.map(({ prop, val }) => ({
+                            tipo: 'arbitrario', classeBase, breakpoint,
+                            variantes: variantes || [], prefixo,
+                            propriedade: prop, valor: val,
+                            eTransform: false, tipoTransform: null,
+                        }));
+                    }
+                }
+                // Caso contrário cai no fluxo normal (ex: border[1px] → border-width)
+            }
+            // ─────────────────────────────────────────────────────────────
+
             valor = _resolverValorTema(valor);
             valor = valor.replace(/_/g, ' ');
             const propriedade = _config.mapaPropriedades[prefixo];
@@ -414,7 +536,6 @@
                 if (Cache.temComponente(classe)) return true;
                 if (!classe.includes(':') && !classe.includes('[')) return false;
 
-                // Separar qualificadores para obter a classe base real
                 const partes = _separarQualificadoresRapido(classe);
                 if (!partes) return false;
                 const { classeBase } = partes;
@@ -423,7 +544,11 @@
                 if (Cache.temComponente(classeBase)) return true;
 
                 const matchArb = classeBase.match(REGEX_ARBITRARIO);
-                if (matchArb) return _config.mapaPropriedades[matchArb.groups.prefixo] !== undefined;
+                if (matchArb) {
+                    const p = matchArb.groups.prefixo;
+                    return _config.mapaPropriedades[p] !== undefined
+                        || BORDER_SHORTHAND_PREFIXOS.has(p);
+                }
 
                 return false;
             });
@@ -541,7 +666,7 @@
                 nivel: _config.debug ? 'debug' : (_config.log === false ? 'silencioso' : 'info'),
                 silencioso: _config.log === false,
             });
-            Logger.info('Inicializando BreezeCSS v2.1...');
+            Logger.info('Inicializando BreezeCSS v2.2...');
             if (_config.plugins) _config.plugins.forEach(p => _aplicarPlugin(p));
             Parser.inicializar(_config);
             Renderer.inicializar(_config);
@@ -708,6 +833,7 @@
                 ],
 
                 mapaPropriedades: {
+                    // Espaçamento
                     m: 'margin', mt: 'margin-top', mr: 'margin-right',
                     mb: 'margin-bottom', ml: 'margin-left',
                     mx: 'margin-inline', my: 'margin-block',
@@ -715,48 +841,99 @@
                     pb: 'padding-bottom', pl: 'padding-left',
                     px: 'padding-inline', py: 'padding-block',
                     gap: 'gap', 'gap-x': 'column-gap', 'gap-y': 'row-gap',
+
+                    // Dimensões
                     w: 'width', h: 'height',
                     'min-w': 'min-width', 'min-h': 'min-height',
                     'max-w': 'max-width', 'max-h': 'max-height',
                     'size': 'width; height',
+
+                    // Cor
                     bg: 'background-color', text: 'color',
-                    'border-color': 'border-color',
-                    'border-t-color': 'border-top-color', 'border-r-color': 'border-right-color',
-                    'border-b-color': 'border-bottom-color', 'border-l-color': 'border-left-color',
-                    'border-style': 'border-style',
-                    'border-t-style': 'border-top-style', 'border-r-style': 'border-right-style',
-                    'border-b-style': 'border-bottom-style', 'border-l-style': 'border-left-style',
+
+                    // ── Bordas ────────────────────────────────────────────
+                    // Largura simples (border[2px], border-t[1px], …)
+                    border:    'border-width',
+                    'border-t': 'border-top-width',
+                    'border-r': 'border-right-width',
+                    'border-b': 'border-bottom-width',
+                    'border-l': 'border-left-width',
+
+                    // Cor de borda por lado
+                    'border-color':   'border-color',
+                    'border-t-color': 'border-top-color',
+                    'border-r-color': 'border-right-color',
+                    'border-b-color': 'border-bottom-color',
+                    'border-l-color': 'border-left-color',
+
+                    // Estilo de borda por lado
+                    'border-style':   'border-style',
+                    'border-t-style': 'border-top-style',
+                    'border-r-style': 'border-right-style',
+                    'border-b-style': 'border-bottom-style',
+                    'border-l-style': 'border-left-style',
+
+                    // Outline
                     'outline-color': 'outline-color',
-                    'text-size': 'font-size', 'font-size': 'font-size',
-                    'leading': 'line-height', 'tracking': 'letter-spacing',
-                    'font-family': 'font-family',
-                    border: 'border-width', 'border-t': 'border-top-width',
-                    'border-r': 'border-right-width', 'border-b': 'border-bottom-width',
-                    'border-l': 'border-left-width', rounded: 'border-radius',
+                    outline: 'outline',
+                    ring: 'box-shadow',
+
+                    // Radius
+                    rounded: 'border-radius',
                     'rounded-t': 'border-top-left-radius; border-top-right-radius',
                     'rounded-b': 'border-bottom-left-radius; border-bottom-right-radius',
                     'rounded-l': 'border-top-left-radius; border-bottom-left-radius',
                     'rounded-r': 'border-top-right-radius; border-bottom-right-radius',
+                    // ─────────────────────────────────────────────────────
+
+                    // Tipografia
+                    'text-size': 'font-size', 'font-size': 'font-size',
+                    'leading': 'line-height', 'tracking': 'letter-spacing',
+                    'font-family': 'font-family',
+                    // font-weight arbitrário: fw[700] ou font-weight[700]
+                    'fw': 'font-weight',
+                    'font-weight': 'font-weight',
+
+                    // Sombras
+                    shadow: 'box-shadow',
+                    // text-shadow arbitrário: text-shadow[2px_2px_4px_#000]
+                    'text-shadow': 'text-shadow',
+
+                    // Posicionamento
                     top: 'top', right: 'right', bottom: 'bottom', left: 'left',
                     z: 'z-index', inset: 'inset',
-                    opacity: 'opacity', shadow: 'box-shadow',
+
+                    // Efeitos visuais
+                    opacity: 'opacity',
                     blur: 'filter', brightness: 'filter', contrast: 'filter',
                     grayscale: 'filter', saturate: 'filter',
                     'drop-shadow': 'filter', 'backdrop-blur': 'backdrop-filter',
+
+                    // Background
                     'bg-gradient': 'background-image', 'bg-image': 'background-image',
                     'bg-size': 'background-size', 'bg-pos': 'background-position',
                     'bg-repeat': 'background-repeat',
                     'bg-attach': 'background-attachment', filter: 'filter',
+
+                    // Transforms
                     rotate: 'transform', scale: 'transform',
                     'scale-x': 'transform', 'scale-y': 'transform',
                     'translate-x': 'transform', 'translate-y': 'transform',
                     'skew-x': 'transform', 'skew-y': 'transform',
+
+                    // Grid
                     cols: 'grid-template-columns', rows: 'grid-template-rows',
                     'col-span': 'grid-column', 'row-span': 'grid-row',
+
+                    // Transição arbitrária: transition[opacity_300ms_ease]
+                    'transition-prop': 'transition',
+
+                    // Animação / timing
                     duration: 'transition-duration', delay: 'transition-delay',
                     ease: 'transition-timing-function', animate: 'animation',
+
+                    // Outros
                     content: 'content', cursor: 'cursor',
-                    outline: 'outline', ring: 'box-shadow',
                     aspect: 'aspect-ratio', columns: 'columns',
                 },
 
@@ -778,17 +955,39 @@
                     'row-span': v => `span ${v} / span ${v}`,
                     ring:       v => `0 0 0 ${v} currentColor`,
                     aspect:     v => ({ square: '1/1', video: '16/9', photo: '4/3' })[v] || v,
-                    'size':     v => v,
+                    // font-weight: normaliza keywords para números
+                    'fw': v => {
+                        const mapa = { thin: '100', extralight: '200', light: '300',
+                            normal: '400', medium: '500', semibold: '600',
+                            bold: '700', extrabold: '800', black: '900' };
+                        return mapa[v.toLowerCase()] || v;
+                    },
+                    'font-weight': v => {
+                        const mapa = { thin: '100', extralight: '200', light: '300',
+                            normal: '400', medium: '500', semibold: '600',
+                            bold: '700', extrabold: '800', black: '900' };
+                        return mapa[v.toLowerCase()] || v;
+                    },
+                    // transition shorthand: transition-prop[opacity_300ms_ease]
+                    'transition-prop': v => v, // já vem com espaços corretos
                 },
 
                 classesFixas: {
+                    // Display
                     block: 'display: block', inline: 'display: inline',
                     'inline-block': 'display: inline-block',
                     flex: 'display: flex', 'inline-flex': 'display: inline-flex',
                     grid: 'display: grid', 'inline-grid': 'display: inline-grid',
                     hidden: 'display: none', contents: 'display: contents',
                     table: 'display: table', 'table-cell': 'display: table-cell',
-                    'bg-fixed': 'background-attachment: fixed','bg-scroll': 'background-attachment: scroll','bg-local': 'background-attachment: local','flex-row': 'flex-direction: row', 'flex-col': 'flex-direction: column',
+
+                    // Background attachment
+                    'bg-fixed': 'background-attachment: fixed',
+                    'bg-scroll': 'background-attachment: scroll',
+                    'bg-local': 'background-attachment: local',
+
+                    // Flex
+                    'flex-row': 'flex-direction: row', 'flex-col': 'flex-direction: column',
                     'flex-row-reverse': 'flex-direction: row-reverse',
                     'flex-col-reverse': 'flex-direction: column-reverse',
                     'flex-wrap': 'flex-wrap: wrap', 'flex-nowrap': 'flex-wrap: nowrap',
@@ -810,12 +1009,18 @@
                     'self-start': 'align-self: flex-start', 'self-end': 'align-self: flex-end',
                     'self-center': 'align-self: center', 'self-stretch': 'align-self: stretch',
                     'place-center': 'place-items: center',
+
+                    // Posição
                     relative: 'position: relative', absolute: 'position: absolute',
                     fixed: 'position: fixed', sticky: 'position: sticky', static: 'position: static',
+
+                    // Overflow
                     'overflow-auto': 'overflow: auto', 'overflow-hidden': 'overflow: hidden',
                     'overflow-visible': 'overflow: visible', 'overflow-scroll': 'overflow: scroll',
                     'overflow-x-auto': 'overflow-x: auto', 'overflow-y-auto': 'overflow-y: auto',
                     'overflow-x-hidden': 'overflow-x: hidden', 'overflow-y-hidden': 'overflow-y: hidden',
+
+                    // Texto
                     'text-left': 'text-align: left', 'text-center': 'text-align: center',
                     'text-right': 'text-align: right', 'text-justify': 'text-align: justify',
                     uppercase: 'text-transform: uppercase', lowercase: 'text-transform: lowercase',
@@ -829,12 +1034,23 @@
                     'font-thin': 'font-weight: 100', 'font-light': 'font-weight: 300',
                     'font-normal': 'font-weight: 400', 'font-medium': 'font-weight: 500',
                     'font-semibold': 'font-weight: 600', 'font-bold': 'font-weight: 700',
-                    'font-black': 'font-weight: 900',
+                    'font-extrabold': 'font-weight: 800', 'font-black': 'font-weight: 900',
+
+                    // Border radius
                     'rounded-none': 'border-radius: 0', 'rounded-sm': 'border-radius: 0.125rem',
                     rounded: 'border-radius: 0.25rem', 'rounded-md': 'border-radius: 0.375rem',
                     'rounded-lg': 'border-radius: 0.5rem', 'rounded-xl': 'border-radius: 0.75rem',
                     'rounded-2xl': 'border-radius: 1rem', 'rounded-3xl': 'border-radius: 1.5rem',
                     'rounded-full': 'border-radius: 9999px',
+
+                    // Border style fixo
+                    solid:  'border-style: solid',
+                    dashed: 'border-style: dashed',
+                    dotted: 'border-style: dotted',
+                    double: 'border-style: double',
+                    'border-none': 'border: none',
+
+                    // Sombras
                     'shadow-sm': 'box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05)',
                     shadow: 'box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
                     'shadow-md': 'box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1)',
@@ -843,47 +1059,68 @@
                     'shadow-2xl': 'box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25)',
                     'shadow-none': 'box-shadow: none',
                     'shadow-inner': 'box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
+
+                    // Transições
                     transition: 'transition-property: all; transition-timing-function: cubic-bezier(0.4,0,0.2,1); transition-duration: 150ms',
                     'transition-none': 'transition-property: none',
                     'transition-colors': 'transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4,0,0.2,1); transition-duration: 150ms',
                     'transition-opacity': 'transition-property: opacity; transition-timing-function: cubic-bezier(0.4,0,0.2,1); transition-duration: 150ms',
                     'transition-transform': 'transition-property: transform; transition-timing-function: cubic-bezier(0.4,0,0.2,1); transition-duration: 150ms',
                     'transition-shadow': 'transition-property: box-shadow; transition-timing-function: cubic-bezier(0.4,0,0.2,1); transition-duration: 150ms',
+
+                    // Cursor
                     'cursor-pointer': 'cursor: pointer', 'cursor-default': 'cursor: default',
                     'cursor-not-allowed': 'cursor: not-allowed', 'cursor-wait': 'cursor: wait',
                     'cursor-text': 'cursor: text', 'cursor-grab': 'cursor: grab',
                     'cursor-grabbing': 'cursor: grabbing',
                     'pointer-events-none': 'pointer-events: none',
                     'pointer-events-auto': 'pointer-events: auto',
+
+                    // Selecção / user-select
                     'select-none': 'user-select: none', 'select-text': 'user-select: text',
                     'select-all': 'user-select: all',
+
+                    // Objeto
                     'object-contain': 'object-fit: contain', 'object-cover': 'object-fit: cover',
                     'object-fill': 'object-fit: fill', 'object-none': 'object-fit: none',
+
+                    // Whitespace
                     'whitespace-normal': 'white-space: normal',
                     'whitespace-nowrap': 'white-space: nowrap', 'whitespace-pre': 'white-space: pre',
                     'whitespace-pre-wrap': 'white-space: pre-wrap',
                     'whitespace-pre-line': 'white-space: pre-line',
+
+                    // Visibilidade
                     visible: 'visibility: visible', invisible: 'visibility: hidden',
                     isolate: 'isolation: isolate', 'isolation-auto': 'isolation: auto',
+
+                    // Blend
                     'mix-blend-normal': 'mix-blend-mode: normal',
                     'mix-blend-multiply': 'mix-blend-mode: multiply',
                     'mix-blend-screen': 'mix-blend-mode: screen',
                     'mix-blend-overlay': 'mix-blend-mode: overlay',
+
+                    // List
                     'list-none': 'list-style-type: none', 'list-disc': 'list-style-type: disc',
                     'list-decimal': 'list-style-type: decimal',
+
+                    // Resize
                     resize: 'resize: both', 'resize-x': 'resize: horizontal',
                     'resize-y': 'resize: vertical', 'resize-none': 'resize: none',
+
+                    // Misc
                     'appearance-none': '-webkit-appearance: none; appearance: none',
                     'outline-none': 'outline: 2px solid transparent; outline-offset: 2px',
                     'will-change-transform': 'will-change: transform',
                     'will-change-opacity': 'will-change: opacity',
+
+                    // Animações
                     'animate-spin': 'animation: breeze-spin 1s linear infinite',
                     'animate-ping': 'animation: breeze-ping 1s cubic-bezier(0,0,0.2,1) infinite',
                     'animate-pulse': 'animation: breeze-pulse 2s cubic-bezier(0.4,0,0.6,1) infinite',
                     'animate-bounce': 'animation: breeze-bounce 1s infinite',
                     'animate-fade-in': 'animation: breeze-fade-in 0.3s ease-in-out',
                     'animate-slide-in': 'animation: breeze-slide-in 0.3s ease-out',
-                    solid: 'border-style: solid',
                 },
             };
         }
@@ -911,7 +1148,7 @@
         addFixedClass: (n, e)   => Engine.addFixedClass(n, e),
         addProcessor:  (p, fn)  => Engine.addProcessor(p, fn),
         stats:         ()       => Engine.obterStats(),
-        versao: '2.1.0',
+        versao: '2.2.0',
     };
 
     // Auto-init
