@@ -1,7 +1,10 @@
 /**
- * BreezeCSS v2.2.0 — breeze.bundle.js
+ * BreezeCSS v2.2.1 — breeze.bundle.js
  * Bundle sem módulos ES — compatível com <script src="...">
  * Autor: Pedro de Oliveira
+ *
+ * Novidades v2.2.1:
+ *  • Suporte a !important: basta terminar o valor com ! → bg[red!], w[100%!]
  *
  * Novidades v2.2.0:
  *  • border[solid_1px_#fff]     — shorthand completo (style? width? color?)
@@ -180,9 +183,12 @@
         function _renderizarRegular(r, classeOriginal) {
             const seletor = _construirSeletor(classeOriginal, r.variantes);
             const props = r.propriedade.split(';').map(p => p.trim()).filter(Boolean);
+            // ── !important ────────────────────────────────────────────────
+            const sufixo = r.importante ? ' !important' : '';
+            // ─────────────────────────────────────────────────────────────
             props.forEach(prop => {
-                let regra = `${seletor} { ${prop}: ${r.valor}; }`;
-                if (r.breakpoint) regra = _comMediaQuery(r.breakpoint, `${seletor} { ${prop}: ${r.valor}; }`);
+                let regra = `${seletor} { ${prop}: ${r.valor}${sufixo}; }`;
+                if (r.breakpoint) regra = _comMediaQuery(r.breakpoint, `${seletor} { ${prop}: ${r.valor}${sufixo}; }`);
                 _inserirRegra(regra);
             });
         }
@@ -225,8 +231,11 @@
                 }
             }
 
-            let regra = `${seletorRegra} { transform: ${transformCombinado}; }`;
-            if (r.breakpoint) regra = _comMediaQuery(r.breakpoint, `${seletorRegra} { transform: ${transformCombinado}; }`);
+            // ── !important ────────────────────────────────────────────────
+            const sufixo = r.importante ? ' !important' : '';
+            // ─────────────────────────────────────────────────────────────
+            let regra = `${seletorRegra} { transform: ${transformCombinado}${sufixo}; }`;
+            if (r.breakpoint) regra = _comMediaQuery(r.breakpoint, `${seletorRegra} { transform: ${transformCombinado}${sufixo}; }`);
 
             if (_modoOffline) { _regrasOffline.push(regra); return; }
             const sheet = _obterSheet();
@@ -290,16 +299,6 @@
     // ═══════════════════════════════════════════════════════════════════════
     // BORDER SHORTHAND PARSER
     // ═══════════════════════════════════════════════════════════════════════
-    /**
-     * Parseia um valor de border shorthand como "solid_1px_#f0f0ff"
-     * Suporta qualquer ordem de: style | width | color
-     *
-     * Retorna um array de declarações CSS:
-     *   [{ prop: 'border-style', val: 'solid' }, { prop: 'border-width', val: '1px' }, ...]
-     *
-     * @param {string} valor  — valor com underscores já convertidos para espaços
-     * @param {string} lado   — '' | '-top' | '-right' | '-bottom' | '-left'
-     */
     const ESTILOS_BORDA = new Set([
         'none','hidden','dotted','dashed','solid','double',
         'groove','ridge','inset','outset','initial','inherit','unset',
@@ -307,7 +306,6 @@
 
     const REGEX_LARGURA_BORDA = /^(\d+(\.\d+)?(px|em|rem|%|vw|vh|pt|cm|mm)|thin|medium|thick)$/i;
 
-    // Simples heurística de cor: hex, rgb(...), hsl(...), named keywords comuns ou var(...)
     function _parece_cor(v) {
         return /^#[0-9a-fA-F]{3,8}$/.test(v)
             || /^rgba?\(/.test(v)
@@ -317,11 +315,7 @@
     }
 
     function parsearBorderShorthand(valorBruto, lado = '') {
-        // Repor espaços internos de funções como rgba(0,_0,_0)
         const valor = valorBruto.replace(/_/g, ' ');
-
-        // Se não tem espaço, pode ser apenas um dos componentes — tratar como largura genérica
-        // mas tentamos classificar mesmo assim
         const partes = _splitRespeitandoParenteses(valor);
 
         const resultado = [];
@@ -342,7 +336,6 @@
                 resultado.push({ prop: propColor, val: parte });
                 temColor = true;
             } else {
-                // Desconhecido — emitir aviso e tentar usar como largura se ainda não tiver
                 Logger.aviso(`border shorthand: parte não reconhecida "${parte}", usando como largura`);
                 if (!temWidth) { resultado.push({ prop: propWidth, val: parte }); temWidth = true; }
             }
@@ -351,7 +344,6 @@
         return resultado;
     }
 
-    /** Divide uma string por espaços, respeitando parênteses (ex: rgba(0, 0, 0, 0.5)) */
     function _splitRespeitandoParenteses(str) {
         const partes = [];
         let atual = '', profundidade = 0;
@@ -373,12 +365,10 @@
         let _config = null;
         const REGEX_ARBITRARIO = /^(?<prefixo>[a-zA-Z-]+(?:-[a-zA-Z-]+)*)\[(?<valor>[^\]]+)\]$/;
 
-        // Prefixos de border shorthand que precisam tratamento especial
         const BORDER_SHORTHAND_PREFIXOS = new Set([
             'border', 'border-t', 'border-r', 'border-b', 'border-l',
         ]);
 
-        // Mapa de prefixo → lado CSS
         const BORDER_LADO_MAP = {
             'border':   '',
             'border-t': '-top',
@@ -447,6 +437,7 @@
                     variantes: variantes || [],
                     propriedade: d.slice(0, idx).trim(),
                     valor: d.slice(idx + 1).trim(),
+                    importante: false,
                     eTransform: false,
                 };
             }).filter(Boolean);
@@ -457,18 +448,20 @@
             if (!match) return null;
             let { prefixo, valor } = match.groups;
 
+            // ── !important: detectar e remover o "!" final ────────────────
+            let importante = false;
+            if (valor.endsWith('!')) {
+                importante = true;
+                valor = valor.slice(0, -1);
+            }
+            // ─────────────────────────────────────────────────────────────
+
             // ── BORDER SHORTHAND ──────────────────────────────────────────
-            // Detecta se o valor contém múltiplos tokens (estilo, largura, cor)
-            // Um border simples como border[1px] ou border-t[2px] continua a
-            // funcionar como antes (mapeia diretamente à propriedade do mapaPropriedades).
-            // Se o valor tiver espaço (após substituir _) OU contiver um estilo de borda,
-            // activamos o modo shorthand.
             if (BORDER_SHORTHAND_PREFIXOS.has(prefixo)) {
                 const valorComEspacos = valor.replace(/_/g, ' ');
                 const partes = _splitRespeitandoParenteses(valorComEspacos);
                 const temEstilo = partes.some(p => ESTILOS_BORDA.has(p.toLowerCase()));
                 const temCor    = partes.some(p => _parece_cor(p));
-                // Usar shorthand se tiver mais de 1 parte, ou se tiver estilo/cor
                 if (partes.length > 1 || temEstilo || temCor) {
                     const lado = BORDER_LADO_MAP[prefixo];
                     const declaracoes = parsearBorderShorthand(valor, lado);
@@ -477,11 +470,11 @@
                             tipo: 'arbitrario', classeBase, breakpoint,
                             variantes: variantes || [], prefixo,
                             propriedade: prop, valor: val,
+                            importante,  // ← propagado
                             eTransform: false, tipoTransform: null,
                         }));
                     }
                 }
-                // Caso contrário cai no fluxo normal (ex: border[1px] → border-width)
             }
             // ─────────────────────────────────────────────────────────────
 
@@ -501,7 +494,9 @@
             return [{
                 tipo: 'arbitrario', classeBase, breakpoint,
                 variantes: variantes || [], prefixo, propriedade,
-                valor: valorProcessado, eTransform, tipoTransform,
+                valor: valorProcessado,
+                importante,  // ← propagado
+                eTransform, tipoTransform,
             }];
         }
 
@@ -666,7 +661,7 @@
                 nivel: _config.debug ? 'debug' : (_config.log === false ? 'silencioso' : 'info'),
                 silencioso: _config.log === false,
             });
-            Logger.info('Inicializando BreezeCSS v2.2...');
+            Logger.info('Inicializando BreezeCSS v2.2.1...');
             if (_config.plugins) _config.plugins.forEach(p => _aplicarPlugin(p));
             Parser.inicializar(_config);
             Renderer.inicializar(_config);
@@ -852,21 +847,18 @@
                     bg: 'background-color', text: 'color',
 
                     // ── Bordas ────────────────────────────────────────────
-                    // Largura simples (border[2px], border-t[1px], …)
                     border:    'border-width',
                     'border-t': 'border-top-width',
                     'border-r': 'border-right-width',
                     'border-b': 'border-bottom-width',
                     'border-l': 'border-left-width',
 
-                    // Cor de borda por lado
                     'border-color':   'border-color',
                     'border-t-color': 'border-top-color',
                     'border-r-color': 'border-right-color',
                     'border-b-color': 'border-bottom-color',
                     'border-l-color': 'border-left-color',
 
-                    // Estilo de borda por lado
                     'border-style':   'border-style',
                     'border-t-style': 'border-top-style',
                     'border-r-style': 'border-right-style',
@@ -890,13 +882,11 @@
                     'text-size': 'font-size', 'font-size': 'font-size',
                     'leading': 'line-height', 'tracking': 'letter-spacing',
                     'font-family': 'font-family',
-                    // font-weight arbitrário: fw[700] ou font-weight[700]
                     'fw': 'font-weight',
                     'font-weight': 'font-weight',
 
                     // Sombras
                     shadow: 'box-shadow',
-                    // text-shadow arbitrário: text-shadow[2px_2px_4px_#000]
                     'text-shadow': 'text-shadow',
 
                     // Posicionamento
@@ -925,12 +915,14 @@
                     cols: 'grid-template-columns', rows: 'grid-template-rows',
                     'col-span': 'grid-column', 'row-span': 'grid-row',
 
-                    // Transição arbitrária: transition[opacity_300ms_ease]
+                    // Transição
                     'transition-prop': 'transition',
 
                     // Animação / timing
                     duration: 'transition-duration', delay: 'transition-delay',
                     ease: 'transition-timing-function', animate: 'animation',
+                    'animate-delay': 'animation-delay',
+'animate-duration': 'animation-duration',
 
                     // Outros
                     content: 'content', cursor: 'cursor',
@@ -955,7 +947,6 @@
                     'row-span': v => `span ${v} / span ${v}`,
                     ring:       v => `0 0 0 ${v} currentColor`,
                     aspect:     v => ({ square: '1/1', video: '16/9', photo: '4/3' })[v] || v,
-                    // font-weight: normaliza keywords para números
                     'fw': v => {
                         const mapa = { thin: '100', extralight: '200', light: '300',
                             normal: '400', medium: '500', semibold: '600',
@@ -968,8 +959,7 @@
                             bold: '700', extrabold: '800', black: '900' };
                         return mapa[v.toLowerCase()] || v;
                     },
-                    // transition shorthand: transition-prop[opacity_300ms_ease]
-                    'transition-prop': v => v, // já vem com espaços corretos
+                    'transition-prop': v => v,
                 },
 
                 classesFixas: {
@@ -1148,7 +1138,7 @@
         addFixedClass: (n, e)   => Engine.addFixedClass(n, e),
         addProcessor:  (p, fn)  => Engine.addProcessor(p, fn),
         stats:         ()       => Engine.obterStats(),
-        versao: '2.2.0',
+        versao: '2.2.1',
     };
 
     // Auto-init
