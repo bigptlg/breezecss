@@ -583,7 +583,7 @@
             }
 
             valor = _resolverValorTema(valor);
-            valor = valor.replace(/_/g, ' ');
+            valor = _substituirUnderscoreFora(valor);
             const propriedade = _config.mapaPropriedades[prefixo];
             if (!propriedade) { Logger.aviso(`Prefixo desconhecido: "${prefixo}"`); return null; }
             const eTransform = _config.transformPrefixos?.includes(prefixo) ?? false;
@@ -602,6 +602,20 @@
                 importante,
                 eTransform, tipoTransform,
             }];
+        }
+
+        // Substitui _ por espaço apenas fora de funções CSS como url(), var(), etc.
+        // Dentro dessas funções o _ é parte do valor real e não deve ser tocado.
+        function _substituirUnderscoreFora(valor) {
+            let resultado = '';
+            let profundidade = 0;
+            for (let i = 0; i < valor.length; i++) {
+                const c = valor[i];
+                if (c === '(') profundidade++;
+                else if (c === ')') profundidade--;
+                resultado += (c === '_' && profundidade === 0) ? ' ' : c;
+            }
+            return resultado;
         }
 
         function _resolverValorTema(valor) {
