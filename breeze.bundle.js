@@ -1,17 +1,31 @@
 /**
- * BreezeCSS v2.2.1 — breeze.bundle.js
- * Bundle sem módulos ES — compatível com <script src="...">
+ * BreezeCSS v2.2.3 – breeze.bundle.js
+ * Bundle sem módulos ES – compatível com <script src="...">
  * Autor: Pedro de Oliveira
+ *
+ * Novidades v2.2.3:
+ *  • !important em classes fixas: flex!, hidden!, rounded! (e com variantes: hover:flex!)
+ *  • !important em componentes:   btn! aplica !important a todas as propriedades internas
+ *  • Aliases flex: grow[n], shrink[n], basis[valor] (mais ergonómicos que flex-g/flex-basis)
+ *  • flex-g removido em favor de grow (flex-g mantido por compatibilidade)
+ *  • Debounce no MutationObserver via requestAnimationFrame (batching de mutações)
+ *  • safelist: classes pré-geradas mesmo antes de aparecerem no DOM
+ *  • prefix: evita conflitos com outras frameworks (ex: bz-)
+ *  • Minificador melhorado: remove espaços desnecessários dentro das declarações
+ *
+ * Novidades v2.2.2:
+ *  • Suporte a flex-basis
+ *  • BreezeCSS.exportar() – exporta todo o CSS gerado como ficheiro .css
  *
  * Novidades v2.2.1:
  *  • Suporte a !important: basta terminar o valor com ! → bg[red!], w[100%!]
  *
  * Novidades v2.2.0:
- *  • border[solid_1px_#fff]     — shorthand completo (style? width? color?)
- *  • border-t/r/b/l[...]        — shorthand por lado (ex: border-t[2px_solid_red])
- *  • font-weight[100] / fw[700] — peso de fonte arbitrário
- *  • text-shadow[...]           — sombra de texto
- *  • transition[prop_dur_ease]  — transição arbitrária
+ *  • border[solid_1px_#fff]     – shorthand completo (style? width? color?)
+ *  • border-t/r/b/l[...]        – shorthand por lado (ex: border-t[2px_solid_red])
+ *  • font-weight[100] / fw[700] – peso de fonte arbitrário
+ *  • text-shadow[...]           – sombra de texto
+ *  • transition[prop_dur_ease]  – transição arbitrária
  *  • Fixes: border-color/style já incluíam prefixos; melhor fallback de parse
  */
 
@@ -110,11 +124,15 @@
                 classesCacheadas: classesResolvidas.size,
             };
         }
+        // Devolve todas as regras CSS registadas no cache (strings originais
+        // tal como foram passadas ao insertRule — sempre utilizáveis).
+        function obterTodasRegras() { return Array.from(regrasCSS); }
+
         return {
             temRegra, registarRegra, temClasse, obterClasse, registarClasse,
             obterTransforms, atualizarTransform, construirTransform,
             registarComponente, obterComponente, temComponente,
-            limpar, obterStats,
+            limpar, obterStats, obterTodasRegras,
         };
     })();
 
@@ -183,9 +201,7 @@
         function _renderizarRegular(r, classeOriginal) {
             const seletor = _construirSeletor(classeOriginal, r.variantes);
             const props = r.propriedade.split(';').map(p => p.trim()).filter(Boolean);
-            // ── !important ────────────────────────────────────────────────
             const sufixo = r.importante ? ' !important' : '';
-            // ─────────────────────────────────────────────────────────────
             props.forEach(prop => {
                 let regra = `${seletor} { ${prop}: ${r.valor}${sufixo}; }`;
                 if (r.breakpoint) regra = _comMediaQuery(r.breakpoint, `${seletor} { ${prop}: ${r.valor}${sufixo}; }`);
@@ -231,9 +247,7 @@
                 }
             }
 
-            // ── !important ────────────────────────────────────────────────
             const sufixo = r.importante ? ' !important' : '';
-            // ─────────────────────────────────────────────────────────────
             let regra = `${seletorRegra} { transform: ${transformCombinado}${sufixo}; }`;
             if (r.breakpoint) regra = _comMediaQuery(r.breakpoint, `${seletorRegra} { transform: ${transformCombinado}${sufixo}; }`);
 
@@ -285,6 +299,87 @@
             return minificar ? _regrasOffline.join('') : _regrasOffline.join('\n');
         }
 
+        // ─────────────────────────────────────────────────────────────────
+        // obterRegrasDOMAtual
+        // Lê as cssRules da <style> tag ao vivo e reconstrói CSS utilizável.
+        // Usa rule.style para extrair declarações (evita bug do browser que
+        // serializa cssText com blocos vazios em seletores escapados).
+        // ─────────────────────────────────────────────────────────────────
+        function obterRegrasDOMAtual() {
+            if (!_sheet) return [];
+            const linhas = [];
+            const rules = Array.from(_sheet.cssRules || []);
+
+            function _serializarEstilo(style) {
+                // Lê cada propriedade declarada e reconstrói "prop: valor".
+                // getPropertyValue pode devolver "" para "0" em alguns engines —
+                // usamos acesso camelCase como fallback.
+                const decls = [];
+                for (let i = 0; i < style.length; i++) {
+                    const prop = style[i];
+                    let val    = style.getPropertyValue(prop);
+                    const prio = style.getPropertyPriority(prop);
+                    if (val === '' || val === undefined) {
+                        const camel = prop.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
+                        val = style[camel] != null ? String(style[camel]) : '';
+                    }
+                    if (val !== '' && val !== undefined) {
+                        decls.push(`  ${prop}: ${val}${prio ? ' !' + prio : ''};`);
+                    }
+                }
+                return decls.join('\n');
+            }
+
+            function _serializarRegra(rule, indent) {
+                const pad = indent || '';
+
+                // CSSStyleRule (regra normal com seletor)
+                if (rule.type === 1 && rule.style) {
+                    const decls = _serializarEstilo(rule.style);
+                    // Seletor: preferir selectorText que o browser normaliza
+                    const sel = rule.selectorText || '';
+                    if (!decls) return null; // regra vazia — ignorar
+                    return `${pad}${sel} {\n${decls}\n${pad}}`;
+                }
+
+                // CSSMediaRule (@media)
+                if (rule.type === 4 && rule.cssRules) {
+                    const cond = rule.conditionText || rule.media?.mediaText || '';
+                    const inner = Array.from(rule.cssRules)
+                        .map(r => _serializarRegra(r, pad + '  '))
+                        .filter(Boolean)
+                        .join('\n');
+                    if (!inner) return null;
+                    return `${pad}@media ${cond} {\n${inner}\n${pad}}`;
+                }
+
+                // CSSKeyframesRule (@keyframes)
+                if (rule.type === 7 && rule.cssRules) {
+                    const nome = rule.name || '';
+                    const inner = Array.from(rule.cssRules)
+                        .map(r => {
+                            const decls = _serializarEstilo(r.style);
+                            return decls ? `  ${r.keyText} {\n${decls.replace(/^/gm, '  ')}\n  }` : null;
+                        })
+                        .filter(Boolean)
+                        .join('\n');
+                    if (!inner) return null;
+                    return `${pad}@keyframes ${nome} {\n${inner}\n${pad}}`;
+                }
+
+                // Fallback para outros tipos (@font-face, etc.) — usar cssText
+                if (rule.cssText) return pad + rule.cssText;
+                return null;
+            }
+
+            for (const rule of rules) {
+                const linha = _serializarRegra(rule, '');
+                if (linha) linhas.push(linha);
+            }
+
+            return linhas;
+        }
+
         function limpar() {
             if (_tagEstilo) { _tagEstilo.remove(); _tagEstilo = null; _sheet = null; }
         }
@@ -292,7 +387,7 @@
         return {
             inicializar, renderizar, inserirRegrasGlobais, inserirVariaveisCSS,
             ativarModoOffline, desativarModoOffline, obterRegrasOffline,
-            gerarCSSEstatico, limpar,
+            gerarCSSEstatico, obterRegrasDOMAtual, limpar,
         };
     })();
 
@@ -382,12 +477,20 @@
         function interpretarClasse(classeOriginal) {
             if (!_config) return null;
             if (Cache.temClasse(classeOriginal)) return Cache.obterClasse(classeOriginal);
-            if (Cache.temComponente(classeOriginal)) {
-                const cls = Cache.obterComponente(classeOriginal);
-                const res = cls.map(c => interpretarClasse(c)).flat().filter(Boolean);
+
+            // Componente com sufixo ! → btn! expande como btn mas com importante: true
+            const classeParaComponente = classeOriginal.endsWith('!') ? classeOriginal.slice(0, -1) : classeOriginal;
+            const importanteComponente = classeOriginal.endsWith('!') && classeOriginal !== classeParaComponente;
+
+            if (Cache.temComponente(classeParaComponente)) {
+                const cls = Cache.obterComponente(classeParaComponente);
+                const res = cls.map(c => interpretarClasse(c)).flat().filter(Boolean).map(r =>
+                    importanteComponente ? { ...r, importante: true } : r
+                );
                 Cache.registarClasse(classeOriginal, res);
                 return res;
             }
+
             const resultado = _parsearClasse(classeOriginal);
             Cache.registarClasse(classeOriginal, resultado);
             return resultado;
@@ -427,6 +530,11 @@
         }
 
         function _resolverClasseFixa(classeBase, breakpoint, variantes) {
+            let importante = false;
+            if (classeBase.endsWith('!')) {
+                importante = true;
+                classeBase = classeBase.slice(0, -1);
+            }
             const estiloFixo = _config.classesFixas[classeBase];
             if (!estiloFixo) return null;
             return estiloFixo.split(';').map(d => d.trim()).filter(Boolean).map(d => {
@@ -437,7 +545,7 @@
                     variantes: variantes || [],
                     propriedade: d.slice(0, idx).trim(),
                     valor: d.slice(idx + 1).trim(),
-                    importante: false,
+                    importante,
                     eTransform: false,
                 };
             }).filter(Boolean);
@@ -448,15 +556,12 @@
             if (!match) return null;
             let { prefixo, valor } = match.groups;
 
-            // ── !important: detectar e remover o "!" final ────────────────
             let importante = false;
             if (valor.endsWith('!')) {
                 importante = true;
                 valor = valor.slice(0, -1);
             }
-            // ─────────────────────────────────────────────────────────────
 
-            // ── BORDER SHORTHAND ──────────────────────────────────────────
             if (BORDER_SHORTHAND_PREFIXOS.has(prefixo)) {
                 const valorComEspacos = valor.replace(/_/g, ' ');
                 const partes = _splitRespeitandoParenteses(valorComEspacos);
@@ -470,13 +575,12 @@
                             tipo: 'arbitrario', classeBase, breakpoint,
                             variantes: variantes || [], prefixo,
                             propriedade: prop, valor: val,
-                            importante,  // ← propagado
+                            importante,
                             eTransform: false, tipoTransform: null,
                         }));
                     }
                 }
             }
-            // ─────────────────────────────────────────────────────────────
 
             valor = _resolverValorTema(valor);
             valor = valor.replace(/_/g, ' ');
@@ -495,7 +599,7 @@
                 tipo: 'arbitrario', classeBase, breakpoint,
                 variantes: variantes || [], prefixo, propriedade,
                 valor: valorProcessado,
-                importante,  // ← propagado
+                importante,
                 eTransform, tipoTransform,
             }];
         }
@@ -527,18 +631,24 @@
 
         function extrairClassesRelevantes(elemento) {
             return Array.from(elemento.classList).filter(classe => {
-                if (_config.classesFixas[classe]) return true;
-                if (Cache.temComponente(classe)) return true;
+                // Normalizar sufixo ! para lookup em classesFixas e componentes
+                const classeNorm = classe.endsWith('!') ? classe.slice(0, -1) : classe;
+
+                if (_config.classesFixas[classeNorm]) return true;
+                if (Cache.temComponente(classeNorm)) return true;
                 if (!classe.includes(':') && !classe.includes('[')) return false;
 
                 const partes = _separarQualificadoresRapido(classe);
                 if (!partes) return false;
                 const { classeBase } = partes;
 
-                if (_config.classesFixas[classeBase]) return true;
-                if (Cache.temComponente(classeBase)) return true;
+                // classeBase também pode ter sufixo !
+                const classeBaseNorm = classeBase.endsWith('!') ? classeBase.slice(0, -1) : classeBase;
 
-                const matchArb = classeBase.match(REGEX_ARBITRARIO);
+                if (_config.classesFixas[classeBaseNorm]) return true;
+                if (Cache.temComponente(classeBaseNorm)) return true;
+
+                const matchArb = classeBaseNorm.match(REGEX_ARBITRARIO);
                 if (matchArb) {
                     const p = matchArb.groups.prefixo;
                     return _config.mapaPropriedades[p] !== undefined
@@ -579,6 +689,26 @@
         let _observer = null;
         let _callback = null;
 
+        // ── Debounce via requestAnimationFrame ──────────────────────────────
+        // Todas as mutações ocorridas no mesmo frame são agrupadas numa única
+        // chamada ao callback, evitando processamento repetido em páginas
+        // dinâmicas que inserem muitos elementos de seguida.
+        const _fila = new Set();
+        let _agendado = false;
+
+        function _agendarProcessamento(elementos) {
+            elementos.forEach(el => _fila.add(el));
+            if (_agendado) return;
+            _agendado = true;
+            requestAnimationFrame(() => {
+                _agendado = false;
+                const lista = Array.from(_fila);
+                _fila.clear();
+                Logger.debug(`Observer (rAF): ${lista.length} elemento(s)`);
+                _callback(lista);
+            });
+        }
+
         function iniciar(callback) {
             if (_observer) { Logger.aviso('Observer já activo'); return; }
             _callback = callback;
@@ -587,7 +717,7 @@
                 childList: true, subtree: true,
                 attributes: true, attributeFilter: ['class'],
             });
-            Logger.debug('MutationObserver iniciado');
+            Logger.debug('MutationObserver iniciado (com debounce rAF)');
         }
 
         function parar() {
@@ -608,10 +738,7 @@
                     elementos.add(m.target);
                 }
             }
-            if (elementos.size > 0) {
-                Logger.debug(`Observer: ${elementos.size} elemento(s)`);
-                _callback(Array.from(elementos));
-            }
+            if (elementos.size > 0) _agendarProcessamento(Array.from(elementos));
         }
 
         function coletarInicialmente() { return Array.from(document.querySelectorAll('*')); }
@@ -628,6 +755,11 @@
         let _idCounter = 0;
         const _mapaIdsElemento = new WeakMap();
 
+        // Registo permanente: breezeId → array de classes CSS de transform.
+        // Usado na exportação para substituir [data-breeze-id="bN"] por seletores
+        // de classe reais, tornando o CSS exportado independente do Breeze.
+        const _mapaIdParaClasses = new Map();
+
         function _obterIdElemento(elemento) {
             if (!_mapaIdsElemento.has(elemento)) {
                 const id = `b${++_idCounter}`;
@@ -641,11 +773,20 @@
             for (const el of elementos) {
                 if (!el.classList || el.classList.length === 0) continue;
                 const classes = Parser.extrairClassesRelevantes(el);
+                const classesTransform = [];
                 for (const classe of classes) {
                     const resultados = Parser.interpretarClasse(classe);
                     if (!resultados || resultados.length === 0) continue;
-                    if (resultados.some(r => r.eTransform)) _obterIdElemento(el);
+                    if (resultados.some(r => r.eTransform)) {
+                        _obterIdElemento(el);
+                        classesTransform.push(classe);
+                    }
                     Renderer.renderizar(resultados, classe, el);
+                }
+                // Actualizar o mapa id → classes de transform para este elemento
+                if (classesTransform.length > 0) {
+                    const id = el.getAttribute('data-breeze-id');
+                    if (id) _mapaIdParaClasses.set(id, classesTransform);
                 }
             }
         }
@@ -661,12 +802,41 @@
                 nivel: _config.debug ? 'debug' : (_config.log === false ? 'silencioso' : 'info'),
                 silencioso: _config.log === false,
             });
-            Logger.info('Inicializando BreezeCSS v2.2.1...');
+            Logger.info('Inicializando BreezeCSS v2.2.3...');
             if (_config.plugins) _config.plugins.forEach(p => _aplicarPlugin(p));
+
+            // ── prefix ───────────────────────────────────────────────────
+            // Se definido, aplica o prefixo a todas as classes fixas e
+            // mapeamentos existentes, permitindo uso como bz-flex, bz-bg[red], …
+            if (_config.prefix) {
+                const pf = _config.prefix;
+                const novasFixas = {};
+                for (const [k, v] of Object.entries(_config.classesFixas))
+                    novasFixas[pf + k] = v;
+                _config.classesFixas = novasFixas;
+
+                const novosMapa = {};
+                for (const [k, v] of Object.entries(_config.mapaPropriedades))
+                    novosMapa[pf + k] = v;
+                _config.mapaPropriedades = novosMapa;
+                Logger.info(`Prefix activo: "${pf}"`);
+            }
+
             Parser.inicializar(_config);
             Renderer.inicializar(_config);
             if (_config.reset) Renderer.inserirRegrasGlobais(_config.regrasGlobais);
             Renderer.inserirVariaveisCSS(_config.tema);
+
+            // ── safelist ─────────────────────────────────────────────────
+            // Pré-gera as classes indicadas, mesmo que ainda não estejam no DOM.
+            if (_config.safelist && _config.safelist.length > 0) {
+                Logger.info(`Safelist: ${_config.safelist.length} classe(s)`);
+                // Criar um elemento fantasma para forçar o processamento
+                const fantasma = document.createElement('div');
+                fantasma.className = _config.safelist.join(' ');
+                processarElementos([fantasma]);
+            }
+
             const elementosIniciais = Observer.coletarInicialmente();
             processarElementos(elementosIniciais);
             Observer.iniciar(processarElementos);
@@ -677,6 +847,7 @@
             Observer.parar();
             Renderer.limpar();
             Cache.limpar();
+            _mapaIdParaClasses.clear();
             _config = null;
             _iniciado = false;
             _idCounter = 0;
@@ -707,6 +878,128 @@
             Renderer.desativarModoOffline();
             Logger.info(`Build: ${css.length} chars`);
             return css;
+        }
+
+        // ─────────────────────────────────────────────────────────────────
+        // exportar
+        //
+        // Lê o CSS real presente no <style> do browser (via obterRegrasDOMAtual),
+        // substitui seletores [data-breeze-id="bN"] pelos seletores de classe
+        // originais (tornando o CSS portável, sem dependência do Breeze),
+        // e dispara o download do ficheiro .css.
+        //
+        // Opções:
+        //   nome             {string}  – nome do ficheiro (sem extensão). Default: 'breeze-output'
+        //   minificar        {boolean} – output numa linha só.            Default: false
+        //   incluirCabecalho {boolean} – adiciona comentário no topo.     Default: true
+        //
+        // Devolve o conteúdo CSS como string.
+        // ─────────────────────────────────────────────────────────────────
+        function exportar(opcoes = {}) {
+            const {
+                nome             = 'breeze-output',
+                minificar        = false,
+                incluirCabecalho = true,
+            } = opcoes;
+
+            // ── 1. Fonte de verdade: CSS real presente no DOM ────────────
+            const regras = Renderer.obterRegrasDOMAtual();
+
+            if (regras.length === 0) {
+                Logger.aviso('exportar(): nenhuma regra CSS encontrada. O Breeze já foi inicializado?');
+                return '';
+            }
+
+            // ── 2. Construir tabela de substituição ──────────────────────
+            // [data-breeze-id="bN"] → seletor de classe baseado nas classes
+            // de transform do elemento (ex: .translate-x\[10px\].rotate\[45deg\])
+            //
+            // Porquê: os IDs são dinâmicos e deixam de funcionar sem o Breeze.
+            // Ao substituir por seletores de classe, o CSS exportado é autónomo.
+            const tabelaSubstituicao = new Map(); // "bN" → seletor CSS
+
+            for (const [id, classes] of _mapaIdParaClasses) {
+                // Construir seletor combinado a partir das classes do elemento.
+                // cssEscape trata os '[', ']' e outros caracteres especiais.
+                const seletor = classes.map(c => '.' + cssEscape(c)).join('');
+                tabelaSubstituicao.set(id, seletor);
+            }
+
+            // ── 3. Aplicar substituições nas regras ──────────────────────
+            // Regex que captura [data-breeze-id="bN"] com ou sem pseudoclasse/
+            // pseudoelemento a seguir (ex: [data-breeze-id="b1"]:hover).
+            const REGEX_ID = /\[data-breeze-id="(b\d+)"\]/g;
+
+            const regrasSubstituidas = regras.map(regra => {
+                return regra.replace(REGEX_ID, (match, id) => {
+                    return tabelaSubstituicao.has(id)
+                        ? tabelaSubstituicao.get(id)
+                        : match; // sem correspondência conhecida: manter original
+                });
+            });
+
+            // ── 4. Montar conteúdo final ─────────────────────────────────
+            let conteudo = '';
+
+            if (incluirCabecalho) {
+                const agora = new Date().toISOString().replace('T', ' ').slice(0, 19);
+                conteudo += [
+                    `/* =========================================`,
+                    ` * Gerado por BreezeCSS v${BreezeCSS.versao}`,
+                    ` * Data: ${agora}`,
+                    ` * Total de regras: ${regrasSubstituidas.length}`,
+                    ` * ========================================= */`,
+                    '',
+                ].join('\n');
+            }
+
+            if (minificar) {
+                conteudo += regrasSubstituidas
+                    .map(r => r
+                        // Colapsar espaços em branco (incluindo newlines)
+                        .replace(/\s+/g, ' ')
+                        .trim()
+                        // Remover espaço à volta de { } : ;
+                        .replace(/\s*\{\s*/g, '{')
+                        .replace(/\s*\}\s*/g, '}')
+                        .replace(/\s*;\s*/g, ';')
+                        // Remover último ; antes de }
+                        .replace(/;}/g, '}')
+                        // Remover espaços à volta de : dentro de declarações
+                        // (mas não em pseudo-seletores como :hover — que ficam dentro de {})
+                        .replace(/\{([^}]+)\}/g, (_, decls) =>
+                            '{' + decls.replace(/\s*:\s*/g, ':') + '}'
+                        )
+                    )
+                    .join('');
+            } else {
+                conteudo += regrasSubstituidas.join('\n') + '\n';
+            }
+
+            // ── 5. Download ──────────────────────────────────────────────
+            if (typeof document !== 'undefined' && typeof URL !== 'undefined') {
+                try {
+                    const blob = new Blob([conteudo], { type: 'text/css;charset=utf-8' });
+                    const url  = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href     = url;
+                    link.download = nome.endsWith('.css') ? nome : `${nome}.css`;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    setTimeout(() => {
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+                    }, 100);
+                    Logger.info(`exportar(): "${link.download}" (${regrasSubstituidas.length} regras, ${conteudo.length} chars)`);
+                } catch (e) {
+                    Logger.erro('exportar(): falha ao criar download', e);
+                }
+            } else {
+                Logger.aviso('exportar(): ambiente sem DOM – CSS devolvido como string apenas.');
+            }
+
+            return conteudo;
         }
 
         function use(plugin) {
@@ -785,7 +1078,9 @@
                     espacamento: { ...(b.tema.espacamento  || {}), ...(u.tema?.espacamento || {}) },
                     fontes:      { ...(b.tema.fontes       || {}), ...(u.tema?.fontes      || {}) },
                 },
-                plugins: u.plugins || [],
+                plugins:  u.plugins  || [],
+                safelist: u.safelist || [],
+                prefix:   u.prefix   || '',
             };
         }
 
@@ -846,7 +1141,7 @@
                     // Cor
                     bg: 'background-color', text: 'color',
 
-                    // ── Bordas ────────────────────────────────────────────
+                    // Bordas
                     border:    'border-width',
                     'border-t': 'border-top-width',
                     'border-r': 'border-right-width',
@@ -876,7 +1171,6 @@
                     'rounded-b': 'border-bottom-left-radius; border-bottom-right-radius',
                     'rounded-l': 'border-top-left-radius; border-bottom-left-radius',
                     'rounded-r': 'border-top-right-radius; border-bottom-right-radius',
-                    // ─────────────────────────────────────────────────────
 
                     // Tipografia
                     'text-size': 'font-size', 'font-size': 'font-size',
@@ -905,6 +1199,13 @@
                     'bg-repeat': 'background-repeat',
                     'bg-attach': 'background-attachment', filter: 'filter',
 
+                    // Flex
+                    'flex-basis': 'flex-basis',
+                    'flex-g': 'flex-grow',      // mantido por compatibilidade
+                    grow: 'flex-grow',
+                    shrink: 'flex-shrink',
+                    basis: 'flex-basis',
+
                     // Transforms
                     rotate: 'transform', scale: 'transform',
                     'scale-x': 'transform', 'scale-y': 'transform',
@@ -922,7 +1223,7 @@
                     duration: 'transition-duration', delay: 'transition-delay',
                     ease: 'transition-timing-function', animate: 'animation',
                     'animate-delay': 'animation-delay',
-'animate-duration': 'animation-duration',
+                    'animate-duration': 'animation-duration',
 
                     // Outros
                     content: 'content', cursor: 'cursor',
@@ -1066,7 +1367,7 @@
                     'pointer-events-none': 'pointer-events: none',
                     'pointer-events-auto': 'pointer-events: auto',
 
-                    // Selecção / user-select
+                    // Seleção / user-select
                     'select-none': 'user-select: none', 'select-text': 'user-select: text',
                     'select-all': 'user-select: all',
 
@@ -1116,7 +1417,7 @@
         }
 
         return {
-            init, reiniciar, processar, build, use,
+            init, reiniciar, processar, build, exportar, use,
             addMapping, addVariant, addBreakpoint, addComponent,
             addFixedClass, addProcessor, obterStats,
         };
@@ -1130,6 +1431,33 @@
         reiniciar:     ()       => Engine.reiniciar(),
         processar:     ()       => Engine.processar(),
         build:         (h, o)   => Engine.build(h, o),
+
+        /**
+         * exportar(opcoes?)
+         *
+         * Exporta o CSS real gerado pelo BreezeCSS como ficheiro .css.
+         *
+         * Lê directamente o <style> injectado no browser (não o cache interno),
+         * garantindo que o output reflecte o estado final da página — incluindo
+         * transforms combinados e sem regras obsoletas.
+         *
+         * Seletores dinâmicos [data-breeze-id="bN"] são automaticamente
+         * convertidos para seletores de classe CSS (.translate-x\[10px\], etc.),
+         * tornando o ficheiro exportado portável e independente do Breeze.
+         *
+         * @param {object}  opcoes
+         * @param {string}  opcoes.nome             – nome do ficheiro (sem .css). Default: 'breeze-output'
+         * @param {boolean} opcoes.minificar         – minifica o output.           Default: false
+         * @param {boolean} opcoes.incluirCabecalho  – adiciona comentário no topo. Default: true
+         * @returns {string} CSS gerado
+         *
+         * @example
+         * BreezeCSS.exportar()
+         * BreezeCSS.exportar({ nome: 'meu-site', minificar: true })
+         * BreezeCSS.exportar({ nome: 'estilos', incluirCabecalho: false })
+         */
+        exportar:      (o = {}) => Engine.exportar(o),
+
         use:           (p)      => Engine.use(p),
         addMapping:    (p, pr)  => Engine.addMapping(p, pr),
         addVariant:    (n, ps)  => Engine.addVariant(n, ps),
@@ -1138,7 +1466,7 @@
         addFixedClass: (n, e)   => Engine.addFixedClass(n, e),
         addProcessor:  (p, fn)  => Engine.addProcessor(p, fn),
         stats:         ()       => Engine.obterStats(),
-        versao: '2.2.1',
+        versao: '2.2.3',
     };
 
     // Auto-init
