@@ -264,6 +264,127 @@ const Engine = (() => {
         processarElementos(elementos);
     }
 
+    /**
+     * exportar(opcoes?)
+     *
+     * Lê o CSS real presente no <style> do browser, substitui seletores
+     * dinâmicos [data-breeze-id="bN"] pelos seletores de classe originais
+     * e dispara o download do ficheiro .css resultante.
+     *
+     * @param {object}  opcoes
+     * @param {string}  opcoes.nome             – nome do ficheiro (sem .css). Default: 'breeze-output'
+     * @param {boolean} opcoes.minificar         – minifica o output.           Default: false
+     * @param {boolean} opcoes.incluirCabecalho  – adiciona comentário no topo. Default: true
+     * @returns {string} CSS gerado
+     */
+    function exportar(opcoes = {}) {
+        const {
+            nome = 'breeze-output',
+            minificar = false,
+            incluirCabecalho = true,
+        } = opcoes;
+
+        // Ler CSS real do <style> injectado pelo Breeze
+        const tagEstilo = typeof document !== 'undefined'
+            ? document.querySelector('style[data-breeze]')
+            : null;
+
+        const regras = [];
+        if (tagEstilo?.sheet) {
+            try {
+                for (const rule of tagEstilo.sheet.cssRules) {
+                    regras.push(rule.cssText);
+                }
+            } catch (e) {
+                Logger.aviso('exportar(): não foi possível ler cssRules (CORS?). A tentar textContent.');
+                const linhas = (tagEstilo.textContent || '').split('\n').filter(Boolean);
+                regras.push(...linhas);
+            }
+        } else if (tagEstilo) {
+            const linhas = (tagEstilo.textContent || '').split('\n').filter(Boolean);
+            regras.push(...linhas);
+        }
+
+        if (regras.length === 0) {
+            Logger.aviso('exportar(): nenhuma regra CSS encontrada. O Breeze já foi inicializado?');
+            return '';
+        }
+
+        // Substituir [data-breeze-id="bN"] por seletores de classe portáveis
+        const cssEscape = (typeof CSS !== 'undefined' && typeof CSS.escape === 'function')
+            ? CSS.escape
+            : s => s.replace(/([[{}\]*+?,.\\/^$|#\s:])/g, '\\$1');
+
+        const REGEX_ID = /\[data-breeze-id="(b\d+)"\]/g;
+        const regrasSubstituidas = regras.map(regra =>
+            regra.replace(REGEX_ID, (match, id) => {
+                // Tentar reconstruir seletor a partir dos elementos com esse id
+                if (typeof document !== 'undefined') {
+                    const el = document.querySelector(`[data-breeze-id="${id}"]`);
+                    if (el) {
+                        const classes = Array.from(el.classList).filter(c => c !== 'breeze');
+                        if (classes.length) return classes.map(c => '.' + cssEscape(c)).join('');
+                    }
+                }
+                return match;
+            })
+        );
+
+        let conteudo = '';
+
+        if (incluirCabecalho) {
+            const agora = new Date().toISOString().replace('T', ' ').slice(0, 19);
+            conteudo += [
+                `/* =========================================`,
+                ` * Gerado por BreezeCSS v2.2.3`,
+                ` * Data: ${agora}`,
+                ` * Total de regras: ${regrasSubstituidas.length}`,
+                ` * ========================================= */`,
+                '',
+            ].join('\n');
+        }
+
+        if (minificar) {
+            conteudo += regrasSubstituidas
+                .map(r => r
+                    .replace(/\s+/g, ' ')
+                    .trim()
+                    .replace(/\s*\{\s*/g, '{')
+                    .replace(/\s*\}\s*/g, '}')
+                    .replace(/\s*;\s*/g, ';')
+                    .replace(/;}/g, '}')
+                    .replace(/\{([^}]+)\}/g, (_, decls) => '{' + decls.replace(/\s*:\s*/g, ':') + '}')
+                )
+                .join('');
+        } else {
+            conteudo += regrasSubstituidas.join('\n') + '\n';
+        }
+
+        if (typeof document !== 'undefined' && typeof URL !== 'undefined') {
+            try {
+                const blob = new Blob([conteudo], { type: 'text/css;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = nome.endsWith('.css') ? nome : `${nome}.css`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                setTimeout(() => {
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                }, 100);
+                Logger.info(`exportar(): "${link.download}" (${regrasSubstituidas.length} regras, ${conteudo.length} chars)`);
+            } catch (e) {
+                Logger.erro('exportar(): falha ao criar download', e);
+            }
+        } else {
+            Logger.aviso('exportar(): ambiente sem DOM – CSS devolvido como string apenas.');
+        }
+
+        return conteudo;
+    }
+
     function obterStats() {
         return {
             cache: Cache.obterStats(),
@@ -718,6 +839,7 @@ const Engine = (() => {
         reiniciar,
         processar,
         build,
+        exportar,
         use,
         addMapping,
         addVariant,

@@ -1,4 +1,4 @@
-# 🌬️ BreezeCSS v2 — Runtime CSS Engine
+# 🌬️ BreezeCSS v2.2.3 — Runtime CSS Engine
 
 BreezeCSS é um motor de CSS em runtime que permite criar estilos usando classes utilitárias diretamente em HTML — sem build step, sem configuração obrigatória. Inspirado em Tailwind, mas simples, rápido e totalmente em português, com suporte para temas, plugins, componentes, variantes compostas e modo build.
 
@@ -46,6 +46,12 @@ window.BreezeConfig = {
   debug: false,
   reset: true,
 
+  // Prefixo para evitar conflitos com outras frameworks
+  prefix: 'bz-',
+
+  // Classes pré-geradas antes de aparecerem no DOM
+  safelist: ['flex', 'hidden', 'bg[primario]'],
+
   // Sistema de temas
   tema: {
     cores: {
@@ -83,6 +89,8 @@ Ou via `BreezeCSS.init()` manualmente:
 BreezeCSS.init({
   debug: false,
   reset: true,
+  prefix: 'bz-',
+  safelist: ['flex', 'hidden'],
   tema: {
     cores: { primario: '#00ff88' },
     espacamento: { sm: '8px', md: '16px' }
@@ -136,9 +144,71 @@ Breakpoints padrão: `sm`, `md`, `lg`, `xl`, `2xl`. Podem ser adicionados person
 
 ---
 
-## 🎞️ Classes de Animação
+## ❗ !important
+
+Terminar o valor com `!` aplica `!important` à declaração:
 
 ```html
+<!-- Valor arbitrário com !important -->
+<div class="bg[red!] w[100%!]"></div>
+
+<!-- Classe fixa com !important -->
+<div class="flex! hidden!"></div>
+
+<!-- Com variantes -->
+<div class="hover:flex! md:hidden!"></div>
+
+<!-- Componente com !important (aplica a todas as propriedades internas) -->
+<button class="btn!"></button>
+```
+
+---
+
+## 📐 Flex — Aliases
+
+```html
+<div class="grow[1]">    <!-- flex-grow: 1  (alias mais ergonómico de flex-g) -->
+<div class="shrink[0]">  <!-- flex-shrink: 0 -->
+<div class="basis[50%]"> <!-- flex-basis: 50% -->
+```
+
+> `flex-g` mantém-se por compatibilidade, mas `grow` é o alias recomendado a partir de v2.2.3.
+
+---
+
+## 🖼️ Border
+
+```html
+<!-- Shorthand completo -->
+<div class="border[solid_1px_#fff]"></div>
+
+<!-- Shorthand por lado -->
+<div class="border-t[2px_solid_red]"></div>
+<div class="border-b[1px_dashed_#ccc]"></div>
+```
+
+---
+
+## 🔤 Tipografia
+
+```html
+<!-- Peso de fonte arbitrário -->
+<div class="font-weight[700]"></div>
+<div class="fw[300]"></div>
+
+<!-- Sombra de texto -->
+<div class="text-shadow[2px_2px_4px_rgba(0,0,0,0.5)]"></div>
+```
+
+---
+
+## 🎞️ Transições e Animações
+
+```html
+<!-- Transição arbitrária -->
+<div class="transition[color_0.3s_ease,opacity_0.2s_linear]"></div>
+
+<!-- Animações pré-definidas -->
 <div class="animate-spin">     <!-- rotação contínua -->
 <div class="animate-pulse">    <!-- fade loop -->
 <div class="animate-bounce">   <!-- salto loop -->
@@ -165,6 +235,11 @@ BreezeCSS.processar()
 
 // Modo build — gera CSS estático a partir de HTML
 const css = BreezeCSS.build(htmlString, { minificar: true })
+
+// Exportar todo o CSS gerado como ficheiro .css
+BreezeCSS.exportar()
+BreezeCSS.exportar({ nome: 'meu-site', minificar: true })
+BreezeCSS.exportar({ nome: 'estilos', incluirCabecalho: false })
 
 // Estatísticas de cache e configuração
 BreezeCSS.stats()
@@ -226,7 +301,7 @@ BreezeCSS.addComponent('btn', [
 ## 🏗️ Arquitetura
 
 ```
-breezecss-main/
+breezecss/
 ├── breeze.bundle.js      ← Bundle IIFE (para <script src="">)
 ├── breeze.js             ← Entry point (módulos ES)
 ├── core/
@@ -234,7 +309,7 @@ breezecss-main/
 │   ├── parser.js         ← Interpretação de classes
 │   ├── renderer.js       ← Injeção de CSS no DOM
 │   ├── cache.js          ← Cache inteligente
-│   ├── observer.js       ← MutationObserver
+│   ├── observer.js       ← MutationObserver com debounce via rAF
 │   └── logger.js         ← Sistema de logging com níveis
 ├── tests/
 │   └── breeze.test.js    ← 55 testes (node tests/breeze.test.js)
@@ -243,20 +318,29 @@ breezecss-main/
 
 ---
 
-## 🆚 Melhorias v2 vs v1
+## 🆚 Histórico de versões
 
-| Feature | v1 | v2 |
-|---|---|---|
-| Performance | `querySelectorAll('*')` a cada mudança | MutationObserver — só o que muda ✅ |
-| Transforms | `rotate` sobrescreve `scale` ❌ | Combinados automaticamente ✅ |
-| Variantes compostas | Apenas 1 nível | `md:hover:focus:classe` ✅ |
-| Sistema de temas | ❌ | `bg[primario]` → cor do tema ✅ |
-| Plugins | ❌ | `BreezeCSS.use(plugin)` ✅ |
-| Componentes | ❌ | `addComponent('btn', [...])` ✅ |
-| Modo build | ❌ | `BreezeCSS.build(html)` → CSS ✅ |
-| Logging | `console.log` simples | Níveis + histórico ✅ |
-| Arquitetura | 1 ficheiro monolítico | 6 módulos separados ✅ |
-| Testes | ❌ | 55 testes ✅ |
+| Feature | v1 | v2.0 | v2.2.3 |
+|---|---|---|---|
+| Performance | `querySelectorAll('*')` a cada mudança | MutationObserver ✅ | + debounce via rAF ✅ |
+| Transforms | `rotate` sobrescreve `scale` ❌ | Combinados automaticamente ✅ | ✅ |
+| Variantes compostas | Apenas 1 nível | `md:hover:focus:classe` ✅ | ✅ |
+| Sistema de temas | ❌ | `bg[primario]` → cor do tema ✅ | ✅ |
+| Plugins | ❌ | `BreezeCSS.use(plugin)` ✅ | ✅ |
+| Componentes | ❌ | `addComponent('btn', [...])` ✅ | + `btn!` com !important ✅ |
+| Modo build | ❌ | `BreezeCSS.build(html)` → CSS ✅ | ✅ |
+| Exportar CSS | ❌ | ❌ | `BreezeCSS.exportar()` ✅ |
+| !important | ❌ | ❌ | `bg[red!]`, `flex!`, `btn!` ✅ |
+| Aliases flex | `flex-g` | `flex-g` | `grow`, `shrink`, `basis` ✅ |
+| Border shorthand | ❌ | ❌ | `border[solid_1px_#fff]` ✅ |
+| font-weight arb. | ❌ | ❌ | `fw[700]` ✅ |
+| text-shadow | ❌ | ❌ | `text-shadow[...]` ✅ |
+| Transição arb. | ❌ | ❌ | `transition[prop_dur_ease]` ✅ |
+| safelist | ❌ | ❌ | `safelist: [...]` ✅ |
+| prefix | ❌ | ❌ | `prefix: 'bz-'` ✅ |
+| Logging | `console.log` simples | Níveis + histórico ✅ | ✅ |
+| Arquitetura | 1 ficheiro monolítico | 6 módulos separados ✅ | ✅ |
+| Testes | ❌ | 55 testes ✅ | ✅ |
 
 ---
 
