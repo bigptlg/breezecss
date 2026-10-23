@@ -1,3 +1,330 @@
+/*! Breeze bundle — BreezeCSS 2.2.4 + BreezeGlass 1.0.0 (ficheiro único) */
+/*!
+ * BreezeGlass v1.0.0 — plugin "glass" para o BreezeCSS (>= 2.2)
+ *
+ * Camada 1 (todos os browsers): utilitários CSS ao vivo — backdrop-filter, tint,
+ *   brilho especular e rebordo em box-shadow. Sem snapshot, sem WebGL.
+ * Camada 2 (só Chromium, opcional): refracção real via SVG feDisplacementMap
+ *   aplicada ao backdrop. Nos outros browsers degrada para a camada 1.
+ *
+ * Uso (recomendado — antes do BreezeCSS):
+ *   <script src="breeze--glass.js"></script>
+ *   <script>window.BreezeConfig = { plugins: [BreezeGlass] }</script>
+ *   <script src="breeze.min.js"></script>
+ *
+ * Uso (depois do BreezeCSS já inicializado):
+ *   BreezeCSS.use(BreezeGlass)
+ *
+ * Opções:  BreezeGlass.criar({ refracao: 'auto' | true | false,
+ *            intensidade: 16, bisel: 0.3, resolucaoMax: 200 })
+ *
+ * Classes:
+ *   glass                       base (obrigatória)
+ *   glass-sm|md|lg|xl           desfoque (8 / 16 / 28 / 40 px)
+ *   glass-light | glass-dark    tom
+ *   glass-pill | glass-circle   forma
+ *   glass-refract               refracção (Chromium) — glass-refract[24] = 24px
+ *   glass-blur[20px]  glass-saturate[2]  glass-brightness[1.1]
+ *   glass-tint[0.3]   glass-shadow[0.4]  glass-rgb[12_16_24]  glass-bezel[0.4]
+ *   Variantes do Breeze funcionam: hover:glass-dark, md:glass-lg, etc.
+ */
+(function (global) {
+  'use strict'
+
+  const VERSAO = '1.0.0'
+  const PADROES = { refracao: 'auto', intensidade: 16, bisel: 0.3, resolucaoMax: 200 }
+
+  // ---------------------------------------------------------------- classes
+  // Nota: o Breeze separa as declarações por ";" — não usar ";" dentro de valores.
+  const FILTRO =
+    'var(--glass-refract-url,) blur(var(--glass-blur, 16px)) ' +
+    'saturate(var(--glass-saturate, 1.8)) brightness(var(--glass-brightness, 1.06))'
+
+  const CLASSES = {
+    glass: [
+      '--glass-t: var(--glass-tint, var(--glass-tone-tint, 0.14))',
+      'background-color: rgb(var(--glass-rgb, 255 255 255) / var(--glass-t))',
+      'background-image: linear-gradient(135deg, rgb(255 255 255 / calc(var(--glass-t) * 1.8)) 0%, rgb(255 255 255 / 0) 42%, rgb(255 255 255 / 0) 58%, rgb(255 255 255 / calc(var(--glass-t) * 0.8)) 100%)',
+      '-webkit-backdrop-filter: ' + FILTRO,
+      'backdrop-filter: ' + FILTRO,
+      'box-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.55), inset 0 -1px 0 0 rgb(255 255 255 / 0.1), inset 0 0 0 1px rgb(255 255 255 / 0.16), inset 0 0 22px 0 rgb(255 255 255 / 0.07), 0 12px 32px -10px rgb(0 0 0 / var(--glass-shadow, 0.3))',
+      'transition-property: background-color, box-shadow, transform',
+      'transition-duration: 250ms',
+      'transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1)'
+    ].join('; '),
+    'glass-sm': '--glass-blur: 8px',
+    'glass-md': '--glass-blur: 16px',
+    'glass-lg': '--glass-blur: 28px; --glass-saturate: 2',
+    'glass-xl': '--glass-blur: 40px; --glass-saturate: 2.2',
+    'glass-light': '--glass-rgb: 255 255 255',
+    'glass-dark': '--glass-rgb: 12 16 24; --glass-tone-tint: 0.3',
+    'glass-pill': 'border-radius: 9999px',
+    'glass-circle': 'border-radius: 9999px; aspect-ratio: 1 / 1',
+    'glass-refract': '--glass-refract-px: 16'
+  }
+
+  // Valores arbitrários: glass-blur[20px] → --glass-blur: 20px
+  const MAPEAMENTOS = {
+    'glass-blur': '--glass-blur',
+    'glass-saturate': '--glass-saturate',
+    'glass-brightness': '--glass-brightness',
+    'glass-tint': '--glass-tint',
+    'glass-shadow': '--glass-shadow',
+    'glass-rgb': '--glass-rgb',
+    'glass-bezel': '--glass-bezel',
+    'glass-refract': '--glass-refract-px'
+  }
+
+  // ------------------------------------------------- estilos de apoio / a11y
+  function esc(s) {
+    return global.CSS && typeof global.CSS.escape === 'function' ? global.CSS.escape(s) : s.replace(/[^\w-]/g, '\\$&')
+  }
+
+  function injectarEstilos(prefixo) {
+    if (document.getElementById('breeze-glass-estilos')) return
+    const g = '.' + esc(prefixo + 'glass')
+    const s = g + g // .x.x → especificidade maior que os utilitários, para a11y ganhar
+    const css = `
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  ${s} { background-color: rgb(var(--glass-rgb, 255 255 255) / 0.78); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  ${s} { -webkit-backdrop-filter: none; backdrop-filter: none; background-image: none; background-color: rgb(var(--glass-rgb, 255 255 255) / 0.92); }
+}
+@media (prefers-contrast: more) {
+  ${s} { -webkit-backdrop-filter: none; backdrop-filter: none; background-image: none; background-color: rgb(var(--glass-rgb, 255 255 255) / 0.95); box-shadow: inset 0 0 0 2px currentColor; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ${s} { transition: none; }
+}`
+    const el = document.createElement('style')
+    el.id = 'breeze-glass-estilos'
+    el.setAttribute('data-breeze', 'glass')
+    el.textContent = css
+    document.head.appendChild(el)
+  }
+  // ------------------------------------------------ refracção (só Chromium)
+  function refracaoSuportada(cfg) {
+    if (cfg.refracao === false) return false
+    if (typeof ResizeObserver === 'undefined') return false
+    if (cfg.refracao === true) return true
+    const ua = navigator.userAgent || ''
+    const marcas = navigator.userAgentData && navigator.userAgentData.brands
+    const chromium = marcas ? marcas.some(b => /Chromium/i.test(b.brand)) : /Chrome\/\d+/.test(ua)
+    return chromium && !/(iPhone|iPad|iPod)/.test(ua)
+  }
+
+  // Mapa de deslocamento: R/G = vector (128 = neutro). Junto à borda, o vector
+  // aponta para fora (lente convexa), com queda quadrática para o interior.
+  function gerarMapa(w, h, raio, bisel, resMax) {
+    const passo = Math.max(1, Math.ceil(Math.max(w, h) / resMax))
+    const cw = Math.max(1, Math.ceil(w / passo))
+    const ch = Math.max(1, Math.ceil(h / passo))
+    const cv = gerarMapa._cv || (gerarMapa._cv = document.createElement('canvas'))
+    cv.width = cw
+    cv.height = ch
+    const ctx = cv.getContext('2d')
+    const img = ctx.createImageData(cw, ch)
+    const d = img.data
+    const hx = w / 2
+    const hy = h / 2
+    const r = Math.min(raio, hx, hy)
+    const largura = Math.max(2, Math.min(w, h) * bisel)
+
+    for (let j = 0; j < ch; j++) {
+      for (let i = 0; i < cw; i++) {
+        const dx = ((i + 0.5) * w) / cw - hx
+        const dy = ((j + 0.5) * h) / ch - hy
+        const qx = Math.abs(dx) - (hx - r)
+        const qy = Math.abs(dy) - (hy - r)
+        const fora = Math.hypot(Math.max(qx, 0), Math.max(qy, 0))
+        const prof = -(fora + Math.min(Math.max(qx, qy), 0) - r) // >0 dentro da forma
+        let mx = 0
+        let my = 0
+        if (prof > 0 && prof < largura) {
+          const t = 1 - prof / largura
+          const m = t * t
+          let nx, ny
+          if (qx > 0 && qy > 0) {
+            const n = Math.hypot(qx, qy)
+            nx = (Math.sign(dx) * qx) / n
+            ny = (Math.sign(dy) * qy) / n
+          } else if (qx > qy) {
+            nx = Math.sign(dx)
+            ny = 0
+          } else {
+            nx = 0
+            ny = Math.sign(dy)
+          }
+          mx = m * nx
+          my = m * ny
+        }
+        const k = (j * cw + i) * 4
+        d[k] = 128 + 127 * mx
+        d[k + 1] = 128 + 127 * my
+        d[k + 2] = 128
+        d[k + 3] = 255
+      }
+    }
+    ctx.putImageData(img, 0, 0)
+    return cv.toDataURL()
+  }
+
+  function iniciarRefraccao(cfg) {
+    const NS = 'http://www.w3.org/2000/svg'
+    const alvos = new Map() // elemento → { filtro, img, disp, w, h, raio, px, bisel }
+    let svg = null
+    let contador = 0
+    let agendado = false
+
+    const lerPx = el => parseFloat(getComputedStyle(el).getPropertyValue('--glass-refract-px')) || 0
+
+    function garantirSvg() {
+      if (svg) return svg
+      svg = document.createElementNS(NS, 'svg')
+      svg.setAttribute('aria-hidden', 'true')
+      svg.setAttribute('width', '0')
+      svg.setAttribute('height', '0')
+      svg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none'
+      svg.appendChild(document.createElementNS(NS, 'defs'))
+      document.body.appendChild(svg)
+      return svg
+    }
+
+    function actualizar(el, a) {
+      const w = el.offsetWidth
+      const h = el.offsetHeight
+      if (!w || !h) return
+      const cs = getComputedStyle(el)
+      const brut = cs.borderTopLeftRadius || '0'
+      const raio = brut.includes('%') ? (parseFloat(brut) / 100) * Math.min(w, h) : parseFloat(brut) || 0
+      const px = lerPx(el) || a.px
+      const bisel = parseFloat(cs.getPropertyValue('--glass-bezel')) || cfg.bisel
+      if (w === a.w && h === a.h && raio === a.raio && px === a.px && bisel === a.bisel) return
+      Object.assign(a, { w, h, raio, px, bisel })
+      a.img.setAttribute('href', gerarMapa(w, h, raio, bisel, cfg.resolucaoMax))
+      a.img.setAttribute('x', '0')
+      a.img.setAttribute('y', '0')
+      a.img.setAttribute('width', String(w))
+      a.img.setAttribute('height', String(h))
+      a.disp.setAttribute('scale', String(px * 2))
+    }
+
+    const ro = new ResizeObserver(entradas => {
+      entradas.forEach(e => {
+        const a = alvos.get(e.target)
+        if (a) actualizar(e.target, a)
+      })
+    })
+
+    function registar(el, px) {
+      const id = 'bz-lg-' + ++contador
+      const filtro = document.createElementNS(NS, 'filter')
+      filtro.setAttribute('id', id)
+      filtro.setAttribute('x', '0%')
+      filtro.setAttribute('y', '0%')
+      filtro.setAttribute('width', '100%')
+      filtro.setAttribute('height', '100%')
+      filtro.setAttribute('color-interpolation-filters', 'sRGB')
+      const img = document.createElementNS(NS, 'feImage')
+      img.setAttribute('result', 'mapa')
+      img.setAttribute('preserveAspectRatio', 'none')
+      const disp = document.createElementNS(NS, 'feDisplacementMap')
+      disp.setAttribute('in', 'SourceGraphic')
+      disp.setAttribute('in2', 'mapa')
+      disp.setAttribute('xChannelSelector', 'R')
+      disp.setAttribute('yChannelSelector', 'G')
+      filtro.appendChild(img)
+      filtro.appendChild(disp)
+      garantirSvg().firstChild.appendChild(filtro)
+      alvos.set(el, { filtro, img, disp, w: 0, h: 0, raio: -1, px, bisel: 0 })
+      el.style.setProperty('--glass-refract-url', 'url(#' + id + ')')
+      ro.observe(el) // o 1.º callback gera o mapa
+    }
+
+    function remover(el) {
+      const a = alvos.get(el)
+      if (!a) return
+      ro.unobserve(el)
+      a.filtro.remove()
+      el.style.removeProperty('--glass-refract-url')
+      alvos.delete(el)
+    }
+
+    function varrer() {
+      agendado = false
+      if (!document.body) return
+      document.querySelectorAll('[class*="glass-refract"]').forEach(el => {
+        const px = lerPx(el)
+        const a = alvos.get(el)
+        if (px > 0 && !a) registar(el, px)
+        else if (px > 0 && a && a.px !== px) actualizar(el, a)
+        else if (px <= 0 && a) remover(el)
+      })
+      alvos.forEach((_, el) => {
+        if (!el.isConnected) remover(el)
+      })
+    }
+
+    // rAF duplo: dá tempo ao Breeze de inserir as regras das classes novas
+    function agendar(mutacoes) {
+      if (svg && mutacoes && mutacoes.every(m => svg.contains(m.target))) return
+      if (agendado) return
+      agendado = true
+      requestAnimationFrame(() => requestAnimationFrame(varrer))
+    }
+
+    new MutationObserver(agendar).observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class']
+    })
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => agendar())
+    else agendar()
+
+    return { varrer }
+  }
+
+  // ----------------------------------------------------------------- plugin
+  function criar(opcoes) {
+    const cfg = Object.assign({}, PADROES, opcoes)
+    let motor = null
+    return {
+      nome: 'glass',
+      versao: VERSAO,
+      setup(ctx) {
+        const prefixo = (ctx.config && ctx.config.prefix) || ''
+        // Se o Breeze já aplicou o prefixo (use() depois do init), aplicamo-lo nós.
+        const fixas = (ctx.config && ctx.config.classesFixas) || {}
+        const jaPrefixado = prefixo && prefixo + 'block' in fixas
+        const nome = n => (jaPrefixado ? prefixo + n : n)
+
+        Object.keys(CLASSES).forEach(n => ctx.addFixedClass(nome(n), CLASSES[n]))
+        Object.keys(MAPEAMENTOS).forEach(p => ctx.addMapping(nome(p), MAPEAMENTOS[p]))
+
+        if (typeof document === 'undefined') return
+        injectarEstilos(prefixo)
+        if (!motor && refracaoSuportada(cfg)) motor = iniciarRefraccao(cfg)
+
+        // use() depois do init: reprocessa os elementos já existentes
+        if (global.BreezeCSS && typeof global.BreezeCSS.processar === 'function') {
+          Promise.resolve().then(() => global.BreezeCSS.processar())
+        }
+      },
+      actualizar() {
+        if (motor) motor.varrer()
+      }
+    }
+  }
+
+  const plugin = Object.assign(criar(), { criar, versao: VERSAO })
+  global.BreezeGlass = plugin
+  if (typeof module !== 'undefined' && module.exports) module.exports = plugin
+})(typeof window !== 'undefined' ? window : globalThis)
+
+;/* Regista o plugin antes do init do Breeze, preservando a BreezeConfig do utilizador.
+   Para desactivar: window.BreezeConfig = { Glass: false } */
 /**
  * BreezeCSS v2.2.4 – breeze.bundle.js
  * Bundle sem módulos ES – compatível com <script src="...">
@@ -10,6 +337,10 @@
  *    overflow-clip, text-wrap, text-nowrap, text-balance
  *  • scrollSmooth: true (default) – injeta html { scroll-behavior: smooth }
  *    automaticamente; desative com BreezeConfig = { scrollSmooth: false }
+ *  • Blend modes completos:
+ *      mix-blend-*  (mix-blend-mode)        → mix-blend-multiply, mix-blend-difference, …
+ *      bg-blend-*   (background-blend-mode) → bg-blend-overlay, bg-blend-luminosity, …
+ *      mix-blend[valor] / bg-blend[valor]   – formas arbitrárias
  *
  * Novidades v2.2.3:
  *  • !important em classes fixas: flex!, hidden!, rounded! (e com variantes: hover:flex!)
@@ -1010,6 +1341,38 @@
   })();
 
   // ═══════════════════════════════════════════════════════════════════════
+  // BLEND MODES
+  // ═══════════════════════════════════════════════════════════════════════
+  const MODOS_BLEND = [
+    "normal",
+    "multiply",
+    "screen",
+    "overlay",
+    "darken",
+    "lighten",
+    "color-dodge",
+    "color-burn",
+    "hard-light",
+    "soft-light",
+    "difference",
+    "exclusion",
+    "hue",
+    "saturation",
+    "color",
+    "luminosity",
+    "plus-lighter",
+    "plus-darker",
+  ];
+
+  // mix-blend-*  → mix-blend-mode
+  // bg-blend-*   → background-blend-mode
+  const BLEND_FIXAS = {};
+  MODOS_BLEND.forEach((m) => {
+    BLEND_FIXAS["mix-blend-" + m] = `mix-blend-mode: ${m}`;
+    BLEND_FIXAS["bg-blend-" + m] = `background-blend-mode: ${m}`;
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════
   // ENGINE
   // ═══════════════════════════════════════════════════════════════════════
   const Engine = (() => {
@@ -1614,6 +1977,10 @@
           cursor: "cursor",
           aspect: "aspect-ratio",
           columns: "columns",
+
+          // Blend (arbitrário): mix-blend[difference], bg-blend[overlay]
+          "mix-blend": "mix-blend-mode",
+          "bg-blend": "background-blend-mode",
         },
 
         processadoresEspeciais: {
@@ -1842,11 +2209,8 @@
           isolate: "isolation: isolate",
           "isolation-auto": "isolation: auto",
 
-          // Blend
-          "mix-blend-normal": "mix-blend-mode: normal",
-          "mix-blend-multiply": "mix-blend-mode: multiply",
-          "mix-blend-screen": "mix-blend-mode: screen",
-          "mix-blend-overlay": "mix-blend-mode: overlay",
+          // Blend (mix-blend-* e bg-blend-*)
+          ...BLEND_FIXAS,
 
           // List
           "list-none": "list-style-type: none",
