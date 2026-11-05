@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BreezeCSS v2.2.5 — Documentação</title>
-  <meta name="description" content="Documentação do BreezeCSS: motor CSS em runtime, sem build, 100% em português. Utilitários prefixo[valor], variantes compostas, temas, plugins, componentes e os plugins BreezeGlass e BreezeDividers.">
+  <meta name="description" content="Documentação do BreezeCSS: motor CSS em runtime, sem build, 100% em português. Utilitários prefixo[valor], variantes compostas, temas, plugins, componentes e os plugins BreezeGlass, BreezeDividers e BreezeProgress.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0e16'/%3E%3Cpath d='M6 12h13a3.5 3.5 0 1 0-3.4-4.4M6 17h17a3.5 3.5 0 1 1-3.4 4.4M6 22h9' stroke='%2300ff88' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,11 +33,12 @@
 
   <!-- Configuração do Breeze (opcional) — tem de existir ANTES do motor -->
   <script>window.BreezeConfig = { scrollSmooth: true }</script>
-  <!-- BreezeCSS v2.2.5 + BreezeGlass 1.0.0 — bundle único, sem build -->
+  <!-- BreezeCSS v2.2.5 + BreezeGlass 1.0.0 + BreezeDividers 1.2.0 + BreezeProgress 1.0.0 — bundle único, sem build -->
   <script src="https://cdn.pedrodeoliveira.me/js/breeze.bundle.js"></script>
 </head>
 
-<body class="bg[#0a0e16] text[#c9d6e8] antialiased font-family['Inter',system-ui,sans-serif] min-h[100vh]">
+<!-- BreezeProgress: a classe progress no body cria a barra de progresso de scroll fixa no topo -->
+<body class="progress progress-h[3px] progress-color[linear-gradient(90deg,#00ff88,#22d3ee)] bg[#0a0e16] text[#c9d6e8] antialiased font-family['Inter',system-ui,sans-serif] min-h[100vh]">
 
   <!-- Aviso caso a CDN não carregue -->
   <div id="aviso-cdn" class="hidden fixed top[0] left[0] right[0] z[120] bg[#3a1520] text[#ffd2dc] text-size[13px] p[10px_16px] text-center">
@@ -58,7 +59,7 @@
         <span class="flex items-center justify-center w[2.25rem] h[2.25rem] rounded-2xl bg-gradient[135deg,#00ff88,#22d3ee] text[#04121f] fw[900] text-size[1.05rem] shadow[0_8px_24px_rgb(0_255_136_/_0.35)] shrink-0" aria-hidden="true">B</span>
         <span class="flex-col hidden sm:flex">
           <span class="fw[850] tracking[-0.02em] text[#eef4ff] text-size[1rem] leading[1.15]">BreezeCSS</span>
-          <span class="text-size[0.72rem] text[#8fa3bf] leading[1.2]">v2.2.5 · BreezeGlass 1.0.0</span>
+          <span class="text-size[0.72rem] text[#8fa3bf] leading[1.2]">v2.2.5 · Glass 1.0.0 · Dividers 1.2.0 · Progress 1.0.0</span>
         </span>
       </a>
       <nav class="flex items-center gap[0.5rem]">
@@ -108,6 +109,7 @@
             <span class="glass glass-sm rounded-full px[12px] py[5px] text-size[12px] fw[600] text[#00ff88]">Runtime, sem build</span>
             <span class="glass glass-sm rounded-full px[12px] py[5px] text-size[12px] fw[600] text[#7fd4ff]">Valores arbitrários prefixo[valor]</span>
             <span class="glass glass-sm rounded-full px[12px] py[5px] text-size[12px] fw[600] text[#d2a8ff]">100% em português</span>
+            <span class="glass glass-sm rounded-full px[12px] py[5px] text-size[12px] fw[600] text[#ffb86b]">Novo · BreezeProgress 1.0.0</span>
           </div>
           <h1 class="text-size[38px] md:text-size[56px] leading[1.05] fw[900] tracking[-0.03em] text[#f2f7ff] text-balance">
             CSS em runtime, <span class="text[#00ff88]">sem build</span> e <span class="text[#7fd4ff]">sem ficheiros</span>.
@@ -219,7 +221,7 @@
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l2.9 6.3L21 9.3l-4.9 4.4 1.4 6.6L12 17l-5.5 3.3 1.4-6.6L3 9.3l6.1-1L12 2z"></path></svg>
             </div>
             <h3 class="text-size[15.5px] fw[700] text[#eef4ff] m[0] mb[6px]">Componentes &amp; plugins</h3>
-            <p class="text-size[13.5px] leading[1.65] text[#9db0cc] m[0]">addComponent('btn', [...]) cria componentes; plugins como o BreezeGlass acrescentam classes e mapeamentos novos.</p>
+            <p class="text-size[13.5px] leading[1.65] text[#9db0cc] m[0]">addComponent('btn', [...]) cria componentes; plugins como o BreezeGlass e o BreezeProgress acrescentam classes, mapeamentos e comportamentos novos.</p>
           </div>
           <div class="glass glass-sm rounded-2xl p[20px]">
             <div class="size[38px] rounded-lg bg[#0f1e33] border[1px_solid_#1d3a55] flex items-center justify-center mb[14px]">
@@ -282,7 +284,7 @@
     window.BreezeConfig = { log: true }
   &lt;/script&gt;
 
-  &lt;!-- 2. O motor (BreezeCSS + BreezeGlass no mesmo ficheiro) --&gt;
+  &lt;!-- 2. O motor (BreezeCSS + plugins Glass, Dividers e Progress no mesmo ficheiro) --&gt;
   &lt;script src="https://cdn.pedrodeoliveira.me/js/breeze.bundle.js"&gt;&lt;/script&gt;
 &lt;/head&gt;
 &lt;body class="bg[#0a0e16] text[#e6edf3] p[24px]"&gt;
@@ -630,7 +632,7 @@ BreezeCSS.use(BreezeGlass)</code></pre>
     <section id="dividers" class="px[20px] md:px[48px] py[72px] border-t[1px_solid_#101a2c]">
       <div class="max-w[960px] mx[auto]">
         <p class="text-size[12px] uppercase tracking[0.22em] fw[700] text[#00ff88] m[0]">Plugin incluído no bundle</p>
-        <h2 class="text-size[30px] md:text-size[38px] fw[800] tracking[-0.02em] text[#f2f7ff] mt[10px] mb[16px]">BreezeDividers 1.1.0</h2>
+        <h2 class="text-size[30px] md:text-size[38px] fw[800] tracking[-0.02em] text[#f2f7ff] mt[10px] mb[16px]">BreezeDividers 1.2.0</h2>
         <p class="text-size[15.5px] leading[1.75] text[#9db0cc] max-w[760px]">
           O plugin <span class="mono text[#7ee787]">dividers</span> transforma qualquer elemento num
           <strong class="text[#e9f2ff]">divisor de secção</strong>. O formato é uma máscara SVG aplicada ao próprio elemento:
@@ -675,6 +677,14 @@ BreezeCSS.use(BreezeGlass)</code></pre>
           <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#b18cff] divider-waves"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-waves</div></div>
           <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#ff7ab8] divider-steps"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-steps</div></div>
           <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#ffb86b] divider-peaks"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-peaks</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#4f7cff] divider-scallop"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-scallop</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#00ff88] divider-arches"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-arches</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#22d3ee] divider-columns"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-columns</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#b18cff] divider-castle"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-castle</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#ff7ab8] divider-clouds"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-clouds</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#ffb86b] divider-fins"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-fins</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#00ff88] divider-skyline"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-skyline</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#22d3ee] divider-dunes"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-dunes</div></div>
         </div>
 
         <div class="grid gap[16px] lg:cols[2] mt[24px] items-start">
@@ -694,7 +704,15 @@ BreezeCSS.use(BreezeGlass)</code></pre>
                   <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-layers</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Camadas — 3 diagonais translúcidas, cor em baixo</td></tr>
                   <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-waves</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Ondas em camadas — 3 ondas translúcidas · [n = 3]</td></tr>
                   <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-steps</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Degraus — escada a subir para a direita · [n = 5]</td></tr>
-                  <tr><td class="px[16px] py[8px] mono text-size[13px] text[#7ee787]">divider-peaks</td><td class="px[16px] py[8px] text-size[12.5px] text[#8fa3bf]">Montanhas — picos irregulares (estáveis) · [n = 5]</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-peaks</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Montanhas — picos irregulares (estáveis) · [n = 5]</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-scallop</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Leques — semicírculos encostados, cor em baixo · [n leques = 8]</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-arches</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Arcos — cor em cima, arcos de aqueduto junto à base · [n arcos = 6]</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-columns</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Colunas — colunas arredondadas com intervalos, cor em baixo · [n colunas = 8]</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-castle</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Ameias — muralha com merlões, cor em baixo · [n ameias = 8]</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-clouds</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Nuvens — montes arredondados de alturas variáveis, cor em baixo · [n montes = 5]</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-fins</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Barbatanas — dentes curvos assimétricos, cor em baixo · [n = 5]</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-skyline</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Silhueta urbana — blocos de larguras e alturas variáveis · [n blocos = 9]</td></tr>
+                  <tr><td class="px[16px] py[8px] mono text-size[13px] text[#7ee787]">divider-dunes</td><td class="px[16px] py[8px] text-size[12.5px] text[#8fa3bf]">Dunas — 2 colinas translúcidas sobrepostas, cor em baixo</td></tr>
                 </tbody>
               </table>
             </div>
@@ -708,7 +726,7 @@ BreezeCSS.use(BreezeGlass)</code></pre>
                   <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">-flip</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Inverte na vertical — <span class="mono">divider-wave-flip</span></td></tr>
                   <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">-mirror</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Inverte na horizontal — <span class="mono">divider-diagonal-mirror</span></td></tr>
                   <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">-flip-mirror</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Ambos — <span class="mono">divider-layers-flip-mirror</span></td></tr>
-                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-wave[6]</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Nº de repetições (wave, zigzag, waves, steps, peaks; máx. 60)</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">divider-wave[6]</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Nº de repetições — ex.: wave, zigzag, scallop, arches, columns, clouds, fins, skyline (máx. 60)</td></tr>
                   <tr><td class="px[16px] py[8px] mono text-size[13px] text[#7ee787]">md:divider-wave-flip</td><td class="px[16px] py[8px] text-size[12.5px] text[#8fa3bf]">As variantes e breakpoints do Breeze funcionam</td></tr>
                 </tbody>
               </table>
@@ -722,13 +740,161 @@ BreezeCSS.use(BreezeGlass)</code></pre>
           <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#22d3ee] divider-diagonal-mirror"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-diagonal-mirror</div></div>
           <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#b18cff] divider-wave[8]"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-wave[8]</div></div>
           <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#ffb86b] divider-zigzag-flip[20]"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-zigzag-flip[20]</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#4f7cff] divider-scallop[12]"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-scallop[12]</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#00ff88] divider-arches-flip"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-arches-flip</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#ff7ab8] divider-clouds-flip"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-clouds-flip</div></div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden"><div class="h[90px] flex flex-col justify-end"><div class="w[100%] h[70px] bg[#b18cff] divider-fins-mirror"></div></div><div class="px[12px] py[10px] mono text-size[12px] text[#7ee787] border-t[1px_solid_#18233c]">divider-fins-mirror</div></div>
         </div>
 
         <div class="glass glass-sm rounded-xl p[16px] mt[18px]">
           <p class="m[0] text-size[13px] leading[1.65] text[#9db0cc]">
-            As camadas translúcidas (<span class="mono text[#7ee787]">layers</span> e <span class="mono text[#7ee787]">waves</span>) usam o
+            As camadas translúcidas (<span class="mono text[#7ee787]">layers</span>, <span class="mono text[#7ee787]">waves</span> e <span class="mono text[#7ee787]">dunes</span>) usam o
             <span class="mono">bg</span> como tinta: a opacidade de cada camada é relativa à cor que definires.
             Nota: o Breeze separa declarações por <span class="mono">;</span> — o plugin já escapa o SVG, por isso não precisas de te preocupar com isso.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─────────────── BREEZEPROGRESS ─────────────── -->
+    <section id="progress" class="px[20px] md:px[48px] py[72px] border-t[1px_solid_#101a2c]">
+      <div class="max-w[960px] mx[auto]">
+        <p class="text-size[12px] uppercase tracking[0.22em] fw[700] text[#00ff88] m[0]">Plugin incluído no bundle · novo</p>
+        <h2 class="text-size[30px] md:text-size[38px] fw[800] tracking[-0.02em] text[#f2f7ff] mt[10px] mb[16px]">BreezeProgress 1.0.0</h2>
+        <p class="text-size[15.5px] leading[1.75] text[#9db0cc] max-w[760px]">
+          O plugin <span class="mono text[#7ee787]">progress</span> transforma qualquer elemento numa
+          <strong class="text[#e9f2ff]">barra de progresso</strong> — sem JavaScript e sem acrescentar um único elemento ao HTML.
+          No <span class="mono text[#7ee787]">&lt;body&gt;</span> mede o scroll da página inteira; num elemento com scroll interno
+          mede o scroll dele; num elemento normal mede a <strong class="text[#e9f2ff]">passagem pelo ecrã</strong> (progresso de leitura).
+          A barra é criada pelo plugin, vive fora do fluxo do elemento e só é visível enquanto ele estiver no ecrã —
+          nunca estraga flex, grid nem nth-child. <span class="text[#e9f2ff]">A barra no topo desta documentação é o próprio plugin em acção.</span>
+        </p>
+
+        <h3 class="text-size[18px] fw[700] text[#eef4ff] mt[32px] mb[12px]">Activar o BreezeProgress</h3>
+        <div class="grid gap[16px] md:cols[2]">
+          <div class="glass glass-sm rounded-xl p[18px]">
+            <h4 class="m[0] mb[8px] text-size[14.5px] fw[700] text[#00ff88]">Bundle — depois do init</h4>
+            <pre class="m[0] p[12px] bg[#0b1120] border[1px_solid_#18233c] rounded-lg overflow-x-auto text-size[12.5px] leading[1.7]"><code data-lang="js">BreezeCSS.use(BreezeProgress)</code></pre>
+          </div>
+          <div class="glass glass-sm rounded-xl p[18px]">
+            <h4 class="m[0] mb[8px] text-size[14.5px] fw[700] text[#7fd4ff]">Pela configuração</h4>
+            <pre class="m[0] p[12px] bg[#0b1120] border[1px_solid_#18233c] rounded-lg overflow-x-auto text-size[12.5px] leading[1.7]"><code data-lang="js">window.BreezeConfig = {
+  plugins: [BreezeGlass, BreezeDividers, BreezeProgress]
+}</code></pre>
+          </div>
+        </div>
+
+        <h3 class="text-size[18px] fw[700] text[#eef4ff] mt[32px] mb[12px]">Uso básico</h3>
+        <pre class="relative bg[#0b1120] border[1px_solid_#18233c] rounded-xl p[16px] overflow-x-auto text-size[13px] leading[1.75]"><code data-lang="html">&lt;!-- barra de scroll da página inteira, fixa no topo do viewport --&gt;
+&lt;body class="progress"&gt;
+
+&lt;!-- barra em baixo, com espessura, cor e trilho próprios --&gt;
+&lt;body class="progress progress-bottom progress-h[6px] progress-color[#e11d48] progress-track[rgb(0_0_0/_.1)]"&gt;
+
+&lt;!-- progresso de scroll de um elemento com overflow interno --&gt;
+&lt;div class="h[300px] overflow-auto progress progress-lg"&gt;…&lt;/div&gt;
+
+&lt;!-- progresso de leitura de um artigo (passagem pelo ecrã) --&gt;
+&lt;article class="progress progress-view progress-color[linear-gradient(90deg,#b18cff,#ff7ab8)]"&gt;…&lt;/article&gt;</code></pre>
+
+        <h3 class="text-size[18px] fw[700] text[#eef4ff] mt[32px] mb[12px]">Três modos de medição (ao vivo)</h3>
+        <div class="grid gap[14px] md:cols[2]">
+          <div class="glass glass-sm rounded-xl p[18px] flex flex-col gap[10px]">
+            <div class="mono text-size[12px] text[#00ff88]">body.progress · scroll da página</div>
+            <div class="flex items-baseline justify-between gap[10px]">
+              <span id="demo-progress-pct" class="mono text-size[30px] fw[800] text[#00ff88] leading[1]">0%</span>
+              <span class="text-size[11px] text[#7f92b3] uppercase tracking[0.1em] text-right">evento breeze:progress</span>
+            </div>
+            <p class="m[0] text-size[12.5px] leading[1.6] text[#8fa3bf]">A barra verde-água no topo do viewport enche enquanto percorres a documentação — é o <span class="mono">&lt;body&gt;</span> desta página a ser medido pelo plugin. A percentagem ao lado é actualizada pelo evento <span class="mono text[#7ee787]">breeze:progress</span>.</p>
+          </div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden flex flex-col">
+            <div class="px[14px] py[10px] mono text-size[12px] text[#7ee787] border-b[1px_solid_#18233c]">overflow-auto · progress-bottom · modo scroll</div>
+            <div class="h[190px] overflow-auto progress progress-bottom progress-h[4px] progress-color[linear-gradient(90deg,#00ff88,#22d3ee)] progress-track[rgb(255_255_255_/_0.06)] p[16px] text-size[12.5px] leading[1.7] text[#9db0cc]">
+              <p class="m[0] mb[8px]">Faz scroll dentro desta caixa: o plugin detecta o overflow interno (modo <span class="mono text[#7ee787]">auto</span>) e mede <span class="mono">scrollTop / (scrollHeight − clientHeight)</span> deste elemento, não o da página.</p>
+              <p class="m[0] mb[8px]">A barra fica limitada à largura do elemento e só é visível enquanto ele estiver no ecrã — nunca ultrapassa as bordas.</p>
+              <p class="m[0] mb[8px]">O trilho recebe a cor de <span class="mono text[#7ee787]">progress-track[…]</span>; aqui usámos branco a 6% por baixo do gradiente verde-água.</p>
+              <p class="m[0] mb[8px]">Chegaste ao fim? O evento <span class="mono text[#7ee787]">breeze:progress</span> disparou a 100% neste elemento e a variável <span class="mono text[#7ee787]">--progress</span> ficou a 1.</p>
+              <p class="m[0]">Volta a subir: a animação usa <span class="mono text[#7ee787]">progress-dur[80ms]</span> por omissão — suave sem atrasar o scroll.</p>
+            </div>
+          </div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden flex flex-col">
+            <div class="px[14px] py[10px] mono text-size[12px] text[#7ee787] border-b[1px_solid_#18233c]">elemento normal · progress-view · leitura</div>
+            <article class="flex-1 progress progress-view progress-bottom progress-h[5px] progress-color[linear-gradient(90deg,#b18cff,#ff7ab8)] progress-track[rgb(255_255_255_/_0.06)] p[16px] text-size[12.5px] leading[1.7] text[#9db0cc]">
+              <p class="m[0] mb[8px]">Sem scroll interno, o plugin cai no modo <span class="mono text[#d2a8ff]">view</span>: mede a passagem deste cartão pelo ecrã.</p>
+              <p class="m[0] mb[8px]">A barra roxa enche à medida que o artigo atravessa o viewport, da entrada à saída da janela.</p>
+              <p class="m[0]">É o modo ideal para barras de leitura em artigos e posts — sem medir nada à mão nem criar elementos extra.</p>
+            </article>
+          </div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-hidden flex flex-col">
+            <div class="px[14px] py[10px] mono text-size[12px] text[#7ee787] border-b[1px_solid_#18233c]">progress-right · barra vertical</div>
+            <div class="flex-1 flex items-center">
+              <section class="w[100%] h[190px] progress progress-right progress-h[6px] progress-color[#ffb86b] progress-track[rgb(255_255_255_/_0.06)] p[16px] text-size[12.5px] leading[1.7] text[#9db0cc]">
+                <p class="m[0]">Com <span class="mono text[#ffb86b]">progress-right</span> (ou <span class="mono text[#ffb86b]">progress-left</span>) a barra fica vertical, colada à borda do elemento, e enche de cima para baixo com <span class="mono">scaleY</span>. Combina com <span class="mono text[#7ee787]">progress-reverse</span> para inverter o sentido.</p>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid gap[16px] lg:cols[2] mt[24px] items-start">
+          <div>
+            <h3 class="text-size[16px] fw[700] text[#eef4ff] mb[10px]">Classes do plugin</h3>
+            <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-x-auto">
+              <table class="w[100%] text-left border-collapse">
+                <thead><tr><th class="px[16px] py[10px] text-size[11.5px] uppercase tracking[0.08em] text[#7f92b3] border-b[1px_solid_#18233c]">Classe</th><th class="px[16px] py[10px] text-size[11.5px] uppercase tracking[0.08em] text[#7f92b3] border-b[1px_solid_#18233c]">Efeito</th></tr></thead>
+                <tbody>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">progress</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Activa a barra (obrigatória) — no body mede a página, noutros elementos aplica o modo</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">progress-top · bottom · left · right</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Posição (por omissão: top); left/right tornam a barra vertical</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">progress-sm · md · lg · xl</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Espessura 2 / 4 / 6 / 10 px</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">progress-rounded</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Arredondamento total (9999px) — ou progress-radius[…] arbitrário</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">progress-smooth · progress-instant</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Duração da animação: 200ms / 0ms (por omissão 80ms)</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">progress-reverse</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Enche da direita para a esquerda (ou de baixo para cima)</td></tr>
+                  <tr><td class="px[16px] py[8px] mono text-size[13px] text[#7ee787]">progress-auto · scroll · view</td><td class="px[16px] py[8px] text-size[12.5px] text[#8fa3bf]">Modo de medição — auto (padrão): scroll se houver overflow interno, senão passagem pelo ecrã</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h3 class="text-size[16px] fw[700] text[#eef4ff] mb[10px]">Valores arbitrários do plugin</h3>
+            <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] overflow-x-auto">
+              <table class="w[100%] text-left border-collapse">
+                <thead><tr><th class="px[16px] py[10px] text-size[11.5px] uppercase tracking[0.08em] text[#7f92b3] border-b[1px_solid_#18233c]">Classe</th><th class="px[16px] py[10px] text-size[11.5px] uppercase tracking[0.08em] text[#7f92b3] border-b[1px_solid_#18233c]">Controla</th></tr></thead>
+                <tbody>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">progress-h[6px]</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Espessura da barra (--progress-h)</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">progress-color[#e11d48]</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Cor da barra — aceita gradientes: progress-color[linear-gradient(90deg,#f0f,#0ff)]</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">progress-track[rgb(0_0_0/_.1)]</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Cor do trilho (fundo) — transparente por omissão</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">progress-radius[9999px]</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">Arredondamento da barra e do trilho</td></tr>
+                  <tr><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787]">progress-z[50]</td><td class="px[16px] py[8px] border-b[1px_solid_#101a2c] text-size[12.5px] text[#8fa3bf]">z-index — 9990 por omissão, acima de cabeçalhos fixos</td></tr>
+                  <tr><td class="px[16px] py[8px] mono text-size[13px] text[#7ee787]">progress-dur[200ms]</td><td class="px[16px] py[8px] text-size[12.5px] text[#8fa3bf]">Duração da animação de enchimento</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="text-size[18px] fw[700] text[#eef4ff] mt[32px] mb[12px]">Extras para o programador</h3>
+        <div class="grid gap[12px] md:cols[3]">
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] p[16px] text-size[13px] leading[1.65] text[#9db0cc]">
+            <div class="mono text[#7ee787] mb[6px]">--progress</div>
+            O elemento recebe a variável CSS <span class="mono">--progress</span> (0 a 1) — úsala para animar outras coisas em sincronia com a barra.
+          </div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] p[16px] text-size[13px] leading[1.65] text[#9db0cc]">
+            <div class="mono text[#7ee787] mb[6px]">breeze:progress</div>
+            Evento no elemento: <span class="mono">e.detail = { progresso: 0..1, percentagem: 0..100 }</span> — dispara sempre que a percentagem muda.
+          </div>
+          <div class="rounded-xl border[1px_solid_#18233c] bg[#0c1322] p[16px] text-size[13px] leading[1.65] text[#9db0cc]">
+            <div class="mono text[#7ee787] mb[6px]">BreezeProgress.criar(…)</div>
+            <span class="mono">criar({ altura: 4, cor: '#3b82f6', z: 9990 })</span> cria uma instância com outros valores por omissão.
+          </div>
+        </div>
+
+        <div class="glass glass-sm rounded-xl p[16px] mt[18px]">
+          <p class="m[0] text-size[13px] leading[1.65] text[#9db0cc]">
+            As variantes do Breeze funcionam nas classes do progress: <span class="mono text[#7ee787]">md:progress-lg</span>,
+            <span class="mono text[#7ee787]">dark:progress-color[#fff]</span>…
+            Com <span class="mono text[#7ee787]">prefers-reduced-motion</span> a animação passa a 0ms.
+            Nota: se um antepassado do elemento tiver <span class="mono">transform</span> ou <span class="mono">filter</span>,
+            a barra fixa pode não alinhar — nesse caso aplica <span class="mono text[#7ee787]">progress-scroll</span> /
+            <span class="mono text[#7ee787]">progress-view</span> a um elemento fora desse antepassado.
           </p>
         </div>
       </div>
@@ -784,7 +950,7 @@ BreezeCSS.use(BreezeGlass)</code></pre>
             </tr></thead>
             <tbody>
               <tr><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787] whitespace-nowrap">init(config?)</td><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] text-size[13px] leading[1.55] text[#8fa3bf]">Inicializa o motor. Sem chamada explícita acontece sozinho no carregamento, lendo <span class="mono">window.BreezeConfig</span>.</td></tr>
-              <tr><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787] whitespace-nowrap">use(plugin)</td><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] text-size[13px] leading[1.55] text[#8fa3bf]">Regista um plugin antes ou depois do init — é assim que se activa o BreezeGlass no bundle.</td></tr>
+              <tr><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787] whitespace-nowrap">use(plugin)</td><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] text-size[13px] leading[1.55] text[#8fa3bf]">Regista um plugin antes ou depois do init — é assim que se activam os plugins do bundle (BreezeGlass, BreezeDividers, BreezeProgress).</td></tr>
               <tr><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787] whitespace-nowrap">processar()</td><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] text-size[13px] leading[1.55] text[#8fa3bf]">Reprocessa todos os elementos do DOM (útil depois de registar classes ou componentes novos).</td></tr>
               <tr><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787] whitespace-nowrap">reiniciar()</td><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] text-size[13px] leading[1.55] text[#8fa3bf]">Para o observador, limpa estilos e cache e permite um novo init() do zero.</td></tr>
               <tr><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] mono text-size[13px] text[#7ee787] whitespace-nowrap">build(html, opcoes?)</td><td class="px[16px] py[9px] border-b[1px_solid_#101a2c] text-size[13px] leading[1.55] text[#8fa3bf]">Compila um string de HTML para CSS sem tocar no DOM (modo offline). Opções: <span class="mono">{ minificar }</span>.</td></tr>
@@ -967,7 +1133,7 @@ const css = BreezeCSS.build(html, { minificar: true })</code></pre>
             <path d="M6 12h13a3.5 3.5 0 1 0-3.4-4.4M6 17h17a3.5 3.5 0 1 1-3.4 4.4M6 22h9" stroke="#00ff88" stroke-width="2.4" stroke-linecap="round" fill="none"></path>
           </svg>
           <div>
-            <div class="fw[700] text[#eef4ff] text-size[15px]">BreezeCSS v2.2.5 + BreezeGlass v1.0.0 + BreezeDividers v1.1.0</div>
+            <div class="fw[700] text[#eef4ff] text-size[15px]">BreezeCSS v2.2.5 + BreezeGlass v1.0.0 + BreezeDividers v1.2.0 + BreezeProgress v1.0.0</div>
             <div class="text-size[12.5px] text[#7f92b3]">Motor CSS em runtime, de Pedro de Oliveira</div>
           </div>
         </div>
@@ -979,8 +1145,9 @@ const css = BreezeCSS.build(html, { minificar: true })</code></pre>
         </nav>
       </div>
       <p class="max-w[960px] mx[auto] mt[28px] text-size[12.5px] leading[1.7] text[#5b6b85]">
-        Esta documentação foi construída com HTML e JavaScript e estilizada apenas com BreezeCSS e BreezeGlass —
-        as 11 linhas de CSS próprio tratam somente da scrollbar, da seleção de texto e da fonte monoespaçada.
+        Esta documentação foi construída com HTML e JavaScript e estilizada apenas com BreezeCSS e os plugins do bundle
+        (BreezeGlass, BreezeDividers e BreezeProgress) — as 11 linhas de CSS próprio tratam somente da scrollbar,
+        da seleção de texto e da fonte monoespaçada. A barra de progresso no topo da página é o BreezeProgress em acção.
         Nenhum outro estilo fugiu ao motor.
       </p>
     </footer>
@@ -1007,6 +1174,7 @@ const css = BreezeCSS.build(html, { minificar: true })</code></pre>
       ['utilitarios', 'Utilitários'],
       ['glass', 'BreezeGlass'],
       ['dividers', 'BreezeDividers'],
+      ['progress', 'BreezeProgress'],
       ['componentes', 'Componentes'],
       ['api', 'API JavaScript'],
       ['config', 'Configuração'],
@@ -1338,7 +1506,8 @@ const css = BreezeCSS.build(html, { minificar: true })</code></pre>
       ['Botão gradiente', 'bg-gradient[135deg,#00ff88,#22d3ee] text[#04121f] fw[800] px[24px] py[12px] rounded-xl cursor-pointer shadow-lg hover:scale[1.06] duration[200ms]'],
       ['Pílula glass', 'glass glass-pill px[20px] py[10px] text-size[13px] uppercase tracking[0.08em]'],
       ['Transform combinado', 'rotate[-4deg] scale[1.06] shadow-2xl rounded-2xl bg-gradient[135deg,#b18cff,#4f7cff] w[240px] h[120px] flex items-center justify-center'],
-      ['Máscara', 'mask-fade-b h[120px] w[260px] rounded-xl bg-gradient[180deg,#00ff88,#0a0e16]']
+      ['Máscara', 'mask-fade-b h[120px] w[260px] rounded-xl bg-gradient[180deg,#00ff88,#0a0e16]'],
+      ['Barra de progresso', 'progress progress-bottom progress-h[4px] progress-color[linear-gradient(90deg,#00ff88,#22d3ee)] progress-track[rgb(255_255_255_/_0.08)] progress-rounded rounded-2xl bg[#101a2e] p[20px] w[240px]']
     ]
     var chipsBox = document.getElementById('pg-chips')
     PG_CHIPS.forEach(function (chip) {
@@ -1368,9 +1537,18 @@ const css = BreezeCSS.build(html, { minificar: true })</code></pre>
       return
     }
 
-    /* 1. Glass: o bundle traz o plugin — o registo é feito aqui */
+    /* 1. Glass, Dividers e Progress: o bundle traz os plugins — o registo é feito aqui */
     BreezeCSS.use(BreezeGlass)
     if (window.BreezeDividers) BreezeCSS.use(BreezeDividers)
+    if (window.BreezeProgress) BreezeCSS.use(BreezeProgress)
+
+    /* 1.b Percentagem de leitura ao vivo — o body emite 'breeze:progress' (BreezeProgress) */
+    var pctEl = document.getElementById('demo-progress-pct')
+    if (pctEl) {
+      document.body.addEventListener('breeze:progress', function (e) {
+        pctEl.textContent = e.detail.percentagem + '%'
+      })
+    }
 
     /* 2. Componentes usados na secção "Componentes" */
     BreezeCSS.addComponent('btn-breeze', [
