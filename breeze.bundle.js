@@ -1,4 +1,4 @@
-/*! Breeze bundle — BreezeCSS 2.2.4 + BreezeGlass 1.0.0 (ficheiro único) */
+/*! Breeze bundle — BreezeCSS 2.2.5 + BreezeGlass 1.0.0 + BreezeDividers 1.2.0 + BreezeProgress 1.0.0 (ficheiro único) */
 /*!
  * BreezeGlass v1.0.0 — plugin "glass" para o BreezeCSS (>= 2.2)
  *
@@ -323,12 +323,713 @@
   if (typeof module !== 'undefined' && module.exports) module.exports = plugin
 })(typeof window !== 'undefined' ? window : globalThis)
 
+;/*!
+ * BreezeDividers v1.2.0 — plugin "dividers" para o BreezeCSS (>= 2.2)
+ *
+ * Transforma qualquer elemento num divisor de secção. O formato é uma máscara
+ * SVG aplicada ao próprio elemento: a COR vem do bg (cor, gradiente ou imagem)
+ * e o TAMANHO das classes w / h normais. Sem elementos extra, sem SVG inline.
+ *
+ * Uso (junto do BreezeGlass, depois do bundle e antes do DOMContentLoaded):
+ *   <script>window.BreezeConfig = { plugins: [BreezeGlass, BreezeDividers] }</script>
+ *
+ *   <div class="w[100%] h[80px] bg[#000033] divider-wave"></div>
+ *
+ * Formatos  (orientação por omissão = a dos exemplos de referência)
+ *   divider-wave        onda            cor em cima, onda em baixo        [n ondas = 4]
+ *   divider-diagonal    diagonal        cor em baixo, sobe p/ a direita
+ *   divider-curve       arco            cor em cima, arco a descer
+ *   divider-triangle    seta            cor em cima, ponta a descer
+ *   divider-zigzag      serrilhado      cor em cima, dentes em baixo      [n dentes = 10]
+ *   divider-notch       curva central   cor em baixo, entalhe suave no centro
+ *   divider-bump        colina central  cor em baixo, elevação suave no centro
+ *   divider-layers      camadas         3 diagonais translúcidas, cor em baixo
+ *   divider-waves       ondas em camadas 3 ondas translúcidas, cor em baixo [n = 3]
+ *   divider-steps       degraus         escada a subir p/ a direita        [n degraus = 5]
+ *   divider-peaks       montanhas       picos irregulares, cor em baixo   [n picos = 5]
+ *   divider-scallop     leques          cor em baixo, leques em cima      [n leques = 8]
+ *   divider-arches      arcos           cor em cima, arcos em baixo       [n arcos = 6]
+ *   divider-columns     colunas         cor em baixo, colunas arredondadas [n colunas = 8]
+ *   divider-castle      ameias          muralha com merlões, cor em baixo [n ameias = 8]
+ *   divider-clouds      nuvens          cor em baixo, montes variáveis    [n montes = 5]
+ *   divider-fins        barbatanas      cor em baixo, barbatanas curvas   [n = 5]
+ *   divider-skyline     silhueta        cor em baixo, blocos urbanos      [n blocos = 9]
+ *   divider-dunes       dunas           2 colinas translúcidas, cor em baixo
+ *
+ * Modificadores (sufixos)
+ *   -flip   inverte na vertical     divider-wave-flip
+ *   -mirror inverte na horizontal   divider-diagonal-mirror
+ *   -flip-mirror  ambos             divider-layers-flip-mirror
+ *
+ * Repetições: divider-wave[6]  divider-zigzag-flip[17]  divider-scallop[12]
+ * As camadas translúcidas (layers / waves / dunes) usam o bg como tinta: a
+ * opacidade de cada camada é relativa à cor que definires.
+ *
+ * Variantes do Breeze funcionam: md:divider-wave-flip, hover:divider-curve, etc.
+ */
+(function (global) {
+  'use strict'
+
+  const VERSAO = '1.2.0'
+  const W = 1200 // largura do viewBox (a máscara é esticada ao elemento)
+  const H = 100
+
+  // ------------------------------------------------------------ geometria
+  // Cada formato devolve uma lista de camadas {d, op}; op = opacidade (0–1).
+  // Orientação natural; flip/mirror são aplicados com um transform no <g>.
+  const n2 = x => +x.toFixed(2)
+  const camada = (d, op) => ({ d, op: op == null ? 1 : op })
+
+  function onda(n) {
+    // Espessura oscila entre 37.5 % e 72.5 %, a começar num vale. Cada meia-onda
+    // é uma cúbica com tangentes horizontais nos extremos (aprox. de co-seno).
+    const meio = 55
+    const amp = 17.5
+    const passos = n * 2
+    const dx = W / passos
+    const k = dx * 0.3642
+    let d = 'M0 0V' + n2(meio + amp)
+    for (let i = 0; i < passos; i++) {
+      const x0 = i * dx
+      const x1 = (i + 1) * dx
+      const y0 = meio + (i % 2 === 0 ? amp : -amp)
+      const y1 = meio + (i % 2 === 0 ? -amp : amp)
+      d += 'C' + n2(x0 + k) + ' ' + n2(y0) + ' ' + n2(x1 - k) + ' ' + n2(y1) + ' ' + n2(x1) + ' ' + n2(y1)
+    }
+    return [camada(d + 'V0Z')]
+  }
+
+  function dentes(n) {
+    const dx = W / (n * 2)
+    let d = 'M0 0V40'
+    for (let i = 1; i <= n * 2; i++) d += 'L' + n2(i * dx) + ' ' + (i % 2 ? 90 : 40)
+    return [camada(d + 'V0Z')]
+  }
+
+  // Senoide com cor em baixo: y = meio - amp·sin(2π·n·x/W + fase)
+  function senoide(n, fase, meio, amp) {
+    const pts = Math.max(48, n * 24)
+    let d = 'M0 ' + H
+    for (let i = 0; i <= pts; i++) {
+      const x = (i / pts) * W
+      d += 'L' + n2(x) + ' ' + n2(meio - amp * Math.sin((2 * Math.PI * n * x) / W + fase))
+    }
+    return d + 'V' + H + 'Z'
+  }
+
+  function ondasCamadas(n) {
+    return [
+      camada(senoide(n, 0, 42, 12), 0.3),
+      camada(senoide(n, 2.1, 60, 12), 0.5),
+      camada(senoide(n, 4.2, 78, 10), 1)
+    ]
+  }
+
+  function degraus(n) {
+    let d = 'M0 ' + H
+    for (let i = 0; i < n; i++) {
+      d += 'V' + n2(H * (1 - (i + 1) / n)) + 'H' + n2(((i + 1) * W) / n)
+    }
+    return [camada(d + 'V' + H + 'Z')]
+  }
+
+  function picos(n) {
+    // alturas irregulares mas determinísticas (sem Math.random → resultado estável)
+    const dx = W / n
+    let d = 'M0 ' + H + 'V80'
+    for (let i = 0; i < n; i++) {
+      const f = (i * 0.618034 + 0.2) % 1
+      const topo = 8 + f * 52
+      d += 'L' + n2(i * dx + dx / 2) + ' ' + n2(topo) + 'L' + n2((i + 1) * dx) + ' 80'
+    }
+    return [camada(d + 'V' + H + 'Z')]
+  }
+
+  // Raio mínimo de um arco que liga dois pontos afastados `corda` subindo
+  // exatamente `altura` (fórmula do círculo circunscrito ao triângulo corda/flecha).
+  const raioParaAltura = (corda, altura) => (altura * altura + (corda * corda) / 4) / (2 * altura)
+
+  function leques(n) {
+    // Semicírculos encostados sobre uma base: scallop clássico. A altura dos
+    // leques é limitada a 74 para não sair do viewBox em poucas repetições.
+    const dx = W / n
+    const altura = Math.min(dx / 2, 74)
+    const r = raioParaAltura(dx, altura)
+    let d = 'M0 ' + H + 'V80'
+    for (let i = 1; i <= n; i++) d += 'A' + n2(r) + ' ' + n2(r) + ' 0 0 1 ' + n2(i * dx) + ' 80'
+    return [camada(d + 'V' + H + 'Z')]
+  }
+
+  function arcos(n) {
+    // Aqueduto: parede em cima e arcos semicirculares abertos junto à base.
+    const dx = W / n
+    const r = Math.min(dx * 0.35, 92)
+    const vao = dx * 0.7
+    const margem = dx * 0.15
+    let d = 'M0 0H' + W + 'V' + H
+    for (let i = n; i >= 1; i--) {
+      const b = n2(i * dx - margem)
+      d += 'L' + b + ' ' + H + 'A' + n2(r) + ' ' + n2(r) + ' 0 0 0 ' + n2(b - vao) + ' ' + H
+    }
+    return [camada(d + 'L0 ' + H + 'Z')]
+  }
+
+  function colunas(n) {
+    // Colunas com topos arredondados e intervalos transparentes entre elas.
+    const dx = W / n
+    const cw = dx * 0.62
+    const r = cw / 2
+    const cap = 34 + r
+    let d = ''
+    for (let i = 0; i < n; i++) {
+      const x0 = n2(i * dx + (dx - cw) / 2)
+      d += 'M' + x0 + ' ' + H + 'V' + n2(cap) + 'A' + n2(r) + ' ' + n2(r) + ' 0 0 1 ' + n2(x0 + cw) + ' ' + n2(cap) + 'V' + H + 'Z'
+    }
+    return [camada(d)]
+  }
+
+  function ameias(n) {
+    // Muralha de castelo: merlões no topo (y 30) e reentrâncias (y 56).
+    const dx = W / n
+    const mw = dx * 0.55
+    let d = 'M0 30'
+    for (let i = 0; i < n; i++) {
+      d += 'H' + n2(i * dx + mw) + 'V56H' + n2((i + 1) * dx) + 'V30'
+    }
+    return [camada(d + 'V' + H + 'H0Z')]
+  }
+
+  function nuvens(n) {
+    // Montes arredondados com alturas variáveis (determinísticas) sobre a base 62.
+    const dx = W / n
+    let d = 'M0 ' + H + 'V62'
+    for (let i = 0; i < n; i++) {
+      const f = (i * 0.618034 + 0.35) % 1
+      const r = raioParaAltura(dx, 16 + f * 36)
+      d += 'A' + n2(r) + ' ' + n2(r) + ' 0 0 1 ' + n2((i + 1) * dx) + ' 62'
+    }
+    return [camada(d + 'V' + H + 'Z')]
+  }
+
+  function barbatanas(n) {
+    // Dentes curvos assimétricos: aresta dianteira convexa e traseira côncava.
+    const dx = W / n
+    let d = 'M0 ' + H + 'V78'
+    for (let i = 0; i < n; i++) {
+      const x0 = i * dx
+      const x1 = (i + 1) * dx
+      const f = (i * 0.618034 + 0.25) % 1
+      const pico = 14 + f * 26
+      const xp = x0 + dx * 0.42
+      d += 'C' + n2(x0 + dx * 0.2) + ' 74 ' + n2(x0 + dx * 0.32) + ' ' + n2(pico + 6) + ' ' + n2(xp) + ' ' + n2(pico)
+      d += 'C' + n2(xp + dx * 0.16) + ' ' + n2(pico + 10) + ' ' + n2(x1 - dx * 0.06) + ' 76 ' + n2(x1) + ' 78'
+    }
+    return [camada(d + 'V' + H + 'Z')]
+  }
+
+  function blocos(n) {
+    // Silhueta urbana: blocos de larguras e alturas variáveis (determinísticas).
+    const dx = W / n
+    let d = 'M0 ' + H
+    let x = 0
+    let i = 0
+    while (x < W - 1) {
+      const f1 = (i * 0.618034 + 0.15) % 1
+      const f2 = (i * 0.381966 + 0.55) % 1
+      const x2 = Math.min(x + dx * (0.55 + f1 * 0.75), W)
+      d += 'V' + n2(16 + f2 * 44) + 'H' + n2(x2)
+      x = x2
+      i++
+    }
+    return [camada(d + 'V' + H + 'Z')]
+  }
+
+  const FORMATOS = {
+    wave: { padrao: 4, caminho: onda, repete: true },
+    zigzag: { padrao: 10, caminho: dentes, repete: true },
+    waves: { padrao: 3, caminho: ondasCamadas, repete: true },
+    steps: { padrao: 5, caminho: degraus, repete: true },
+    peaks: { padrao: 5, caminho: picos, repete: true },
+    diagonal: { caminho: () => [camada('M0 ' + H + 'L' + W + ' 0V' + H + 'Z')] },
+    curve: { caminho: () => [camada('M0 0V30Q' + W / 2 + ' 170 ' + W + ' 30V0Z')] },
+    triangle: { caminho: () => [camada('M0 0L' + W / 2 + ' ' + H + 'L' + W + ' 0Z')] },
+    notch: {
+      caminho: () => [camada('M0 0H450C520 0 540 70 600 70S680 0 750 0H1200V' + H + 'H0Z')]
+    },
+    bump: {
+      caminho: () => [camada('M0 ' + H + 'V72H450C520 72 540 0 600 0S680 72 750 72H1200V' + H + 'Z')]
+    },
+    layers: {
+      caminho: () => [
+        camada('M0 60L330 18L700 62L1200 8V' + H + 'H0Z', 0.3),
+        camada('M0 82L420 42L820 72L1200 28V' + H + 'H0Z', 0.55),
+        camada('M0 ' + H + 'L1200 38V' + H + 'Z', 1)
+      ]
+    },
+    scallop: { padrao: 8, caminho: leques, repete: true },
+    arches: { padrao: 6, caminho: arcos, repete: true },
+    columns: { padrao: 8, caminho: colunas, repete: true },
+    castle: { padrao: 8, caminho: ameias, repete: true },
+    clouds: { padrao: 5, caminho: nuvens, repete: true },
+    fins: { padrao: 5, caminho: barbatanas, repete: true },
+    skyline: { padrao: 9, caminho: blocos, repete: true },
+    dunes: {
+      // Fixo (como layers): duas colinas translúcidas desfasadas.
+      caminho: () => [
+        camada('M0 ' + H + 'V64C140 30 300 22 470 44C560 55 640 62 720 58C860 50 980 22 1200 44V' + H + 'Z', 0.38),
+        camada('M0 ' + H + 'V78C120 60 210 54 330 62C450 70 520 82 660 80C800 78 900 58 1030 60C1100 61 1160 68 1200 72V' + H + 'Z', 1)
+      ]
+    }
+  }
+
+  const ORIENTACOES = {
+    '': '',
+    '-flip': 'matrix(1 0 0 -1 0 ' + H + ')',
+    '-mirror': 'matrix(-1 0 0 1 ' + W + ' 0)',
+    '-flip-mirror': 'matrix(-1 0 0 -1 ' + W + ' ' + H + ')'
+  }
+
+  // Devolve o valor da propriedade `mask`: url(<svg>) + posição/tamanho/repetição.
+  // Nota: o Breeze separa declarações por ";" — encodeURIComponent escapa-o (%3B)
+  // e o SVG não usa aspas simples/duplas literais.
+  function mascara(formato, orient, n) {
+    const camadas = FORMATOS[formato].caminho(n)
+    const t = ORIENTACOES[orient]
+    const paths = camadas
+      .map(c => '<path d="' + c.d + '"' + (c.op < 1 ? ' fill-opacity="' + c.op + '"' : '') + '/>')
+      .join('')
+    const svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+      (t ? '<g transform="' + t + '">' + paths + '</g>' : paths) +
+      '</svg>'
+    const uri = 'data:image/svg+xml,' + encodeURIComponent(svg).replace(/'/g, '%27')
+    return 'url("' + uri + '") center / 100% 100% no-repeat'
+  }
+
+  function lerRepeticoes(valor, padrao) {
+    const n = Math.round(parseFloat(valor))
+    if (!isFinite(n) || n < 1) return padrao
+    return Math.min(n, 60)
+  }
+
+  // ----------------------------------------------------------------- plugin
+  function criar() {
+    return {
+      nome: 'dividers',
+      versao: VERSAO,
+      setup(ctx) {
+        const prefixo = (ctx.config && ctx.config.prefix) || ''
+        // Se o Breeze já aplicou o prefixo (use() depois do init), aplicamo-lo nós.
+        const fixas = (ctx.config && ctx.config.classesFixas) || {}
+        const jaPrefixado = prefixo && prefixo + 'block' in fixas
+        const nome = n => (jaPrefixado ? prefixo + n : n)
+
+        Object.keys(FORMATOS).forEach(formato => {
+          const f = FORMATOS[formato]
+          Object.keys(ORIENTACOES).forEach(orient => {
+            const classe = 'divider-' + formato + orient
+            const m = mascara(formato, orient, f.padrao)
+            // fixa:  divider-wave
+            ctx.addFixedClass(nome(classe), 'mask: ' + m + '; -webkit-mask: ' + m)
+            // arbitrária: divider-wave[6]
+            if (f.repete) {
+              ctx.addMapping(nome(classe), 'mask; -webkit-mask')
+              ctx.addProcessor(nome(classe), v => mascara(formato, orient, lerRepeticoes(v, f.padrao)))
+            }
+          })
+        })
+
+        // use() depois do init: reprocessa os elementos já existentes
+        if (typeof document !== 'undefined' && global.BreezeCSS && typeof global.BreezeCSS.processar === 'function') {
+          Promise.resolve().then(() => global.BreezeCSS.processar())
+        }
+      }
+    }
+  }
+
+  const plugin = Object.assign(criar(), { criar, versao: VERSAO })
+  global.BreezeDividers = plugin
+  if (typeof module !== 'undefined' && module.exports) module.exports = plugin
+})(typeof window !== 'undefined' ? window : globalThis)
+
+;/*!
+ * BreezeProgress v1.0.0 — plugin "progress" para o BreezeCSS (>= 2.2)
+ *
+ * Barra de progresso em qualquer elemento. Basta adicionar a classe `progress`:
+ *   • no <body> (ou <html>)  → progresso de scroll da página inteira, fixa no viewport
+ *   • num elemento com scroll interno (overflow auto/scroll) → progresso do scroll dele
+ *   • num elemento normal (ex.: uma <section> ou <article>) → progresso da leitura
+ *     do elemento enquanto passa pelo ecrã
+ * Nos dois últimos casos a barra só é visível enquanto o elemento está visível e
+ * fica limitada à largura/altura dele (não ultrapassa as bordas do elemento).
+ *
+ * Sem elementos extra no HTML: o plugin cria a barra sozinho (fica fora do fluxo
+ * do elemento, por isso não estraga flex/grid/nth-child).
+ *
+ * Uso (junto dos outros plugins, antes do DOMContentLoaded):
+ *   <script>window.BreezeConfig = { plugins: [BreezeGlass, BreezeDividers, BreezeProgress] }</script>
+ *
+ *   <body class="progress">                      barra no topo da página
+ *   <body class="progress progress-bottom">      barra em baixo
+ *   <article class="progress progress-color[#e11d48]">…</article>
+ *   <div class="h[300px] overflow-auto progress progress-lg">…</div>
+ *
+ * Classes
+ *   progress                    activa a barra (obrigatória)
+ *   progress-top|bottom|left|right   posição (por omissão: top). left/right = barra vertical
+ *   progress-sm|md|lg|xl        espessura (2 / 4 / 6 / 10 px)
+ *   progress-h[6px]             espessura arbitrária
+ *   progress-color[#6366f1]     cor da barra (aceita gradientes: progress-color[linear-gradient(90deg,#f0f,#0ff)])
+ *   progress-track[rgb(0_0_0/_.1)]  cor do fundo (trilho) — transparente por omissão
+ *   progress-radius[9999px]     arredondamento — ou a classe fixa progress-rounded
+ *   progress-z[50]              z-index (por omissão 9990)
+ *   progress-dur[200ms]         duração da animação — ou progress-smooth (200ms) / progress-instant (0)
+ *   progress-reverse            enche da direita→esquerda (ou de baixo→cima)
+ *   progress-scroll | progress-view | progress-auto   modo de medição
+ *        scroll → usa o scroll do próprio elemento
+ *        view   → usa a passagem do elemento pelo viewport
+ *        auto   → scroll se o elemento tiver scroll interno, senão view (por omissão)
+ *   Variantes do Breeze funcionam: md:progress, md:progress-lg, dark:progress-color[#fff]…
+ *
+ * Extras para o programador
+ *   • o elemento recebe a variável CSS --progress (0 a 1), útil para animar outras coisas
+ *   • evento 'breeze:progress' no elemento: e.detail = { progresso: 0..1, percentagem: 0..100 }
+ *   • BreezeProgress.criar({ altura: 4, cor: '#3b82f6', z: 9990 }) altera os valores por omissão
+ *
+ * Nota: se um antepassado do elemento tiver transform/filter, a barra fixa pode
+ * não alinhar; nesse caso use progress-scroll/view num elemento fora dele.
+ */
+(function (global) {
+  'use strict'
+
+  const VERSAO = '1.0.0'
+  const PADROES = { altura: 4, cor: '#3b82f6', z: 9990 }
+
+  // Nota: o Breeze separa as declarações por ";" — não usar ";" dentro de valores.
+  const CLASSES = {
+    progress: '--progress-on: 1',
+    'progress-top': '--progress-pos: top',
+    'progress-bottom': '--progress-pos: bottom',
+    'progress-left': '--progress-pos: left',
+    'progress-right': '--progress-pos: right',
+    'progress-sm': '--progress-h: 2px',
+    'progress-md': '--progress-h: 4px',
+    'progress-lg': '--progress-h: 6px',
+    'progress-xl': '--progress-h: 10px',
+    'progress-rounded': '--progress-radius: 9999px',
+    'progress-smooth': '--progress-dur: 200ms',
+    'progress-instant': '--progress-dur: 0ms',
+    'progress-reverse': '--progress-reverse: 1',
+    'progress-auto': '--progress-mode: auto',
+    'progress-scroll': '--progress-mode: scroll',
+    'progress-view': '--progress-mode: view'
+  }
+
+  // Valores arbitrários: progress-color[#f00] → --progress-color: #f00
+  const MAPEAMENTOS = {
+    'progress-h': '--progress-h',
+    'progress-color': '--progress-color',
+    'progress-track': '--progress-track',
+    'progress-radius': '--progress-radius',
+    'progress-z': '--progress-z',
+    'progress-dur': '--progress-dur'
+  }
+
+  function esc(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  }
+
+  // ---------------------------------------------------------------- motor
+  function iniciarMotor(cfg, prefixo) {
+    const reToken = new RegExp('(^|:)' + esc(prefixo + 'progress') + '!?$')
+    const alvos = new Map() // elemento → { host, fill, c, chave, pct }
+    const hosts = new WeakSet()
+    let pendente = false
+    let agendado = false
+
+    // --progress-on não herda: senão todos os filhos de um <body class="progress">
+    // seriam tratados como alvos.
+    let registada = false
+    try {
+      if (global.CSS && typeof global.CSS.registerProperty === 'function') {
+        global.CSS.registerProperty({ name: '--progress-on', syntax: '<number>', inherits: false, initialValue: '0' })
+        registada = true
+      }
+    } catch (e) {
+      registada = !!(e && e.name === 'InvalidModificationError') // já registada
+    }
+
+    const reduzMovimento = () => global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const ePagina = el => el === document.body || el === document.documentElement
+
+    function ehAlvo(el) {
+      let ok = false
+      for (const c of el.classList) {
+        if (reToken.test(c)) {
+          ok = true
+          break
+        }
+      }
+      if (!ok) return false
+      if (!registada) return true
+      return parseFloat(getComputedStyle(el).getPropertyValue('--progress-on')) > 0
+    }
+
+    function configurar(el, a) {
+      const cs = getComputedStyle(el)
+      const v = n => cs.getPropertyValue(n).trim()
+      const pos = v('--progress-pos')
+      const modo = v('--progress-mode')
+      const c = {
+        pos: ['top', 'bottom', 'left', 'right'].indexOf(pos) >= 0 ? pos : 'top',
+        h: v('--progress-h') || cfg.altura + 'px',
+        cor: v('--progress-color') || cfg.cor,
+        trilho: v('--progress-track') || 'transparent',
+        raio: v('--progress-radius') || '0',
+        z: v('--progress-z') || String(cfg.z),
+        dur: reduzMovimento() ? '0ms' : v('--progress-dur') || '80ms',
+        inverso: v('--progress-reverse') === '1',
+        modo: modo === 'scroll' || modo === 'view' ? modo : 'auto'
+      }
+      const vert = c.pos === 'left' || c.pos === 'right'
+      const prev = a.c
+      a.c = c
+      if (prev && JSON.stringify(prev) === JSON.stringify(c)) return
+      const hs = a.host.style
+      hs.cssText =
+        'position:fixed;left:0;top:0;margin:0;padding:0;box-sizing:border-box;pointer-events:none;overflow:hidden;' +
+        'visibility:hidden;background:' + c.trilho + ';border-radius:' + c.raio + ';z-index:' + c.z
+      const fs = a.fill.style
+      fs.cssText =
+        'width:100%;height:100%;will-change:transform;background:' + c.cor + ';' +
+        'transition:transform ' + c.dur + ' linear;' +
+        'transform-origin:' + (vert ? (c.inverso ? 'center bottom' : 'center top') : c.inverso ? 'right center' : 'left center')
+      a.chave = ''
+    }
+
+    function registar(el) {
+      const host = document.createElement('div')
+      host.setAttribute('data-breeze-progress', '')
+      host.setAttribute('aria-hidden', 'true')
+      const fill = document.createElement('div')
+      host.appendChild(fill)
+      hosts.add(host)
+      document.body.appendChild(host)
+      const a = { host, fill, c: null, chave: '', pct: -1 }
+      alvos.set(el, a)
+      configurar(el, a)
+      if (typeof ResizeObserver !== 'undefined') {
+        a.ro = new ResizeObserver(pedir)
+        a.ro.observe(ePagina(el) ? document.documentElement : el)
+      }
+    }
+
+    function remover(el) {
+      const a = alvos.get(el)
+      if (!a) return
+      if (a.ro) a.ro.disconnect()
+      a.host.remove()
+      alvos.delete(el)
+      try {
+        el.style.removeProperty('--progress')
+      } catch (e) {
+        /* ignorar */
+      }
+    }
+
+    const limita = x => (x < 0 ? 0 : x > 1 ? 1 : x)
+
+    function medir(el, a) {
+      const c = a.c
+      if (!c) return
+      const de = document.documentElement
+      const vw = de.clientWidth
+      const vh = de.clientHeight
+      const vert = c.pos === 'left' || c.pos === 'right'
+      let p = 0
+      let rect
+
+      if (ePagina(el)) {
+        rect = { left: 0, top: 0, right: vw, bottom: vh, width: vw, height: vh }
+        const se = document.scrollingElement || de
+        const maxV = se.scrollHeight - se.clientHeight
+        const maxH = se.scrollWidth - se.clientWidth
+        if (maxV > 1) p = (global.scrollY || se.scrollTop) / maxV
+        else if (maxH > 1) p = (global.scrollX || se.scrollLeft) / maxH
+      } else {
+        rect = el.getBoundingClientRect()
+        const dentro = rect.width > 0 && rect.height > 0 && rect.bottom > 0 && rect.top < vh && rect.right > 0 && rect.left < vw
+        if (!dentro) {
+          if (a.chave !== 'oculto') {
+            a.host.style.visibility = 'hidden'
+            a.chave = 'oculto'
+          }
+          return
+        }
+        const cs = getComputedStyle(el)
+        const maxV = el.scrollHeight - el.clientHeight
+        const maxH = el.scrollWidth - el.clientWidth
+        const rolaV = maxV > 1 && /(auto|scroll)/.test(cs.overflowY)
+        const rolaH = maxH > 1 && /(auto|scroll)/.test(cs.overflowX)
+        const usaScroll = c.modo === 'scroll' || (c.modo === 'auto' && (rolaV || rolaH))
+        if (usaScroll) {
+          if (maxV > 1 && (rolaV || c.modo === 'scroll')) p = el.scrollTop / maxV
+          else if (maxH > 1) p = el.scrollLeft / maxH
+        } else {
+          // passagem pelo viewport: elemento alto → do topo ao fim; baixo → da entrada à saída
+          p = rect.height > vh ? -rect.top / (rect.height - vh) : (vh - rect.top) / (vh + rect.height)
+        }
+      }
+      p = limita(p)
+
+      const x0 = Math.max(rect.left, 0)
+      const x1 = Math.min(rect.right, vw)
+      const y0 = Math.max(rect.top, 0)
+      const y1 = Math.min(rect.bottom, vh)
+      let tx = x0
+      let ty = y0
+      let extra = ''
+      let w
+      let h
+      if (vert) {
+        w = c.h
+        h = y1 - y0 + 'px'
+        if (c.pos === 'right') {
+          tx = x1
+          extra = ' translateX(-100%)'
+        }
+      } else {
+        w = x1 - x0 + 'px'
+        h = c.h
+        if (c.pos === 'bottom') {
+          ty = y1
+          extra = ' translateY(-100%)'
+        }
+      }
+      const chave = [tx, ty, w, h, extra].join('|')
+      if (chave !== a.chave) {
+        const hs = a.host.style
+        hs.visibility = 'visible'
+        hs.width = w
+        hs.height = h
+        hs.transform = 'translate(' + tx + 'px,' + ty + 'px)' + extra
+        a.chave = chave
+      }
+      a.fill.style.transform = vert ? 'scaleY(' + p + ')' : 'scaleX(' + p + ')'
+
+      const pct = Math.round(p * 100)
+      if (pct !== a.pct) {
+        a.pct = pct
+        el.style.setProperty('--progress', String(pct / 100))
+        el.dispatchEvent(new CustomEvent('breeze:progress', { detail: { progresso: p, percentagem: pct } }))
+      }
+    }
+
+    function pedir() {
+      if (pendente) return
+      pendente = true
+      requestAnimationFrame(() => {
+        pendente = false
+        alvos.forEach((a, el) => medir(el, a))
+      })
+    }
+
+    function varrer() {
+      agendado = false
+      if (!document.body) return
+      document.querySelectorAll('[class*="progress"]').forEach(el => {
+        const a = alvos.get(el)
+        const activo = ehAlvo(el)
+        if (activo && !a) registar(el)
+        else if (activo && a) configurar(el, a)
+        else if (!activo && a) remover(el)
+      })
+      alvos.forEach((_, el) => {
+        if (!el.isConnected) remover(el)
+      })
+      pedir()
+    }
+
+    const nosso = n => n.nodeType === 1 && hosts.has(n)
+    // rAF duplo: dá tempo ao Breeze de inserir as regras das classes novas
+    function agendar(mutacoes) {
+      if (mutacoes && mutacoes.length && mutacoes.every(m => (m.target.nodeType === 1 && m.target.closest('[data-breeze-progress]')) ||
+          (m.type === 'childList' && [].every.call(m.addedNodes, nosso) && [].every.call(m.removedNodes, nosso)))) return
+      if (agendado) return
+      agendado = true
+      requestAnimationFrame(() => requestAnimationFrame(varrer))
+    }
+
+    global.addEventListener('scroll', pedir, { capture: true, passive: true })
+    global.addEventListener('resize', () => agendar(), { passive: true })
+    global.addEventListener('load', () => agendar())
+    new MutationObserver(agendar).observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class']
+    })
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => agendar())
+    else agendar()
+
+    return { varrer }
+  }
+
+  // ----------------------------------------------------------------- plugin
+  function criar(opcoes) {
+    const cfg = Object.assign({}, PADROES, opcoes)
+    let motor = null
+    return {
+      nome: 'progress',
+      versao: VERSAO,
+      setup(ctx) {
+        const prefixo = (ctx.config && ctx.config.prefix) || ''
+        // Se o Breeze já aplicou o prefixo (use() depois do init), aplicamo-lo nós.
+        const fixas = (ctx.config && ctx.config.classesFixas) || {}
+        const jaPrefixado = prefixo && prefixo + 'block' in fixas
+        const nome = n => (jaPrefixado ? prefixo + n : n)
+
+        Object.keys(CLASSES).forEach(n => ctx.addFixedClass(nome(n), CLASSES[n]))
+        Object.keys(MAPEAMENTOS).forEach(p => ctx.addMapping(nome(p), MAPEAMENTOS[p]))
+
+        if (typeof document === 'undefined') return
+        if (!motor) motor = iniciarMotor(cfg, prefixo)
+
+        // use() depois do init: reprocessa os elementos já existentes
+        if (global.BreezeCSS && typeof global.BreezeCSS.processar === 'function') {
+          Promise.resolve().then(() => global.BreezeCSS.processar())
+        }
+      },
+      actualizar() {
+        if (motor) motor.varrer()
+      }
+    }
+  }
+
+  const plugin = Object.assign(criar(), { criar, versao: VERSAO })
+  global.BreezeProgress = plugin
+  if (typeof module !== 'undefined' && module.exports) module.exports = plugin
+})(typeof window !== 'undefined' ? window : globalThis)
+
+
 ;/* Regista o plugin antes do init do Breeze, preservando a BreezeConfig do utilizador.
    Para desactivar: window.BreezeConfig = { Glass: false } */
 /**
- * BreezeCSS v2.2.4 – breeze.bundle.js
+ * BreezeCSS v2.2.5 – breeze.bundle.js
  * Bundle sem módulos ES – compatível com <script src="...">
  * Autor: Pedro de Oliveira
+ *
+ * Novidades v2.2.5:
+ *  • "_" vira espaço também dentro de calc(), clamp(), min(), max(), gradientes,
+ *    rgb(), etc. (ex: w[calc(100%_-_20px)]). Preservado em url(), var(), env(),
+ *    attr() e src(), onde o "_" faz parte do valor.
+ *  • Suporte a mask (sempre com -webkit- incluído):
+ *      arbitrárias: mask[...], mask-image[...], mask-gradient[to_bottom,#000,transparent],
+ *                   mask-size[...], mask-pos[...], mask-repeat[...], mask-mode[...],
+ *                   mask-clip[...], mask-origin[...], mask-composite[...], mask-border[...]
+ *      fixas:       mask-none, mask-no-repeat, mask-repeat-x/y, mask-contain, mask-cover,
+ *                   mask-center, mask-alpha, mask-luminance, mask-add/subtract/intersect/exclude,
+ *                   mask-clip-*, mask-origin-*, mask-type-*, mask-fade-t/r/b/l
  *
  * Novidades v2.2.4:
  *  • text-stroke[valor]   – -webkit-text-stroke arbitrário (ex: text-stroke[2px_#000])
@@ -1160,16 +1861,36 @@
       ];
     }
 
-    // Substitui _ por espaço apenas fora de funções CSS como url(), var(), etc.
-    // Dentro dessas funções o _ é parte do valor real e não deve ser tocado.
+    // Substitui _ por espaço em todo o valor, EXCEPTO dentro de funções cujo
+    // conteúdo é literal (url, var, env, attr, src), onde o _ faz parte do valor
+    // real (caminhos, nomes de variáveis). Assim funcionam:
+    //   calc(100%_-_20px), clamp(1rem,_4vw_+_1rem,_3rem),
+    //   radial-gradient(circle_at_top,#000_60%,transparent), rgb(0_0_0/_50%)
+    const FUNCOES_LITERAIS = new Set(["url", "var", "env", "attr", "src"]);
+
     function _substituirUnderscoreFora(valor) {
       let resultado = "";
-      let profundidade = 0;
+      const pilha = []; // true = literal (preservar _), false = converter
+      let nomeFn = "";
       for (let i = 0; i < valor.length; i++) {
         const c = valor[i];
-        if (c === "(") profundidade++;
-        else if (c === ")") profundidade--;
-        resultado += c === "_" && profundidade === 0 ? " " : c;
+        if (c === "(") {
+          const literal =
+            FUNCOES_LITERAIS.has(nomeFn.toLowerCase()) ||
+            (pilha.length > 0 && pilha[pilha.length - 1]);
+          pilha.push(literal);
+          nomeFn = "";
+          resultado += c;
+        } else if (c === ")") {
+          pilha.pop();
+          nomeFn = "";
+          resultado += c;
+        } else {
+          if (/[a-zA-Z-]/.test(c)) nomeFn += c;
+          else nomeFn = "";
+          const preservar = pilha.length > 0 && pilha[pilha.length - 1];
+          resultado += c === "_" && !preservar ? " " : c;
+        }
       }
       return resultado;
     }
@@ -1373,6 +2094,71 @@
   });
 
   // ═══════════════════════════════════════════════════════════════════════
+  // MASK
+  // Cada declaração é emitida com e sem prefixo -webkit- (Safari < 15.4 e
+  // Chromium < 120 só reconhecem a versão prefixada).
+  // ═══════════════════════════════════════════════════════════════════════
+  const _mk = (prop, val) => `${prop}: ${val}; -webkit-${prop}: ${val}`;
+  const _fade = (dir) =>
+    _mk("mask-image", `linear-gradient(to ${dir}, #000 60%, transparent)`);
+
+  const MASK_FIXAS = {
+    "mask-none": _mk("mask-image", "none"),
+
+    // repeat
+    "mask-repeat": _mk("mask-repeat", "repeat"),
+    "mask-no-repeat": _mk("mask-repeat", "no-repeat"),
+    "mask-repeat-x": _mk("mask-repeat", "repeat-x"),
+    "mask-repeat-y": _mk("mask-repeat", "repeat-y"),
+    "mask-repeat-round": _mk("mask-repeat", "round"),
+    "mask-repeat-space": _mk("mask-repeat", "space"),
+
+    // size
+    "mask-auto": _mk("mask-size", "auto"),
+    "mask-contain": _mk("mask-size", "contain"),
+    "mask-cover": _mk("mask-size", "cover"),
+
+    // position
+    "mask-center": _mk("mask-position", "center"),
+    "mask-top": _mk("mask-position", "top"),
+    "mask-bottom": _mk("mask-position", "bottom"),
+    "mask-left": _mk("mask-position", "left"),
+    "mask-right": _mk("mask-position", "right"),
+
+    // mode
+    "mask-alpha": _mk("mask-mode", "alpha"),
+    "mask-luminance": _mk("mask-mode", "luminance"),
+    "mask-match-source": _mk("mask-mode", "match-source"),
+
+    // composite (valores standard ↔ valores -webkit- equivalentes)
+    "mask-add": "mask-composite: add; -webkit-mask-composite: source-over",
+    "mask-subtract": "mask-composite: subtract; -webkit-mask-composite: source-out",
+    "mask-intersect": "mask-composite: intersect; -webkit-mask-composite: source-in",
+    "mask-exclude": "mask-composite: exclude; -webkit-mask-composite: xor",
+
+    // clip
+    "mask-clip-border": _mk("mask-clip", "border-box"),
+    "mask-clip-padding": _mk("mask-clip", "padding-box"),
+    "mask-clip-content": _mk("mask-clip", "content-box"),
+    "mask-clip-none": _mk("mask-clip", "no-clip"),
+
+    // origin
+    "mask-origin-border": _mk("mask-origin", "border-box"),
+    "mask-origin-padding": _mk("mask-origin", "padding-box"),
+    "mask-origin-content": _mk("mask-origin", "content-box"),
+
+    // type (máscaras SVG)
+    "mask-type-alpha": "mask-type: alpha",
+    "mask-type-luminance": "mask-type: luminance",
+
+    // presets de fade (esbatimento nas bordas)
+    "mask-fade-t": _fade("top"),
+    "mask-fade-r": _fade("right"),
+    "mask-fade-b": _fade("bottom"),
+    "mask-fade-l": _fade("left"),
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════
   // ENGINE
   // ═══════════════════════════════════════════════════════════════════════
   const Engine = (() => {
@@ -1434,7 +2220,7 @@
             : "info",
         silencioso: _config.log === false,
       });
-      Logger.info("Inicializando BreezeCSS v2.2.4...");
+      Logger.info("Inicializando BreezeCSS v2.2.5...");
       if (_config.plugins) _config.plugins.forEach((p) => _aplicarPlugin(p));
 
       // ── prefix ───────────────────────────────────────────────────
@@ -1981,6 +2767,21 @@
           // Blend (arbitrário): mix-blend[difference], bg-blend[overlay]
           "mix-blend": "mix-blend-mode",
           "bg-blend": "background-blend-mode",
+
+          // Mask (arbitrário): mask-image[url(/m.svg)], mask-size[50%], …
+          // Cada entrada emite a propriedade standard + a versão -webkit-
+          mask: "mask; -webkit-mask",
+          "mask-image": "mask-image; -webkit-mask-image",
+          "mask-gradient": "mask-image; -webkit-mask-image",
+          "mask-size": "mask-size; -webkit-mask-size",
+          "mask-pos": "mask-position; -webkit-mask-position",
+          "mask-position": "mask-position; -webkit-mask-position",
+          "mask-repeat": "mask-repeat; -webkit-mask-repeat",
+          "mask-mode": "mask-mode; -webkit-mask-mode",
+          "mask-clip": "mask-clip; -webkit-mask-clip",
+          "mask-origin": "mask-origin; -webkit-mask-origin",
+          "mask-composite": "mask-composite", // valores diferem entre standard e -webkit-: use mask-add/-subtract/-intersect/-exclude para ambos
+          "mask-border": "mask-border",
         },
 
         processadoresEspeciais: {
@@ -2037,6 +2838,13 @@
             return v;
           },
           "transition-prop": (v) => v,
+          // mask-gradient[to_bottom,#000,transparent] → linear-gradient(...)
+          "mask-gradient": (v) =>
+            v.startsWith("linear-gradient") ||
+            v.startsWith("radial-gradient") ||
+            v.startsWith("conic-gradient")
+              ? v
+              : `linear-gradient(${v})`,
         },
 
         classesFixas: {
@@ -2088,6 +2896,15 @@
           "self-center": "align-self: center",
           "self-stretch": "align-self: stretch",
           "place-center": "place-items: center",
+          'content-start':   'align-content: flex-start',
+          'content-end':     'align-content: flex-end',
+          'content-center':  'align-content: center',
+          'content-between': 'align-content: space-between',
+          'content-around':  'align-content: space-around',
+          'content-evenly':  'align-content: space-evenly',
+          'content-stretch': 'align-content: stretch',
+          'content-baseline':'align-content: baseline',
+          'content-normal':  'align-content: normal',
 
           // Posição
           relative: "position: relative",
@@ -2211,6 +3028,9 @@
 
           // Blend (mix-blend-* e bg-blend-*)
           ...BLEND_FIXAS,
+
+          // Mask (mask-*)
+          ...MASK_FIXAS,
 
           // List
           "list-none": "list-style-type: none",
@@ -2381,7 +3201,7 @@
     addFixedClass: (n, e) => Engine.addFixedClass(n, e),
     addProcessor: (p, fn) => Engine.addProcessor(p, fn),
     stats: () => Engine.obterStats(),
-    versao: "2.2.4",
+    versao: "2.2.5",
   };
 
   // Auto-init
