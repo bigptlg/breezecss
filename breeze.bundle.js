@@ -1,4 +1,4 @@
-/*! Breeze bundle — BreezeCSS 2.2.5 + BreezeGlass 1.0.0 + BreezeDividers 1.2.0 + BreezeProgress 1.0.0 (ficheiro único) */
+/*! Breeze bundle — BreezeCSS 2.2.5 + BreezeGlass 1.0.0 + BreezeDividers 1.2.0 + BreezeProgress 1.0.0 + BreezeScrollbar 1.0.0 (ficheiro único) */
 /*!
  * BreezeGlass v1.0.0 — plugin "glass" para o BreezeCSS (>= 2.2)
  *
@@ -1008,6 +1008,230 @@
 
   const plugin = Object.assign(criar(), { criar, versao: VERSAO })
   global.BreezeProgress = plugin
+  if (typeof module !== 'undefined' && module.exports) module.exports = plugin
+})(typeof window !== 'undefined' ? window : globalThis)
+
+;/*!
+ * BreezeScrollbar v1.0.0 — plugin "scrollbar" para o BreezeCSS (>= 2.2)
+ *
+ * Personaliza a barra de scroll de qualquer elemento — ou da página inteira
+ * (classe no <html> ou no <body>). Chromium/Safari usam ::-webkit-scrollbar
+ * (tamanho, raio, folga e hover totalmente controláveis); o Firefox usa
+ * scrollbar-color / scrollbar-width (cores e fino/normal).
+ *
+ * Uso (junto dos outros plugins, antes do DOMContentLoaded):
+ *   <script>window.BreezeConfig = { plugins: [BreezeGlass, BreezeDividers, BreezeProgress, BreezeScrollbar] }</script>
+ *
+ *   <body class="scrollbar scrollbar-thumb[#6366f1] scrollbar-track[#0f172a]">
+ *   <div class="h[300px] overflow-auto scrollbar scrollbar-thin scrollbar-rounded">…</div>
+ *   <div class="overflow-auto scrollbar-none">…</div>      (esconde a barra, mantém o scroll)
+ *
+ * Classes
+ *   scrollbar                       activa a personalização (obrigatória, excepto com scrollbar-none)
+ *   scrollbar-thin|md|lg|xl         espessura (6 / 10 / 14 / 18 px) — por omissão 8px
+ *   scrollbar-size[12px]            espessura arbitrária
+ *   scrollbar-thumb[#6366f1]        cor do "polegar" (aceita gradientes no Chromium/Safari)
+ *   scrollbar-thumb-hover[#818cf8]  cor do polegar ao passar o rato
+ *   scrollbar-track[rgb(0_0_0/_.1)] cor do trilho (transparente por omissão)
+ *   scrollbar-corner[#000]          cor do canto (quando há scroll nos dois eixos)
+ *   scrollbar-radius[4px]           arredondamento — ou a classe fixa scrollbar-square (0)
+ *   scrollbar-gap[2px]              folga entre polegar e trilho
+ *   scrollbar-none                  esconde a barra (o elemento continua a fazer scroll)
+ *   scrollbar-stable                reserva o espaço da barra (scrollbar-gutter: stable)
+ *   Variantes do Breeze funcionam: md:scrollbar-lg, dark:scrollbar-thumb[#fff], hover:scrollbar-thumb[red]…
+ *
+ * Nota: no Firefox só as cores, scrollbar-none e a escolha fino (por omissão) / normal
+ * (scrollbar-lg e scrollbar-xl) têm efeito; raio, folga e hover do polegar não existem lá.
+ */
+(function (global) {
+  'use strict'
+
+  const VERSAO = '1.0.0'
+  const PADROES = { tamanho: 8, thumb: 'rgb(128 128 128 / 0.5)', thumbHover: 'rgb(128 128 128 / 0.8)' }
+  const VARS = [
+    '--scrollbar-size', '--scrollbar-thumb', '--scrollbar-thumb-hover', '--scrollbar-track',
+    '--scrollbar-corner', '--scrollbar-radius', '--scrollbar-gap', '--scrollbar-ff'
+  ]
+
+  // Nota: o Breeze separa as declarações por ";" — não usar ";" dentro de valores.
+  const CLASSES = {
+    scrollbar: '--scrollbar-on: 1',
+    'scrollbar-thin': '--scrollbar-size: 6px',
+    'scrollbar-md': '--scrollbar-size: 10px',
+    'scrollbar-lg': '--scrollbar-size: 14px; --scrollbar-ff: auto',
+    'scrollbar-xl': '--scrollbar-size: 18px; --scrollbar-ff: auto',
+    'scrollbar-square': '--scrollbar-radius: 0px',
+    'scrollbar-none': '--scrollbar-on: 1; --scrollbar-hide: 1',
+    'scrollbar-stable': 'scrollbar-gutter: stable'
+  }
+
+  // Valores arbitrários: scrollbar-thumb[#f00] → --scrollbar-thumb: #f00
+  const MAPEAMENTOS = {
+    'scrollbar-size': '--scrollbar-size',
+    'scrollbar-thumb': '--scrollbar-thumb',
+    'scrollbar-thumb-hover': '--scrollbar-thumb-hover',
+    'scrollbar-track': '--scrollbar-track',
+    'scrollbar-corner': '--scrollbar-corner',
+    'scrollbar-radius': '--scrollbar-radius',
+    'scrollbar-gap': '--scrollbar-gap'
+  }
+
+  function esc(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  }
+
+  function injectarEstilos(cfg) {
+    if (document.getElementById('breeze-scrollbar-estilos')) return
+    const t = 'var(--scrollbar-size, ' + cfg.tamanho + 'px)'
+    const thumb = 'var(--scrollbar-thumb, ' + cfg.thumb + ')'
+    const css = `
+[data-breeze-scrollbar]::-webkit-scrollbar { width: ${t}; height: ${t}; background: transparent; }
+[data-breeze-scrollbar]::-webkit-scrollbar-track { background: var(--scrollbar-track, transparent); border-radius: var(--scrollbar-radius, 9999px); }
+[data-breeze-scrollbar]::-webkit-scrollbar-thumb { background: ${thumb}; border-radius: var(--scrollbar-radius, 9999px); border: var(--scrollbar-gap, 0px) solid transparent; background-clip: padding-box; }
+[data-breeze-scrollbar]::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover, var(--scrollbar-thumb, ${cfg.thumbHover})); background-clip: padding-box; }
+[data-breeze-scrollbar]::-webkit-scrollbar-corner { background: var(--scrollbar-corner, transparent); }
+[data-breeze-scrollbar]::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
+@supports not selector(::-webkit-scrollbar) {
+  [data-breeze-scrollbar] { scrollbar-width: var(--scrollbar-ff, thin); scrollbar-color: ${thumb} var(--scrollbar-track, transparent); }
+}
+[data-breeze-scrollbar="none"] { scrollbar-width: none; -ms-overflow-style: none; }
+[data-breeze-scrollbar="none"]::-webkit-scrollbar { display: none; width: 0; height: 0; }`
+    const el = document.createElement('style')
+    el.id = 'breeze-scrollbar-estilos'
+    el.setAttribute('data-breeze', 'scrollbar')
+    el.textContent = css
+    document.head.appendChild(el)
+  }
+
+  function iniciarMotor(cfg, prefixo) {
+    const reToken = new RegExp('(^|:)' + esc(prefixo + 'scrollbar') + '(-none)?!?$')
+    const copiadas = new Set() // propriedades copiadas do <body> para o <html>
+    let agendado = false
+
+    // --scrollbar-on não herda: senão todos os filhos de um <body class="scrollbar">
+    // seriam tratados como alvos.
+    let registada = false
+    try {
+      if (global.CSS && typeof global.CSS.registerProperty === 'function') {
+        global.CSS.registerProperty({ name: '--scrollbar-on', syntax: '<number>', inherits: false, initialValue: '0' })
+        registada = true
+      }
+    } catch (e) {
+      registada = !!(e && e.name === 'InvalidModificationError') // já registada
+    }
+
+    function ehAlvo(el) {
+      let ok = false
+      for (const c of el.classList) {
+        if (reToken.test(c)) {
+          ok = true
+          break
+        }
+      }
+      if (!ok) return false
+      if (!registada) return true
+      return parseFloat(getComputedStyle(el).getPropertyValue('--scrollbar-on')) > 0
+    }
+
+    const escondida = el => getComputedStyle(el).getPropertyValue('--scrollbar-hide').trim() === '1'
+
+    // A barra da página é controlada pelo <html>: se a classe estiver no <body>,
+    // copiamos as variáveis e o atributo para o elemento raiz.
+    function espelhar(body, valor) {
+      const raiz = document.documentElement
+      const cs = getComputedStyle(body)
+      raiz.setAttribute('data-breeze-scrollbar', valor)
+      VARS.forEach(v => {
+        const x = cs.getPropertyValue(v).trim()
+        if (x) {
+          raiz.style.setProperty(v, x)
+          copiadas.add(v)
+        } else if (copiadas.has(v)) {
+          raiz.style.removeProperty(v)
+          copiadas.delete(v)
+        }
+      })
+    }
+
+    function limparRaiz() {
+      const raiz = document.documentElement
+      if (!raiz.hasAttribute('data-breeze-scrollbar') || ehAlvo(raiz)) return
+      raiz.removeAttribute('data-breeze-scrollbar')
+      copiadas.forEach(v => raiz.style.removeProperty(v))
+      copiadas.clear()
+    }
+
+    function varrer() {
+      agendado = false
+      if (!document.body) return
+      const vistos = new Set()
+      document.querySelectorAll('[class*="scrollbar"]').forEach(el => {
+        if (ehAlvo(el)) {
+          el.setAttribute('data-breeze-scrollbar', escondida(el) ? 'none' : '')
+          vistos.add(el)
+          if (el === document.body) espelhar(el, escondida(el) ? 'none' : '')
+        }
+      })
+      document.querySelectorAll('[data-breeze-scrollbar]').forEach(el => {
+        if (!vistos.has(el) && el !== document.documentElement) el.removeAttribute('data-breeze-scrollbar')
+      })
+      if (!vistos.has(document.body) || !ehAlvo(document.body)) limparRaiz()
+    }
+
+    // rAF duplo: dá tempo ao Breeze de inserir as regras das classes novas
+    function agendar() {
+      if (agendado) return
+      agendado = true
+      requestAnimationFrame(() => requestAnimationFrame(varrer))
+    }
+
+    new MutationObserver(agendar).observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class']
+    })
+    global.addEventListener('resize', agendar, { passive: true }) // variantes md:/lg: …
+    global.addEventListener('load', agendar)
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', agendar)
+    else agendar()
+
+    return { varrer }
+  }
+
+  function criar(opcoes) {
+    const cfg = Object.assign({}, PADROES, opcoes)
+    let motor = null
+    return {
+      nome: 'scrollbar',
+      versao: VERSAO,
+      setup(ctx) {
+        const prefixo = (ctx.config && ctx.config.prefix) || ''
+        // Se o Breeze já aplicou o prefixo (use() depois do init), aplicamo-lo nós.
+        const fixas = (ctx.config && ctx.config.classesFixas) || {}
+        const jaPrefixado = prefixo && prefixo + 'block' in fixas
+        const nome = n => (jaPrefixado ? prefixo + n : n)
+
+        Object.keys(CLASSES).forEach(n => ctx.addFixedClass(nome(n), CLASSES[n]))
+        Object.keys(MAPEAMENTOS).forEach(p => ctx.addMapping(nome(p), MAPEAMENTOS[p]))
+
+        if (typeof document === 'undefined') return
+        injectarEstilos(cfg)
+        if (!motor) motor = iniciarMotor(cfg, prefixo)
+
+        // use() depois do init: reprocessa os elementos já existentes
+        if (global.BreezeCSS && typeof global.BreezeCSS.processar === 'function') {
+          Promise.resolve().then(() => global.BreezeCSS.processar())
+        }
+      },
+      actualizar() {
+        if (motor) motor.varrer()
+      }
+    }
+  }
+
+  const plugin = Object.assign(criar(), { criar, versao: VERSAO })
+  global.BreezeScrollbar = plugin
   if (typeof module !== 'undefined' && module.exports) module.exports = plugin
 })(typeof window !== 'undefined' ? window : globalThis)
 
