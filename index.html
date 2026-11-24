@@ -2959,6 +2959,36 @@ html.tema-alternando *::after {
 html.tema-claro .icone-sol { display: block; }
 html.tema-claro .icone-lua { display: none; }
 </style>
+<style id="bdoc-cli-style-header">
+/* Cabeçalho unificado com a documentação BreezeCLI. */
+.bdoc-topbar{--bdoc-text:#eef4ff;--bdoc-muted:#8fa3bf;--bdoc-line:#253047;--bdoc-bg:rgba(10,15,26,.92);--bdoc-panel:rgba(255,255,255,.035);--bdoc-hover:rgba(255,255,255,.075);position:sticky;top:0;z-index:80;width:100%;background:var(--bdoc-bg);border-bottom:1px solid var(--bdoc-line);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);color:var(--bdoc-text);font-family:Inter,system-ui,sans-serif}
+.bdoc-topbar *, .bdoc-topbar *::before,.bdoc-topbar *::after{box-sizing:border-box}
+.bdoc-topbar-inner{max-width:1650px;margin:0 auto;padding:0 30px;min-height:77px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.bdoc-brand{display:flex;align-items:center;gap:12px;min-width:0;color:var(--bdoc-text);text-decoration:none;white-space:nowrap}
+.bdoc-brand-icon{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:12px;color:#041e17;font-size:24px;font-weight:950;background:linear-gradient(135deg,#00ee99,#33caff);box-shadow:0 8px 25px rgba(0,238,153,.18)}
+.bdoc-brand-title{display:block;font-size:15px;font-weight:820;letter-spacing:-.035em;line-height:1.25}
+.bdoc-brand-sub{display:block;font-size:10px;color:var(--bdoc-muted);font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.bdoc-brand-divider{width:1px;height:29px;background:var(--bdoc-line);margin:0 2px}
+.bdoc-brand-section{font-size:14px;font-weight:800;letter-spacing:-.025em}
+.bdoc-version{border:1px solid var(--bdoc-line);border-radius:50px;padding:4px 9px;font-size:10px;color:var(--bdoc-muted);font-weight:750}
+.bdoc-top-actions{display:flex;align-items:center;gap:8px}
+.bdoc-top-link{display:inline-flex;align-items:center;justify-content:center;padding:9px 13px;border:1px solid transparent;border-radius:10px;color:var(--bdoc-muted);font:750 12px/1.3 Inter,system-ui,sans-serif;white-space:nowrap;text-decoration:none;background:transparent;cursor:pointer}
+.bdoc-top-link:hover,.bdoc-top-link.bdoc-current{color:var(--bdoc-text);background:var(--bdoc-hover)}
+.bdoc-top-link.bdoc-current{border-color:var(--bdoc-line)}
+.bdoc-icon-btn{width:37px;height:37px;flex:none;border-radius:11px;border:1px solid var(--bdoc-line);background:var(--bdoc-panel);color:var(--bdoc-text);display:grid;place-items:center;cursor:pointer}
+.bdoc-icon-btn:hover{border-color:#00ee99}
+.bdoc-pill-link{display:inline-flex;align-items:center;gap:7px;padding:10px 14px;background:linear-gradient(135deg,#00ee99,#33caff);color:#06241b!important;border-radius:11px;font-size:12px;font-weight:850;white-space:nowrap;text-decoration:none}
+.bdoc-pill-link:hover{filter:brightness(1.07)}
+.bdoc-hamburger{display:none}
+/* O cabeçalho é sticky, em vez de flutuante: evitar espaço duplo no conteúdo. */
+.bdoc-topbar ~ main{padding-top:0!important}
+html.tema-claro .bdoc-topbar{--bdoc-text:#17243a;--bdoc-muted:#64748b;--bdoc-line:#dce3ed;--bdoc-bg:rgba(255,255,255,.94);--bdoc-panel:#f7f9fc;--bdoc-hover:#edf2f8}
+@media(max-width:1150px){.bdoc-export{display:none}}
+@media(max-width:1023px){.bdoc-hamburger{display:grid}.bdoc-topbar-inner{padding:0 20px}.bdoc-github-link{display:none}}
+@media(max-width:700px){.bdoc-topbar-inner{padding:0 14px;gap:10px;min-height:68px}.bdoc-top-actions{gap:6px}.bdoc-brand{gap:8px}.bdoc-brand-divider,.bdoc-brand-section,.bdoc-cli-link{display:none}.bdoc-top-link.bdoc-current{display:none}.bdoc-brand-icon{width:34px;height:34px;border-radius:10px;font-size:21px}}
+@media(max-width:460px){.bdoc-brand-sub{font-size:9px}.bdoc-version{display:none}.bdoc-pill-link{padding:10px;font-size:11px}.bdoc-icon-btn{width:34px;height:34px}}
+@media(max-width:345px){.bdoc-pill-link{display:none}}
+</style>
 </head>
 <!-- BreezeProgress: a classe progress no body cria a barra de progresso de scroll fixa no topo -->
 <body class="scrollbar scrollbar-md scrollbar-thumb[#1c2942] scrollbar-thumb-hover[#2b3f66] scrollbar-gap[2px] scrollbar-radius[8px] progress progress-h[3px] progress-color[linear-gradient(90deg,#00ff88,#22d3ee)] bg[#0a0e16] text[#c9d6e8] antialiased font-family['Inter',system-ui,sans-serif] min-h[100vh]">
@@ -2976,43 +3006,32 @@ html.tema-claro .icone-lua { display: none; }
  </div>
  </div>
  
- <header class="fixed top[16px] left[16px] right[16px] z[80] rounded-3xl glass glass-lg glass-dark px[clamp(1rem,_3vw,_1.5rem)] py[0.7rem]">
- <div class="max-w[88rem] mx[auto] flex items-center justify-between gap[1rem]">
- <a href=#inicio class="flex items-center gap[0.65rem] cursor-pointer no-underline min-w[0]">
- <span class="flex items-center justify-center w[2.25rem] h[2.25rem] rounded-2xl bg-gradient[135deg,#00ff88,#22d3ee] text[#04121f] fw[900] text-size[1.05rem] shadow[0_8px_24px_rgb(0_255_136_/_0.35)] shrink-0" aria-hidden=true>B</span>
- <span class="flex-col hidden sm:flex">
- <span class="fw[850] tracking[-0.02em] text[#eef4ff] text-size[1rem] leading[1.15]">BreezeCSS</span>
- <span class="text-size[0.72rem] text[#8fa3bf] leading[1.2]">v2.2.5 · Glass 1.0.0 · Dividers 1.2.0 ·
- Progress 1.0.0 · Scrollbar 1.0.0 · Backgrounds 1.5.0 · Preloader 1.6.0</span>
- </span>
- </a>
- <nav class="flex items-center gap[0.5rem]">
- <button id=btn-tema type=button class="glass glass-sm rounded-full p[8px] cursor-pointer inline-flex items-center justify-center transition" title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro" aria-pressed=false>
-<svg class=icone-sol width=16 height=16 viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=2 stroke-linecap=round aria-hidden=true><circle cx=12 cy=12 r=4></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path></svg>
-<svg class=icone-lua width=16 height=16 viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=2 stroke-linecap=round stroke-linejoin=round aria-hidden=true><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-</button>
- 
- <a href=https://github.com/bigptlg/breezecss target=_blank rel=noopener title="GitHub do projecto" class="inline-flex items-center gap[8px] glass glass-sm rounded-full px[0.85rem] py[0.5rem] text-size[0.85rem] fw[600] text[#e9f2ff] no-underline cursor-pointer transition hover:glass-light">
- <svg width=15 height=15 viewBox="0 0 24 24" fill=currentColor aria-hidden=true>
- <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.27-.01-1.17-.02-2.12-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .96-.31 3.15 1.18a10.9 10.9 0 0 1 2.87-.39c.97 0 1.95.13 2.87.39 2.19-1.49 3.15-1.18 3.15-1.18.62 1.59.23 2.76.11 3.05.73.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.77 1.05.77 2.12 0 1.53-.01 2.76-.01 3.14 0 .31.2.67.8.56A11.52 11.52 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z">
- </path>
- </svg>
- GitHub
- </a>
- <button id=export-css type=button class="hidden md:inline-flex items-center glass glass-sm rounded-full px[0.85rem] py[0.5rem] text-size[0.85rem] fw[600] text[#e9f2ff] cursor-pointer transition hover:glass-light">Exportar
- CSS</button>
- <a href=#playground class="hidden sm:inline-flex items-center bg-gradient[135deg,#00ff88,#22d3ee] text[#04121f] fw[700] text-size[0.85rem] px[0.95rem] py[0.5rem] rounded-full cursor-pointer no-underline transition hover:scale[1.04] duration[200ms]" data-breeze-id=b1>Playground</a>
- <button id=btn-menu class="lg:hidden glass glass-sm rounded-full p[8px] cursor-pointer flex items-center justify-center" aria-label="Abrir menu">
- <svg width=18 height=18 viewBox="0 0 24 24" fill=none stroke=#c9d6e8 stroke-width=2.2 stroke-linecap=round aria-hidden=true>
- <path d="M4 7h16M4 12h16M4 17h16"></path>
- </svg>
- </button>
- </nav>
- </div>
- </header>
+ <header class="bdoc-topbar" role="banner">
+  <div class="bdoc-topbar-inner">
+    <a class="bdoc-brand" href="#inicio" title="Documentação BreezeCSS">
+      <span class="bdoc-brand-icon" aria-hidden="true">B</span>
+      <span class="bdoc-brand-copy"><span class="bdoc-brand-title">BreezeCSS</span><span class="bdoc-brand-sub">Documentação</span></span>
+      <span class="bdoc-brand-divider" aria-hidden="true"></span>
+      <span class="bdoc-brand-section">CSS</span>
+      <span class="bdoc-version">v2.2.5</span>
+    </a>
+    <nav class="bdoc-top-actions" aria-label="Navegação principal">
+      <a class="bdoc-top-link bdoc-current" aria-current="page" href="index.html">BreezeCSS</a>
+      <a class="bdoc-top-link bdoc-cli-link" href="cli.html">CLI Docs</a>
+      <a class="bdoc-top-link bdoc-github-link" href="https://github.com/bigptlg/breezecss" target="_blank" rel="noopener">GitHub ↗</a>
+      <button class="bdoc-icon-btn bdoc-theme-btn" id="btn-tema" type="button" aria-label="Alternar tema claro/escuro" aria-pressed="false" title="Alternar tema">
+        <svg class="icone-sol" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        <svg class="icone-lua" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="bdoc-top-link bdoc-export" id="export-css" type="button">Exportar CSS</button>
+      <a class="bdoc-pill-link" href="#playground">Playground <span aria-hidden="true">↗</span></a>
+      <button class="bdoc-icon-btn bdoc-hamburger" id="btn-menu" type="button" aria-label="Abrir menu" aria-expanded="false" title="Abrir menu"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </nav>
+  </div>
+</header>
  
  <aside class="hidden lg:flex flex-col fixed top[100px] left[16px] w[264px] z[70] rounded-3xl glass glass-md glass-dark p[0.9rem] overflow-y-auto lg:max-h[calc(100vh_-_116px)] scrollbar scrollbar-md scrollbar-thumb[#1c2942] scrollbar-thumb-hover[#2b3f66] scrollbar-gap[2px] scrollbar-radius[8px]" data-breeze-scrollbar>
- <nav id=nav-lateral class="flex flex-col gap[2px]"><a href=#inicio class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#00ff88] no-underline cursor-pointer transition-colors bg[rgb(255_255_255_/_0.08)]">Início</a><a href=#introducao class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Introdução</a><a href=#instalacao class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Instalação</a><a href=#sintaxe class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Sintaxe</a><a href=#variantes class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Variantes &amp; breakpoints</a><a href=#utilitarios class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Utilitários</a><a href=#glass class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezeGlass</a><a href=#dividers class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezeDividers</a><a href=#progress class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezeProgress</a><a href=#scrollbar class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezeScrollbar</a><a href=#backgrounds class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezeBackgrounds</a><a href=#preloader class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezePreloader</a><a href=#componentes class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Componentes</a><a href=#api class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">API JavaScript</a><a href=#config class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Configuração</a><a href=#praticas class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Práticas recomendadas</a><a href=#build class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Build &amp; exportação</a><a href=#playground class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Playground</a></nav>
+ <nav id=nav-lateral class="flex flex-col gap[2px]"><a href=#inicio class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#00ff88] no-underline cursor-pointer transition-colors bg[rgb(255_255_255_/_0.08)]">Início</a><a href=#introducao class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Introdução</a><a href=#instalacao class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Instalação</a><a href=#sintaxe class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Sintaxe</a><a href=#variantes class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Variantes &amp; breakpoints</a><a href=#utilitarios class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Utilitários</a><a href=#glass class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezeGlass</a><a href=#dividers class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezeDividers</a><a href=#progress class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezeProgress</a><a href=#scrollbar class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezeScrollbar</a><a href=#backgrounds class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezeBackgrounds</a><a href=#preloader class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">BreezePreloader</a><a href=#componentes class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Componentes</a><a href=#api class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">API JavaScript</a><a href=#config class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Configuração</a><a href=#praticas class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Práticas recomendadas</a><a href=#build class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Build &amp; exportação</a><a href=#playground class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#8fa3bf] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">Playground</a><a href="cli.html" class="block px[0.8rem] py[0.55rem] rounded-xl text-size[13.5px] leading[1.35] text[#00ff88] no-underline cursor-pointer transition-colors hover:bg[rgb(255_255_255_/_0.07)] hover:text[white]">↗ BreezeCLI 1.0.0</a></nav>
  <div class="mt[16px] pt[14px] border-t[1px_solid_rgb(255_255_255_/_0.08)]">
  <div class="glass glass-sm rounded-xl p[12px] text-size[12px] leading[1.6] text[#8fa3bf]">
  Esta documentação está estilizada <span class="text[#00ff88] fw[600]">100% com BreezeCSS</span> — o CSS
@@ -3064,6 +3083,7 @@ html.tema-claro .icone-lua { display: none; }
  </svg>
  GitHub
  </a>
+ <a href="cli.html" class="glass rounded-xl px[22px] py[13px] text-size[15px] fw[700] text[#00ff88] cursor-pointer no-underline transition hover:glass-light inline-flex items-center gap[10px]">Compilar com BreezeCLI ↗</a>
  <a href=#sintaxe class="text-size[14px] text[#7fd4ff] no-underline hover:underline cursor-pointer">Ver a
  sintaxe primeiro</a>
  </div>
@@ -6385,6 +6405,7 @@ const css <span class=text[#64748b]>=</span> BreezeCSS<span class=text[#64748b]>
  <nav class="flex flex-wrap gap[20px] text-size[13.5px]">
  <a class="text[#8fa3bf] no-underline hover:text[#00ff88] transition cursor-pointer" href=https://github.com/bigptlg/breezecss target=_blank rel=noopener>GitHub</a>
  <a class="text[#8fa3bf] no-underline hover:text[#00ff88] transition cursor-pointer" href=https://cdn.pedrodeoliveira.me/js/breeze.bundle.js target=_blank rel=noopener>CDN oficial</a>
+ <a class="text[#00ff88] no-underline hover:text[#00ff88] transition cursor-pointer" href="cli.html">BreezeCLI Docs ↗</a>
  <a class="text[#8fa3bf] no-underline hover:text[#00ff88] transition cursor-pointer" href=#sintaxe>Sintaxe</a>
  <a class="text[#8fa3bf] no-underline hover:text[#00ff88] transition cursor-pointer" href=#praticas>Práticas</a>
  <a class="text[#8fa3bf] no-underline hover:text[#00ff88] transition cursor-pointer" href=#playground>Playground</a>
