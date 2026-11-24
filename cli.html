@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BreezeCLI 1.0.0 — Documentação oficial</title>
+<meta name="description" content="Documentação detalhada do BreezeCLI 1.0.0: compilar BreezeCSS em CSS estático, gerar runtimes de plugins, inject, temas automáticos, componentes, templates SPA e referência completa de comandos.">
+<meta name="theme-color" content="#080e19"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230a0e16'/%3E%3Cpath d='M6 12h13a3.5 3.5 0 1 0-3.4-4.4M6 17h17a3.5 3.5 0 1 1-3.4 4.4M6 22h9' stroke='%2300ff88' stroke-width='2.4' stroke-linecap='round' fill='none'/%3E%3C/svg%3E">
+<script>try{if(localStorage.getItem('breeze-doc-tema')==='claro')document.documentElement.classList.add('light')}catch(e){}</script>
+<style>
+:root{color-scheme:dark;--bg:#080e19;--panel:#10192a;--panel2:#111f32;--panel3:#16233a;--text:#edf5ff;--muted:#99a9bf;--soft:#71849f;--line:#25344c;--line2:#1c293d;--accent:#00ee99;--accent2:#33caff;--accent3:#bda2ff;--shadow:0 28px 100px rgba(0,0,0,.24);--glass:rgba(14,24,39,.84);--code:#0b1424;--hover:rgba(255,255,255,.055)}
+html.light{color-scheme:light;--bg:#f3f7fb;--panel:#ffffff;--panel2:#edf4fb;--panel3:#e6eff8;--text:#15243a;--muted:#536783;--soft:#73839b;--line:#d7e2ed;--line2:#e4edf5;--accent:#087e56;--accent2:#067ea6;--accent3:#7451b5;--shadow:0 24px 70px rgba(24,56,96,.09);--glass:rgba(255,255,255,.91);--code:#152239;--hover:rgba(20,65,105,.055)}
+*,*::before,*::after{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:104px}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:15px;line-height:1.72;-webkit-font-smoothing:antialiased}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent2);outline-offset:3px}::selection{background:rgba(0,238,153,.3)}.aurora{position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(ellipse 43% 26% at 76% 0%,rgba(0,238,153,.085),transparent),radial-gradient(ellipse 35% 32% at 14% 28%,rgba(42,116,233,.075),transparent)}
+.top-progress{position:fixed;top:0;left:0;width:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:110}.topbar{position:sticky;top:0;z-index:70;background:var(--glass);border-bottom:1px solid var(--line2);backdrop-filter:blur(24px)}.topbar-inner{max-width:1650px;margin:auto;padding:0 30px;min-height:77px;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{display:flex;align-items:center;gap:12px;min-width:0}.brand-icon{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:12px;color:#041e17;font-weight:950;font-size:24px;background:linear-gradient(135deg,#00ee99,#33caff);box-shadow:0 8px 25px rgba(0,238,153,.18)}.brand-title{display:block;font-size:15px;font-weight:820;letter-spacing:-.035em;line-height:1.25}.brand-sub{display:block;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.12em;text-transform:uppercase}.brand-divider{width:1px;height:29px;background:var(--line);margin:0 2px}.brand-cli{font-size:14px;font-weight:800;letter-spacing:-.025em}.version{border:1px solid var(--line);border-radius:50px;padding:4px 9px;font-size:10px;color:var(--muted);font-weight:750}.top-actions{display:flex;align-items:center;gap:8px}.top-link{padding:9px 13px;border-radius:10px;color:var(--muted);font-size:12px;font-weight:750;white-space:nowrap}.top-link:hover,.top-link.active{color:var(--text);background:var(--hover)}.top-link.active{border:1px solid var(--line)}.icon-btn{width:37px;height:37px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--text);display:grid;place-items:center}.icon-btn:hover{border-color:var(--accent)}.hamburger{display:none}.pill-link{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;background:linear-gradient(135deg,#00ee99,#33caff);color:#06241b;border-radius:11px;font-size:12px;font-weight:850}.pill-link:hover{filter:brightness(1.07)}
+.layout{display:grid;grid-template-columns:267px minmax(0,1fr) 220px;gap:0;max-width:1650px;margin:auto}.sidebar{position:sticky;top:77px;height:calc(100vh - 77px);overflow-y:auto;padding:29px 18px 48px 28px;border-right:1px solid var(--line2);scrollbar-width:thin}.sidebar-top{font-size:10px;letter-spacing:.18em;color:var(--soft);text-transform:uppercase;font-weight:900;margin:0 0 21px 12px}.nav-group{margin-bottom:21px}.nav-caption{display:block;margin:0 12px 8px;color:var(--soft);font-size:10px;text-transform:uppercase;letter-spacing:.15em;font-weight:850}.nav-link{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;font-size:12.5px;line-height:1.4;color:var(--muted);font-weight:600;transition:.18s}.nav-link:hover{color:var(--text);background:var(--hover)}.nav-link.active{color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent);font-weight:800}.nav-mark{width:5px;height:5px;border-radius:50%;background:var(--line);flex:none}.nav-link.active .nav-mark{background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 12%,transparent)}.side-bottom{margin:22px 7px;padding:16px;border-radius:15px;border:1px solid var(--line);background:var(--panel)}.side-bottom strong{display:block;font-size:12px}.side-bottom p{font-size:11.5px;color:var(--muted);margin:7px 0 11px}.side-bottom a{font-size:11.5px;font-weight:800;color:var(--accent)}
+.content{min-width:0;padding:0 55px 110px}.hero{position:relative;isolation:isolate;padding:74px 0 65px;border-bottom:1px solid var(--line2)}.eyebrow{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:50px;padding:6px 12px;color:var(--accent);font-size:11px;font-weight:850;letter-spacing:.08em;text-transform:uppercase;background:var(--panel)}.eyebrow .blink{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}.hero h1{font-size:clamp(44px,5.2vw,77px);letter-spacing:-.075em;line-height:1.025;font-weight:900;margin:23px 0 22px;max-width:900px}.hero h1 em{font-style:normal;background:linear-gradient(105deg,var(--accent),var(--accent2));color:transparent;background-clip:text}.hero-description{color:var(--muted);font-size:17px;max-width:670px;line-height:1.8;margin:0 0 27px}.hero-actions{display:flex;flex-wrap:wrap;align-items:center;gap:11px}.cta{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(125deg,#00ee99,#33caff);color:#041b19;font-weight:900;padding:12px 19px;border-radius:12px;font-size:13px}.cta.secondary{background:var(--panel);color:var(--text);border:1px solid var(--line)}.hero-metrics{display:flex;flex-wrap:wrap;gap:11px;margin-top:35px}.metric{padding:14px 17px;min-width:128px;border:1px solid var(--line);background:var(--panel);border-radius:14px}.metric strong{display:block;font-size:20px;letter-spacing:-.05em;line-height:1.2}.metric span{font-size:10px;color:var(--muted);font-weight:750;text-transform:uppercase;letter-spacing:.06em}.hero-terminal{margin-top:34px;position:relative;border:1px solid var(--line);background:var(--code);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}.hero-terminal .term-header{display:flex;align-items:center;gap:7px;border-bottom:1px solid #273b52;padding:12px 15px;color:#8ba0b9;font-size:11px}.term-header span:last-child{margin-left:12px;font-family:monospace}.term-body{padding:20px 24px;color:#cde4f7;font:12.5px/1.85 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre-wrap;overflow:auto}.term-body .green{color:#62efaa}.term-body .blue{color:#7cd8ff}.term-body .muted{color:#7b8ca2}.dot{width:9px;height:9px;display:inline-block;border-radius:50%;background:#ff5f57}.dot.yellow{background:#febc2e}.dot.green{background:#28c840}
+.doc-section{padding:57px 0 60px;border-bottom:1px solid var(--line2);scroll-margin-top:93px}.section-topline{display:flex;align-items:center;gap:12px;font-size:10px;text-transform:uppercase;letter-spacing:.15em;font-weight:850;color:var(--soft);margin-bottom:17px}.section-number{color:var(--accent)}.section-title{font-size:clamp(26px,2.6vw,36px);letter-spacing:-.045em;line-height:1.18;font-weight:860;margin:0 0 24px}.doc-section h3{font-size:17px;letter-spacing:-.025em;margin:34px 0 14px}.doc-section p{margin:14px 0;color:var(--muted);line-height:1.84}.doc-section strong{color:var(--text)}.doc-section ul,.doc-section ol{color:var(--muted);padding-left:23px}.doc-section li{margin:8px 0}.doc-section li::marker{color:var(--accent)}.doc-section p code,.doc-section li code,.doc-section td code,.doc-section h3 code,.doc-section blockquote code{background:var(--panel2);border:1px solid var(--line2);color:var(--accent2);font-size:.87em;border-radius:5px;padding:2px 5px;overflow-wrap:anywhere}.doc-section blockquote.note{margin:24px 0;padding:16px 20px;border:1px solid color-mix(in srgb,var(--accent) 24%,var(--line));border-left:3px solid var(--accent);border-radius:0 12px 12px 0;background:color-mix(in srgb,var(--accent) 5%,var(--panel));font-size:13px}.doc-section blockquote.note p{margin:0;color:var(--muted)}.doc-section a{color:var(--accent2);text-decoration:underline;text-underline-offset:3px}.doc-section table{border-collapse:collapse;width:100%;min-width:520px;font-size:12.5px}.doc-section table th{text-align:left;font-size:10px;letter-spacing:.075em;text-transform:uppercase;color:var(--muted);background:var(--panel2);font-weight:900;padding:13px 14px;border-bottom:1px solid var(--line)}.doc-section table td{padding:13px 14px;border-bottom:1px solid var(--line2);color:var(--muted);vertical-align:top;line-height:1.65}.doc-section table tr:hover td{background:var(--hover)}.table-scroll{overflow:auto;margin:20px 0;border:1px solid var(--line);border-radius:12px}.code-window{margin:21px 0 25px;border:1px solid #263851;border-radius:14px;background:var(--code);overflow:hidden;box-shadow:0 9px 30px rgba(0,0,0,.08)}.code-bar{display:flex;align-items:center;gap:6px;padding:10px 13px;background:#111e31;border-bottom:1px solid #263851}.code-lang{font:800 10px/1.3 ui-monospace,monospace;letter-spacing:.09em;color:#8da3bf;margin-left:10px}.copy-btn{margin-left:auto;background:#1c3048;border:1px solid #35506c;border-radius:7px;padding:5px 10px;color:#c9d8e9;font-size:10px;font-weight:800}.copy-btn:hover{background:#28435d}.code-window pre{margin:0;padding:19px 21px;overflow:auto;color:#c9e2f2;font:12px/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;tab-size:2}.code-window code{font:inherit}.rightbar{position:sticky;top:77px;height:calc(100vh - 77px);padding:34px 22px 20px 4px}.rightbar-title{font-size:10px;text-transform:uppercase;letter-spacing:.15em;font-weight:850;color:var(--soft);margin-bottom:17px}.rightbar a{display:block;padding:8px 0 8px 12px;border-left:1px solid var(--line);color:var(--muted);font-size:11.5px;line-height:1.4}.rightbar a:hover{color:var(--accent);border-color:var(--accent)}.rightbar .right-tip{margin-top:24px;padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel);font-size:11px;color:var(--muted)}.right-tip strong{color:var(--text)}.footer{padding:34px 0 0;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;color:var(--soft);font-size:12px}.footer a{color:var(--accent)}.mobile-overlay{display:none}.search-box{position:relative;margin-bottom:22px}.search-box input{width:100%;padding:10px 12px 10px 35px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--text);outline:none;font-size:12px}.search-box input:focus{border-color:var(--accent)}.search-box svg{position:absolute;left:11px;top:11px;color:var(--muted)}.search-empty{display:none;font-size:12px;color:var(--soft);padding:10px}.keyboard{font:10px ui-monospace,monospace;color:var(--soft);border:1px solid var(--line);border-radius:5px;padding:2px 5px;margin-left:auto}.hide-search{display:none!important}
+@media(max-width:1370px){.layout{grid-template-columns:248px minmax(0,1fr)}.rightbar{display:none}.content{padding-left:46px;padding-right:46px}}
+@media(max-width:880px){.layout{display:block}.sidebar{position:fixed;z-index:90;top:0;left:0;bottom:0;width:min(300px,85vw);height:100vh;background:var(--bg);transform:translateX(-105%);transition:transform .25s;box-shadow:var(--shadow);border-right:1px solid var(--line)}body.menu-open .sidebar{transform:translateX(0)}body.menu-open .mobile-overlay{display:block;position:fixed;inset:0;z-index:85;background:rgba(0,0,0,.6)}.hamburger{display:grid}.topbar-inner{padding:0 18px;min-height:69px}.content{padding:0 28px 70px}.hero{padding-top:49px}.top-link.desktop{display:none}}
+@media(max-width:580px){.brand-sub,.brand-divider,.brand-cli,.version,.top-link{display:none}.topbar-inner{gap:10px}.top-actions{gap:6px}.content{padding:0 19px 70px}.hero h1{font-size:43px}.hero-description{font-size:14px}.hero-metrics{gap:7px}.metric{flex:1;min-width:100px;padding:11px}.metric strong{font-size:17px}.doc-section{padding:43px 0}.code-window pre{font-size:11px;padding:14px}.doc-section table{font-size:11px}.term-body{font-size:10.5px;padding:16px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="aurora" aria-hidden="true"></div><div class="top-progress" id="reading-progress"></div>
+<header class="topbar"><div class="topbar-inner">
+<a class="brand" href="index.html" title="Documentação BreezeCSS"><span class="brand-icon">B</span><span><span class="brand-title">BreezeCSS</span><span class="brand-sub">Documentação</span></span><span class="brand-divider"></span><span class="brand-cli">CLI</span><span class="version">v1.0.0</span></a>
+<nav class="top-actions" aria-label="Navegação principal"><a class="top-link desktop" href="index.html">BreezeCSS</a><a class="top-link active" href="cli.html" aria-current="page">CLI Docs</a><a class="top-link desktop" href="https://github.com/bigptlg/breezecss" target="_blank" rel="noopener">GitHub ↗</a><button class="icon-btn" id="theme-toggle" type="button" title="Alternar tema" aria-label="Alternar tema">☼</button><a class="pill-link" href="https://www.npmjs.com/package/breezecss-cli" target="_blank" rel="noopener">Ver no npm <span aria-hidden="true">↗</span></a><button class="icon-btn hamburger" id="menu-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">☰</button></nav>
+</div></header>
+<div class="mobile-overlay" id="mobile-overlay"></div>
+<div class="layout">
+<aside class="sidebar" id="sidebar"><div class="sidebar-top">BreezeCLI · v1.0.0</div><div class="search-box"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="nav-search" type="search" placeholder="Pesquisar secções…" aria-label="Pesquisar secções" autocomplete="off"></div><nav aria-label="Índice da documentação"><div class="nav-group"><span class="nav-caption">Começar</span><a class="nav-link" href="#visao-geral"><span class="nav-mark"></span>Visão geral</a><a class="nav-link" href="#inicio-rapido"><span class="nav-mark"></span>Início rápido</a><a class="nav-link" href="#instalacao"><span class="nav-mark"></span>Instalação e requisitos</a></div><div class="nav-group"><span class="nav-caption">Compilação</span><a class="nav-link" href="#modos"><span class="nav-mark"></span>Modos de geração</a><a class="nav-link" href="#opcoes"><span class="nav-mark"></span>Referência de opções</a></div><div class="nav-group"><span class="nav-caption">Configuração</span><a class="nav-link" href="#tema"><span class="nav-mark"></span>Temas e cores automáticos</a><a class="nav-link" href="#config"><span class="nav-mark"></span>breeze.config.js</a><a class="nav-link" href="#componentes"><span class="nav-mark"></span>Componentes personalizados</a></div><div class="nav-group"><span class="nav-caption">Runtime</span><a class="nav-link" href="#plugins"><span class="nav-mark"></span>Plugins: CSS e JavaScript</a><a class="nav-link" href="#runtime"><span class="nav-mark"></span>Runtime Builder e API</a><a class="nav-link" href="#inject"><span class="nav-mark"></span>Injeção e proteção do JavaScript</a></div><div class="nav-group"><span class="nav-caption">Integração</span><a class="nav-link" href="#templates"><span class="nav-mark"></span>Templates, React e Vue</a><a class="nav-link" href="#watch"><span class="nav-mark"></span>Watch e fluxo de desenvolvimento</a><a class="nav-link" href="#estrutura"><span class="nav-mark"></span>Estrutura e motor</a></div><div class="nav-group"><span class="nav-caption">Ajuda</span><a class="nav-link" href="#problemas"><span class="nav-mark"></span>Resolução de problemas</a><a class="nav-link" href="#faq"><span class="nav-mark"></span>Perguntas frequentes</a></div></nav><div class="search-empty" id="search-empty">Nenhuma secção encontrada.</div><div class="side-bottom"><strong>Também estás a usar o BreezeCSS?</strong><p>Consulta as classes, os plugins e as demonstrações interativas na documentação principal.</p><a href="index.html">Abrir documentação do BreezeCSS ↗</a></div></aside>
+<main class="content" id="main-content">
+<section class="hero" id="topo"><span class="eyebrow"><span class="blink"></span> Build time, runtime leve</span><h1>Do teu HTML para <em>produção.</em></h1><p class="hero-description">O poder do BreezeCSS, agora compilado. Gera CSS estático, exporta apenas os plugins necessários e injeta tudo automaticamente — sem abdicar das classes, temas e componentes que já utilizas.</p><div class="hero-actions"><a class="cta" href="#inicio-rapido">Começar agora <span aria-hidden="true">↗</span></a><a class="cta secondary" href="#opcoes">Explorar comandos</a><a class="cta secondary" href="https://www.npmjs.com/package/breezecss-cli" target="_blank" rel="noopener">Pacote npm ↗</a><a class="cta secondary" href="index.html">← Voltar ao BreezeCSS</a></div>
+<div class="hero-metrics"><div class="metric"><strong>1.0.0</strong><span>Versão CLI</span></div><div class="metric"><strong>0</strong><span>Deps npm externas</span></div><div class="metric"><strong>6</strong><span>Plugins suportados</span></div><div class="metric"><strong>18+</strong><span>Node.js</span></div></div>
+<div class="hero-terminal"><div class="term-header"><i class="dot"></i><i class="dot yellow"></i><i class="dot green"></i><span>terminal · npx breezecss-cli</span></div><div class="term-body"><span class="muted">$</span> npx breezecss-cli --split --plugins auto --inject
+<span class="blue">BreezeCLI 1.0.0</span>
+
+<span class="green">✓</span> index.html       <span class="muted">→ css/index.css</span>
+<span class="green">✓</span> Plugins          <span class="muted">→ js/index.runtime.js</span>
+<span class="green">✓</span> CSS e JavaScript injetados
+<span class="green">✓</span> Configuração e cores reconhecidas</div></div>
+</section>
+<section class="doc-section" id="visao-geral" data-title="Visão geral"><div class="section-topline"><span class="section-number">01 / 16</span><span class="section-category">Começar</span></div><h2 class="section-title">O BreezeCSS, pronto para produção</h2>
+<p>O <strong>BreezeCLI 1.0.0</strong> transforma classes do BreezeCSS presentes no teu projeto em <strong>CSS estático</strong>, podendo também gerar um <strong>runtime JavaScript com os plugins necessários</strong>. O motor CSS deixa de ter de analisar e gerar estilos no navegador.</p>
+<p>O CLI utiliza o motor real <code>breeze.bundle.js</code> numa VM Node.js, para manter a geração de CSS alinhada com o BreezeCSS v2.2.5. Não necessita de dependências npm externas; requer <strong>Node.js 18 ou superior</strong>.</p>
+<table>
+<thead>
+<tr>
+<th>BreezeCSS em runtime</th>
+<th>BreezeCLI em modo compilado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>O navegador interpreta classes e gera CSS</td>
+<td>O CSS é gerado antes da publicação</td>
+</tr>
+<tr>
+<td>O bundle contém motor + plugins</td>
+<td>O runtime pode conter apenas os plugins necessários</td>
+</tr>
+<tr>
+<td>Classes adicionadas em runtime podem ser compiladas no browser</td>
+<td>Classes dinâmicas devem ser detetáveis no build ou entrar na safelist</td>
+</tr>
+<tr>
+<td>Configuração aplicada durante a execução</td>
+<td>Tema e componentes são extraídos durante a compilação</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="note">
+<p><strong>Quando usar?</strong> Usa o BreezeCSS original para protótipos e páginas sem build. Usa o BreezeCLI para publicar CSS estático, separar ficheiros por página e reduzir o trabalho feito no navegador.</p>
+</blockquote>
+</section><section class="doc-section" id="inicio-rapido" data-title="Início rápido"><div class="section-topline"><span class="section-number">02 / 16</span><span class="section-category">Começar</span></div><h2 class="section-title">Da página HTML ao CSS e JS compilados</h2>
+<p><strong>Não precisas de descarregar o código fonte nem copiar uma pasta <code>breeze/</code>.</strong> Abre o terminal na raiz do teu projeto, onde estão os ficheiros HTML, e executa o pacote oficial publicado no npm. O comando deteta tema, classes, componentes e plugins, gera os ficheiros e atualiza o HTML automaticamente.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">BASH</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npx breezecss-cli --split --plugins auto --inject
+</code></pre></div>
+<p>A estrutura esperada é semelhante a esta:</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">TEXT</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-text">meu-site/
+├── index.html
+├── contacto.html
+├── css/                   # gerado pelo CLI
+│   ├── index.css
+│   └── contacto.css
+└── js/                    # gerado quando necessário
+    ├── index.runtime.js
+    └── contacto.runtime.js
+</code></pre></div>
+<p>Os ficheiros <code>css/</code> e <code>js/</code> são <strong>saídas do comando</strong>, não precisam de existir antes. Se já tens um <code>&lt;script&gt;</code> a carregar o bundle original, <code>--inject</code> procura substituí-lo pelo runtime compilado.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">HTML</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-html">&lt;!-- Referências geradas automaticamente para index.html --&gt;
+&lt;link rel="stylesheet" href="css/index.css" data-breeze-cli="css"&gt;
+&lt;!-- breeze:css --&gt;
+&lt;script src="js/index.runtime.js" data-breeze-cli="runtime"&gt;&lt;/script&gt;
+&lt;!-- breeze:runtime --&gt;
+</code></pre></div>
+<blockquote class="note">
+<p><strong>Importante:</strong> o CLI gera o runtime quando há plugins que precisam de JavaScript, ou quando pedes <code>--runtime</code>. Se só precisares de CSS, usa <code>--no-runtime</code>.</p>
+</blockquote>
+</section><section class="doc-section" id="instalacao" data-title="Instalação e requisitos"><div class="section-topline"><span class="section-number">03 / 16</span><span class="section-category">Começar</span></div><h2 class="section-title">Executar via npx, instalar ou automatizar</h2>
+<p><strong>Pacote oficial:</strong> <a href="https://www.npmjs.com/package/breezecss-cli" target="_blank" rel="noopener"><code>breezecss-cli</code> no npm</a>. <strong>Requisitos:</strong> Node.js ≥ 18 e npm/npx. O CLI não exige dependências npm externas. O executável instalado chama-se <code>breeze</code>.</p>
+<h3>1. Sem instalação prévia — npx (recomendado)</h3>
+<p>Entra na pasta do teu site e executa diretamente o pacote público. Na primeira execução, o npm pode perguntar se autorizas o descarregamento.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">CMD / TERMINAL</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npx breezecss-cli --version
+npx breezecss-cli --split --plugins auto --inject
+</code></pre></div>
+<h3>2. Instalação local no projeto</h3>
+<p>Instala como dependência de desenvolvimento. Depois, usa <code>npx breeze</code> (o nome do executável é diferente do nome do pacote):</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">CMD / TERMINAL</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npm install -D breezecss-cli
+npx breeze --version
+npx breeze --split --plugins auto --inject
+</code></pre></div>
+<h3>3. Script npm para projetos recorrentes</h3>
+<p>Depois de instalar o pacote localmente, adiciona o comando ao <code>package.json</code>. O npm encontra automaticamente <code>node_modules/.bin/breeze</code> quando executa um script:</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">JSON</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-json">{
+  "scripts": {
+    "compilar": "breeze --split --plugins auto --inject",
+    "compilar:prod": "breeze --split --plugins auto --inject --minify"
+  }
+}
+</code></pre></div>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">CMD / TERMINAL</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npm run compilar
+npm run compilar:prod
+</code></pre></div>
+<blockquote class="note"><p><strong>Windows:</strong> após instalação local, escrever <code>breeze</code> diretamente no CMD pode devolver «não é reconhecido». Usa <code>npx breeze</code> ou <code>npm run compilar</code>. Sem instalação local, usa <code>npx breezecss-cli</code>; <strong>não uses <code>npx breeze</code> isoladamente</strong>, pois <code>breeze</code> é também o nome de outro pacote no npm.</p></blockquote>
+<p>O CLI analisa a <strong>pasta atual</strong>. Mantém os HTML nessa pasta ou indica-os com <code>--file</code>. Se tiveres uma cópia do código fonte dentro do projeto, o CLI exclui os próprios exemplos e testes da descoberta.</p>
+</section><section class="doc-section" id="modos" data-title="Modos de geração"><div class="section-topline"><span class="section-number">04 / 16</span><span class="section-category">Compilação</span></div><h2 class="section-title">Um ficheiro, vários ficheiros ou páginas específicas</h2>
+<table>
+<thead>
+<tr>
+<th>Comando</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>npx breezecss-cli</code></td>
+<td>Um único <code>css/breeze.css</code> com as classes do projeto</td>
+</tr>
+<tr>
+<td><code>npx breezecss-cli --split</code></td>
+<td>Um CSS por página, como <code>css/index.css</code></td>
+</tr>
+<tr>
+<td><code>npx breezecss-cli --file index.html</code></td>
+<td>Compila apenas a página indicada</td>
+</tr>
+<tr>
+<td><code>npx breezecss-cli --file a.html --file b.html --split</code></td>
+<td>Compila só as páginas selecionadas</td>
+</tr>
+<tr>
+<td><code>npx breezecss-cli --split --plugins auto --inject</code></td>
+<td>CSS + runtime dos plugins + referências no HTML</td>
+</tr>
+<tr>
+<td><code>npx breezecss-cli --watch --inject</code></td>
+<td>Reconstrói ao guardar e reinjeta as referências</td>
+</tr>
+</tbody>
+</table>
+<h3>Saídas personalizadas</h3>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">BASH</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npx breezecss-cli --split --plugins auto --inject --out dist/css --js-out dist/js --minify
+</code></pre></div>
+<p>Podes usar <code>--name po</code> para mudar o nome do CSS único, ou <code>--clean</code> para limpar a pasta CSS de saída antes de compilar. <strong>Atenção:</strong> <code>--clean</code> remove o conteúdo da pasta de saída selecionada; não a uses numa pasta com ficheiros que queiras conservar.</p>
+</section><section class="doc-section" id="opcoes" data-title="Referência de opções"><div class="section-topline"><span class="section-number">05 / 16</span><span class="section-category">Compilação</span></div><h2 class="section-title">Todas as flags principais</h2>
+<h3>Saída e páginas</h3>
+<table>
+<thead>
+<tr>
+<th>Opção</th>
+<th>Função</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-o, --out &lt;pasta&gt;</code></td>
+<td>Diretório CSS; por omissão <code>css/</code></td>
+</tr>
+<tr>
+<td><code>--js-out &lt;pasta&gt;</code></td>
+<td>Diretório do runtime; por omissão <code>js/</code></td>
+</tr>
+<tr>
+<td><code>-n, --name &lt;nome&gt;</code></td>
+<td>Nome do CSS único; por omissão <code>breeze</code></td>
+</tr>
+<tr>
+<td><code>--split</code></td>
+<td>Um CSS por HTML</td>
+</tr>
+<tr>
+<td><code>-f, --file &lt;ficheiro&gt;</code></td>
+<td>Limita o build a um HTML; repetível</td>
+</tr>
+<tr>
+<td><code>--include &lt;glob&gt;</code></td>
+<td>Inclui ficheiros por padrão; repetível</td>
+</tr>
+<tr>
+<td><code>--exclude &lt;glob&gt;</code></td>
+<td>Exclui ficheiros por padrão; repetível</td>
+</tr>
+<tr>
+<td><code>--clean</code></td>
+<td>Limpa a pasta de saída CSS antes do build</td>
+</tr>
+<tr>
+<td><code>--inject</code></td>
+<td>Atualiza os links CSS e scripts runtime no HTML</td>
+</tr>
+</tbody>
+</table>
+<h3>Plugins e runtime</h3>
+<table>
+<thead>
+<tr>
+<th>Opção</th>
+<th>Função</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--plugins all</code></td>
+<td>Regista todos os plugins (modo predefinido)</td>
+</tr>
+<tr>
+<td><code>--plugins auto</code></td>
+<td>Descobre os plugins necessários</td>
+</tr>
+<tr>
+<td><code>--plugins glass,progress</code></td>
+<td>Seleciona uma lista explícita</td>
+</tr>
+<tr>
+<td><code>--no-plugins</code></td>
+<td>Desativa o registo de plugins</td>
+</tr>
+<tr>
+<td><code>--all-plugin-css</code></td>
+<td>Inclui o CSS completo dos plugins registados</td>
+</tr>
+<tr>
+<td><code>--runtime</code></td>
+<td>Força o runtime em todas as páginas</td>
+</tr>
+<tr>
+<td><code>--no-runtime</code></td>
+<td>Gera apenas CSS estático</td>
+</tr>
+<tr>
+<td><code>--tpl</code></td>
+<td>Inclui classes encontradas em templates e scripts SPA</td>
+</tr>
+<tr>
+<td><code>--no-tpl</code></td>
+<td>Não analisa templates SPA</td>
+</tr>
+</tbody>
+</table>
+<h3>CSS, configuração e manutenção</h3>
+<table>
+<thead>
+<tr>
+<th>Opção</th>
+<th>Função</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--minify</code></td>
+<td>Minifica o CSS</td>
+</tr>
+<tr>
+<td><code>--no-reset</code></td>
+<td>Remove o reset base</td>
+</tr>
+<tr>
+<td><code>--no-smooth</code></td>
+<td>Remove o scroll suave base</td>
+</tr>
+<tr>
+<td><code>-p, --prefix &lt;prefixo&gt;</code></td>
+<td>Prefixo das classes, como <code>bz-</code></td>
+</tr>
+<tr>
+<td><code>--safelist &lt;classe&gt;</code></td>
+<td>Gera classes não detetadas estaticamente</td>
+</tr>
+<tr>
+<td><code>--tema &lt;valor&gt;</code></td>
+<td>Substitui/define valores do tema</td>
+</tr>
+<tr>
+<td><code>--config &lt;ficheiro&gt;</code></td>
+<td>Seleciona um ficheiro de configuração</td>
+</tr>
+<tr>
+<td><code>--init &lt;ficheiro&gt;</code></td>
+<td>Força um ficheiro para a descoberta de init</td>
+</tr>
+<tr>
+<td><code>--no-init</code></td>
+<td>Desativa a descoberta automática de init</td>
+</tr>
+<tr>
+<td><code>--engine &lt;ficheiro&gt;</code></td>
+<td>Seleciona o bundle motor</td>
+</tr>
+<tr>
+<td><code>-w, --watch</code></td>
+<td>Reconstrói ao detetar alterações</td>
+</tr>
+<tr>
+<td><code>--verbose</code></td>
+<td>Mostra avisos e classes não reconhecidas</td>
+</tr>
+<tr>
+<td><code>-v, --version</code></td>
+<td>Mostra a versão</td>
+</tr>
+<tr>
+<td><code>-h, --help</code></td>
+<td>Mostra a ajuda completa</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="note">
+<p><strong>Dica:</strong> <code>--plugins auto</code> é o modo mais útil para publicar páginas reais. <code>--plugins all</code> regista os plugins mesmo quando não são necessários, embora a presença de JavaScript no runtime dependa também das necessidades detetadas.</p>
+</blockquote>
+</section><section class="doc-section" id="tema" data-title="Temas e cores automáticos"><div class="section-topline"><span class="section-number">06 / 16</span><span class="section-category">Configuração</span></div><h2 class="section-title">O tema do HTML é detetado sem <code>--init</code></h2>
+<p>Na versão 1.0.0, o CLI procura <code>BreezeCSS.init({ ... })</code> e <code>window.BreezeConfig</code> nos scripts do projeto. <strong>Não precisas de acrescentar <code>--init index.html</code> ao comando habitual.</strong></p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">HTML</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-html">&lt;script&gt;
+  BreezeCSS.init({
+    plugins: [BreezeGlass, BreezeProgress, BreezeScrollbar],
+    tema: {
+      cores: {
+        primaria: '#003',
+        secundaria: '#005',
+        tercearia: '#fff'
+      }
+    }
+  });
+&lt;/script&gt;
+</code></pre></div>
+<p>O CSS gerado passa a resolver classes como <code>bg[secundaria]</code>, <code>text[tercearia]</code> e <code>progress-track[tercearia]</code> para valores de cor reais:</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">CSS</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-css">:root {
+  --breeze-primaria: #003;
+  --breeze-secundaria: #005;
+  --breeze-tercearia: #fff;
+}
+.bg\[secundaria\] { background-color: #005; }
+.text\[tercearia\] { color: #fff; }
+.progress-track\[tercearia\] { --progress-track: #fff; }
+</code></pre></div>
+<h3>Ordem de prioridade</h3>
+<p><strong>Valores predefinidos → init descoberto → <code>breeze.config.js</code> → opções CLI.</strong> Se utilizares <code>--file</code>, a descoberta dá prioridade à página indicada. Sem <code>--file</code>, os HTML da raiz são preferidos aos ficheiros aninhados.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">BASH</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash"># Substituição pontual de uma cor no terminal
+npx breezecss-cli --tema cores.primaria=#003
+
+# Configuração JSON completa
+npx breezecss-cli --tema '{"cores":{"primaria":"#003"}}'
+</code></pre></div>
+<p><strong>Limitação atual:</strong> o tema é global por compilação. Para páginas com temas distintos, faz builds separados ou utiliza uma configuração comum. Valores nomeados do tema em shorthands multipartes como <code>border[solid_2px_secundaria]</code> não são resolvidos pelo motor; usa <code>border-color[secundaria]</code> em separado.</p>
+</section><section class="doc-section" id="config" data-title="breeze.config.js"><div class="section-topline"><span class="section-number">07 / 16</span><span class="section-category">Configuração</span></div><h2 class="section-title">Configuração centralizada (opcional)</h2>
+<p>Podes guardar opções no ficheiro <code>breeze.config.js</code>, na raiz do projeto. É útil quando o site cresce ou quando queres manter um tema único.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">JS</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-js">// breeze.config.js
+module.exports = {
+  split: true,
+  inject: true,
+  plugins: 'auto',
+  minify: true,
+  out: 'dist/css',
+  jsOut: 'dist/js',
+  tema: {
+    cores: {
+      primaria: '#003',
+      secundaria: '#005',
+      tercearia: '#fff'
+    }
+  },
+  componentes: {
+    btn: ['p[15px]', 'rounded[10px]', 'hover:translate-y[-3px]']
+  }
+};
+</code></pre></div>
+<p>Depois podes compilar apenas com:</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">BASH</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npx breezecss-cli
+</code></pre></div>
+<p>Não é obrigatório criar este ficheiro: a descoberta automática de <code>BreezeCSS.init()</code> continua disponível. Para forçar um ficheiro de configuração específico, usa <code>--config caminho/ficheiro.js</code>.</p>
+</section><section class="doc-section" id="componentes" data-title="Componentes personalizados"><div class="section-topline"><span class="section-number">08 / 16</span><span class="section-category">Configuração</span></div><h2 class="section-title"><code>addComponent()</code> também funciona no build</h2>
+<p>O CLI descobre as chamadas a <code>BreezeCSS.addComponent()</code> nos scripts do projeto, expande os membros e gera as regras CSS para o nome do componente. Isso inclui variantes, breakpoints e dependências de plugins.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">HTML</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-html">&lt;script&gt;
+  BreezeCSS.addComponent('btn', [
+    'no-underline', 'text[tercearia]', 'p[15px]',
+    'rounded[10px]', 'hover:translate-y[-3px]'
+  ]);
+  BreezeCSS.addComponent('card', [
+    'glass', 'glass-dark', 'rounded[20px]', 'p[32px]', 'md:p[64px]'
+  ]);
+&lt;/script&gt;
+
+&lt;a class="btn" href="#contacto"&gt;Contactar&lt;/a&gt;
+&lt;article class="card"&gt;Conteúdo&lt;/article&gt;
+</code></pre></div>
+<p>A expansão é recursiva, aceita componentes que referenciam outros componentes e protege contra ciclos. Com <code>--split</code>, cada página recebe os componentes efetivamente usados nela. Também podes declarar componentes em <code>breeze.config.js</code>.</p>
+<blockquote class="note">
+<p><strong>Importante:</strong> os nomes de componentes devem ser definidos nos ficheiros que o CLI analisa. Evita manter exemplos ou versões alternativas dos mesmos componentes dentro da pasta do teu site; o pacote BreezeCLI exclui automaticamente apenas os seus próprios exemplos e testes.</p>
+</blockquote>
+</section><section class="doc-section" id="plugins" data-title="Plugins: CSS e JavaScript"><div class="section-topline"><span class="section-number">09 / 16</span><span class="section-category">Runtime</span></div><h2 class="section-title">O que é compilado e o que continua dinâmico?</h2>
+<p>O CLI consegue gerar CSS estático para todos os seis plugins, mas alguns efeitos dependem de JavaScript no navegador. O <code>--plugins auto</code> analisa classes, componentes, templates e configuração para escolher os necessários.</p>
+<table>
+<thead>
+<tr>
+<th>Plugin</th>
+<th>CSS compilado</th>
+<th>Runtime JS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>BreezeGlass</strong></td>
+<td>Glass, blur, tons, acessibilidade</td>
+<td>Necessário para <code>glass-refract</code></td>
+</tr>
+<tr>
+<td><strong>BreezeDividers</strong></td>
+<td>Máscaras e divisores SVG</td>
+<td>Não necessita de JS</td>
+</tr>
+<tr>
+<td><strong>BreezeProgress</strong></td>
+<td>Variáveis, dimensões e cores</td>
+<td>Cria e atualiza a barra no scroll</td>
+</tr>
+<tr>
+<td><strong>BreezeScrollbar</strong></td>
+<td>Scrollbar em WebKit/Firefox</td>
+<td>Aplica atributos e espelhamento body → html</td>
+</tr>
+<tr>
+<td><strong>BreezeBackgrounds</strong></td>
+<td>Presets e variáveis</td>
+<td>Gera SVG/SMIL e observa visibilidade</td>
+</tr>
+<tr>
+<td><strong>BreezePreloader</strong></td>
+<td>Animações e estilos</td>
+<td>Controla overlay, load e saída</td>
+</tr>
+</tbody>
+</table>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">HTML</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-html">&lt;body class="progress progress-color[linear-gradient(90deg,#005,#003)]
+             progress-track[tercearia]
+             scrollbar scrollbar-track[#003] scrollbar-thumb[#ffffff88]"&gt;
+  &lt;div class="custom-bg[topo] custom-bg-animate"&gt;&lt;/div&gt;
+&lt;/body&gt;
+</code></pre></div>
+<p>Para uma página com apenas Glass e Dividers sem efeitos dinâmicos, podes usar <code>--no-runtime</code>. Para efeitos como Progress, Backgrounds e Preloader, mantém o runtime gerado pelo CLI. <strong>Não precisas de carregar a CDN original ao mesmo tempo.</strong></p>
+</section><section class="doc-section" id="runtime" data-title="Runtime Builder e API"><div class="section-topline"><span class="section-number">10 / 16</span><span class="section-category">Runtime</span></div><h2 class="section-title">Um runtime autónomo por página</h2>
+<p>O Runtime Builder extrai o código necessário dos plugins do bundle original e cria <code>js/&lt;pagina&gt;.runtime.js</code>. O núcleo mantém uma API de compatibilidade para projetos existentes:</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">JS</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-js">BreezeCSS.init({ /* plugins e tema */ });
+BreezeCSS.use(/* plugin */);
+BreezeCSS.addComponent('card', ['glass', 'p[20px]']);
+BreezeCSS.processar();
+BreezeCSS.reiniciar();
+
+// Para limpeza explícita do runtime compilado:
+window.__breezeRuntime?.destruir();
+</code></pre></div>
+<p>No modo compilado, <code>build()</code> e <code>exportar()</code> não voltam a gerar CSS no navegador: a geração já ocorreu no terminal. Tema e prefixo devem ser definidos antes do build; alterá-los apenas no browser não recompila as regras estáticas.</p>
+<p>O runtime também tem proteção contra inicialização duplicada. Os plugins mantêm os seus observadores e mecanismos de atualização dinâmica; o CSS de classes totalmente novas continua a depender de um novo build ou de <code>--safelist</code>.</p>
+</section><section class="doc-section" id="inject" data-title="Injeção e proteção do JavaScript"><div class="section-topline"><span class="section-number">11 / 16</span><span class="section-category">Runtime</span></div><h2 class="section-title"><code>--inject</code> substitui o bundle sem interromper outros scripts</h2>
+<p>Quando encontra referências reconhecidas ao <code>breeze.bundle.js</code>, <code>breeze.min.js</code> ou scripts individuais do Breeze, o CLI substitui a primeira pelo runtime compilado e trata referências repetidas. Também injeta ou atualiza a folha CSS.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">BASH</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npx breezecss-cli --split --plugins auto --inject
+</code></pre></div>
+<h3>O que acontece ao JavaScript inline?</h3>
+<p>As chamadas <strong>independentes</strong> a métodos de <code>BreezeCSS</code> são protegidas para evitar <code>ReferenceError</code> caso o runtime não esteja disponível. O restante código do mesmo <code>&lt;script&gt;</code> permanece fora da condição.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">JS</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-js">// Exemplo de saída protegida
+if (typeof BreezeCSS !== 'undefined') {
+  BreezeCSS.init({ tema: { cores: { primaria: '#003' } } });
+}
+
+if (typeof BreezeCSS !== 'undefined') {
+  BreezeCSS.addComponent('card', ['glass', 'p[32px]']);
+}
+
+// Continua a executar sem depender de BreezeCSS:
+Emerge.init();
+window.addEventListener('load', () =&gt; Emerge.refresh());
+</code></pre></div>
+<p>Os guards são identificados por comentários internos e não se acumulam em execuções repetidas. O código de configuração continua disponível no HTML para futuras compilações. A proteção automática <strong>não altera scripts JS externos nem chamadas embutidas em expressões complexas</strong>.</p>
+<h3>Injeção segura e repetível</h3>
+<p>O CLI usa marcadores <code>&lt;!-- breeze:css --&gt;</code> e <code>&lt;!-- breeze:runtime --&gt;</code>, ajusta caminhos relativos em subpastas e evita duplicar referências quando o comando é executado várias vezes. O posicionamento do runtime respeita scripts inline que dependem de <code>BreezeCSS</code>.</p>
+</section><section class="doc-section" id="templates" data-title="Templates, React e Vue"><div class="section-topline"><span class="section-number">12 / 16</span><span class="section-category">Integração</span></div><h2 class="section-title">Classes declaradas em templates também contam</h2>
+<p>Com <code>--tpl</code>, o CLI procura classes em JSX, TSX, Vue, Angular e Svelte, para que as classes detetáveis estaticamente também entrem no CSS. <code>--plugins auto</code> já analisa templates para identificar dependências dos plugins; <code>--tpl</code> força a inclusão de classes em qualquer modo.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">BASH</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npx breezecss-cli --split --plugins auto --tpl --inject
+</code></pre></div>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">JSX</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-jsx">// JSX: classes literais podem ser encontradas durante a análise
+export default function Card() {
+  return &lt;article className="glass rounded[20px] p[32px]"&gt;
+    Conteúdo
+  &lt;/article&gt;;
+}
+</code></pre></div>
+<p>Os plugins com <code>MutationObserver</code> mantêm a capacidade de reagir a elementos adicionados ou removidos por frameworks. Contudo, <strong>classes construídas dinamicamente</strong> — por exemplo, uma string montada a partir de variáveis — podem não ser detetadas pelo analisador estático.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">BASH</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npx breezecss-cli --safelist 'bg[#003]' --safelist 'text[#fff]'
+</code></pre></div>
+<blockquote class="note">
+<p><strong>Para aplicações SPA:</strong> o CLI compila classes encontradas no código do projeto; não executa a tua aplicação React/Vue. Quando a renderização só produz classes em runtime, adiciona-as à safelist ou garante que aparecem de forma estática nos templates.</p>
+</blockquote>
+</section><section class="doc-section" id="watch" data-title="Watch e fluxo de desenvolvimento"><div class="section-topline"><span class="section-number">13 / 16</span><span class="section-category">Integração</span></div><h2 class="section-title">Guarda o HTML. O CLI recompila.</h2>
+<p>O modo <code>--watch</code> observa ficheiros HTML, configuração e motor e volta a compilar quando deteta alterações. Com <code>--inject</code>, as referências geradas também são atualizadas.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">BASH</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npx breezecss-cli --watch --split --plugins auto --inject
+</code></pre></div>
+<p>Um fluxo simples de desenvolvimento:</p>
+<ol>
+<li>Escreve classes BreezeCSS no HTML e define o tema em <code>BreezeCSS.init()</code> ou no <code>breeze.config.js</code>.</li>
+<li>Mantém o terminal com <code>--watch</code> ativo enquanto editas.</li>
+<li>Confirma os ficheiros em <code>css/</code> e <code>js/</code> e os links inseridos no HTML.</li>
+<li>Antes de publicar, executa um build final com <code>--minify</code> e verifica a página num navegador.</li>
+</ol>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">BASH</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npx breezecss-cli --split --plugins auto --inject --minify --verbose
+</code></pre></div>
+<p>Se quiseres diagnosticar classes ignoradas ou problemas de deteção, acrescenta <code>--verbose</code>.</p>
+</section><section class="doc-section" id="estrutura" data-title="Estrutura e motor"><div class="section-topline"><span class="section-number">14 / 16</span><span class="section-category">Integração</span></div><h2 class="section-title">Como o CLI funciona por dentro</h2>
+<p>A estrutura abaixo descreve os ficheiros <strong>internos do pacote npm</strong>, não uma pasta que devas criar no teu site.</p>
+<p>O CLI usa o <code>breeze.bundle.js</code> real numa VM Node.js com um DOM mínimo. Analisa o HTML, descobre as classes e componentes, gera o CSS, adapta seletores dinâmicos para CSS estático e monta os ficheiros de saída.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">TEXT</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-text">breeze/
+├── bin/breeze.js         # entrada CLI
+├── lib/
+│   ├── initscan.js       # descoberta do tema e init
+│   ├── components.js     # addComponent e expansão
+│   ├── plugdep.js        # dependências de plugins
+│   ├── runtime.js        # geração do runtime JS
+│   ├── js-guard.js       # proteção de chamadas inline
+│   ├── htmlscan.js       # leitura e injeção no HTML
+│   ├── cssgen.js         # montagem de CSS
+│   └── engine.js         # VM com o motor original
+├── vendor/breeze.bundle.js
+├── test/
+└── exemplo/
+</code></pre></div>
+<p>O motor é procurado nesta ordem: <code>--engine</code>, bundle presente no projeto (ou pastas superiores), e por último a cópia incluída no pacote npm em <code>vendor/</code>. Não precisas de copiar o bundle para o projeto. Os testes da ferramenta estão incluídos no repositório do código fonte e no pacote publicado.</p>
+</section><section class="doc-section" id="problemas" data-title="Resolução de problemas"><div class="section-topline"><span class="section-number">15 / 16</span><span class="section-category">Ajuda</span></div><h2 class="section-title">Diagnóstico rápido</h2>
+<h3><code>npx breezecss-cli</code> não encontra o executável</h3>
+<p>Confirma se o npm disponibiliza a versão oficial e o binário: <code>npm view breezecss-cli version bin --prefer-online</code>. Se aparecer uma versão temporária como <code>0.0.0-stage</code>, aguarda o processamento da publicação. Se já tens uma instalação local antiga, remove-a e instala <code>breezecss-cli@1.0.0</code>.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">CMD / TERMINAL</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npm view breezecss-cli version bin --prefer-online
+npm uninstall breezecss-cli
+npm install -D breezecss-cli@1.0.0
+npx breeze --version
+</code></pre></div>
+<h3><code>breeze</code> não é reconhecido no Windows</h3>
+<p>O comando <code>breeze</code> está instalado localmente em <code>node_modules/.bin</code>, que não entra automaticamente no <code>PATH</code> do CMD. Executa <code>npx breeze</code> após a instalação local ou cria um script npm. Para executar sem instalar, usa <code>npx breezecss-cli</code>.</p>
+<h3>As cores do tema não aparecem</h3>
+<p>Confirma que o HTML contém <code>BreezeCSS.init({ tema: { cores: ... } })</code> ou que <code>breeze.config.js</code> define as cores. O CLI 1.0.0 dá prioridade ao init dos HTML da raiz e exclui os próprios exemplos. Se tiveres vários temas no mesmo build, lembra-te de que <strong>o tema é global por compilação</strong>.</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">BASH</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-bash">npx breezecss-cli --split --plugins auto --inject --verbose
+</code></pre></div>
+<h3><code>BreezeCSS is not defined</code></h3>
+<p>Usa a versão 1.0.0 com proteção de chamadas inline e recompila com <code>--inject</code>. O guard utiliza <code>typeof BreezeCSS !== 'undefined'</code>, não <code>if (BreezeCSS)</code>. Confirma que o HTML está a carregar o <code>js/&lt;pagina&gt;.runtime.js</code> correto. Scripts JS externos não são modificados automaticamente.</p>
+<h3>Progress e Scrollbar têm a mesma cor do fundo</h3>
+<p>Verifica se <code>progress-track[...]</code> resolve para uma cor válida e se <code>scrollbar-track[...]</code> está definido. Por exemplo:</p>
+<div class="code-window"><div class="code-bar"><i class="dot red"></i><i class="dot yellow"></i><i class="dot green"></i><span class="code-lang">HTML</span><button aria-label="Copiar código" class="copy-btn" title="Copiar código" type="button">Copiar</button></div><pre><code class="language-html">&lt;body class="progress progress-track[#fff] progress-color[#005]
+             scrollbar scrollbar-track[#003] scrollbar-thumb[#ffffff88]"&gt;
+</code></pre></div>
+<h3>Os efeitos de Backgrounds ou Preloader não aparecem</h3>
+<p>Esses plugins dependem do runtime JavaScript. Compila com <code>--plugins auto --inject</code> e confirma que o ficheiro <code>js/&lt;pagina&gt;.runtime.js</code> é carregado. Evita scripts personalizados que escondam o preloader antes da animação de saída.</p>
+<h3>As classes do React não são geradas</h3>
+<p>Usa <code>--tpl</code> e, para classes montadas dinamicamente, <code>--safelist</code>. Confirma também que os ficheiros da aplicação estão dentro do projeto analisado e não foram excluídos.</p>
+<h3>O CLI está a compilar HTML de exemplos</h3>
+<p>Executa o comando na raiz do teu site e limita a seleção com <code>--file</code> ou <code>--exclude</code>. A pasta do próprio CLI é excluída automaticamente, mas outras pastas de exemplos criadas no projeto podem precisar de exclusão explícita.</p>
+</section><section class="doc-section" id="faq" data-title="Perguntas frequentes"><div class="section-topline"><span class="section-number">16 / 16</span><span class="section-category">Ajuda</span></div><h2 class="section-title">Respostas rápidas</h2>
+<h3>Qual é o comando oficial para executar sem instalar?</h3>
+<p><strong><code>npx breezecss-cli --split --plugins auto --inject</code>.</strong> O pacote publicado chama-se <code>breezecss-cli</code>; o seu executável chama-se <code>breeze</code>. Depois de instalar localmente com <code>npm install -D breezecss-cli</code>, também podes usar <code>npx breeze</code>.</p>
+<h3>Preciso de <code>--init index.html</code>?</h3>
+<p><strong>Não.</strong> Na versão 1.0.0, a configuração é detetada automaticamente. <code>--init</code> serve apenas para forçar uma origem específica.</p>
+<h3>Posso continuar a usar <code>BreezeCSS.addComponent()</code>?</h3>
+<p><strong>Sim.</strong> O CLI descobre os componentes e gera as suas regras no CSS. A versão compilada também inclui uma API de compatibilidade quando o runtime está presente.</p>
+<h3>O <code>--inject</code> remove a CDN original?</h3>
+<p><strong>Para referências reconhecidas do Breeze, sim.</strong> Substitui a primeira referência pelo runtime e trata as restantes. Não remove CDNs de bibliotecas diferentes, como Emerge ou Elyra.</p>
+<h3><code>--inject</code> remove o meu JavaScript?</h3>
+<p><strong>Não.</strong> Protege chamadas independentes ao BreezeCSS nos scripts inline e preserva o código das outras bibliotecas. Não altera ficheiros JS externos.</p>
+<h3>Posso publicar sem <code>breeze.bundle.js</code>?</h3>
+<p><strong>Sim.</strong> Publica os CSS e runtimes gerados. O bundle original é necessário ao CLI durante o build, não ao navegador no modo compilado.</p>
+<h3>Posso gerar apenas CSS?</h3>
+<p><strong>Sim.</strong> Usa <code>--no-runtime</code>, sobretudo quando não precisas de efeitos JS. Para Progress, Backgrounds e Preloader, normalmente vais querer o runtime.</p>
+<h3>O que acontece se compilar duas vezes?</h3>
+<p>O <code>--inject</code> foi concebido para ser <strong>idempotente</strong>: atualiza referências e guards sem criar cópias sucessivas.</p>
+</section>
+<footer class="footer"><span>© 2026 BreezeCSS · BreezeCLI 1.0.0 · Documentação em português.</span><span><a href="index.html">BreezeCSS</a> · <a href="https://github.com/bigptlg/breezecss" target="_blank" rel="noopener">GitHub</a> · <a href="https://www.npmjs.com/package/breezecss-cli" target="_blank" rel="noopener">npm</a> · <a href="#topo">Voltar ao topo ↑</a></span></footer>
+</main>
+<aside class="rightbar" aria-label="Nesta página"><div class="rightbar-title">Nesta página</div><a href="#inicio-rapido">Início rápido</a><a href="#modos">Modos de geração</a><a href="#opcoes">Referência de opções</a><a href="#tema">Temas automáticos</a><a href="#plugins">Plugins e runtime</a><a href="#inject">Injeção e guards</a><a href="#problemas">Resolução de problemas</a><div class="right-tip"><strong>Atalho</strong><p>Pesquisa rapidamente uma secção usando <kbd>Ctrl</kbd> + <kbd>K</kbd>.</p></div></aside>
+</div>
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const body=document.body, side=$('#sidebar'), menu=$('#menu-toggle'), overlay=$('#mobile-overlay');
+function closeMenu(){body.classList.remove('menu-open');menu.setAttribute('aria-expanded','false')}
+menu.addEventListener('click',()=>{const open=body.classList.toggle('menu-open');menu.setAttribute('aria-expanded',String(open))});
+overlay.addEventListener('click',closeMenu);
+$$('.nav-link').forEach(a=>a.addEventListener('click',closeMenu));
+const theme=$('#theme-toggle');function themeUI(){theme.textContent=document.documentElement.classList.contains('light')?'☾':'☼'}themeUI();theme.addEventListener('click',()=>{const on=document.documentElement.classList.toggle('light');try{localStorage.setItem('breeze-doc-tema',on?'claro':'escuro')}catch(e){}themeUI()});
+const input=$('#nav-search');function filter(){const q=input.value.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');let shown=0;$$('.nav-link').forEach(a=>{const t=a.textContent.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');const yes=t.includes(q);a.classList.toggle('hide-search',!yes);if(yes)shown++});$$('.nav-group').forEach(g=>g.classList.toggle('hide-search',!g.querySelector('.nav-link:not(.hide-search)')));$('#search-empty').style.display=shown?'none':'block'}input.addEventListener('input',filter);
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();if(innerWidth<=880){body.classList.add('menu-open');menu.setAttribute('aria-expanded','true')}input.focus();input.select()}if(e.key==='Escape'){closeMenu();input.blur()}});
+const navLinks=$$('.nav-link');const sec=$$('.doc-section');const obs=new IntersectionObserver(entries=>{const visible=entries.filter(e=>e.isIntersecting).sort((a,b)=>a.boundingClientRect.top-b.boundingClientRect.top);if(!visible.length)return;const id=visible[0].target.id;navLinks.forEach(a=>{const active=a.getAttribute('href')==='#'+id;a.classList.toggle('active',active);if(active)a.setAttribute('aria-current','location');else a.removeAttribute('aria-current')})},{rootMargin:'-15% 0px -70% 0px',threshold:0});sec.forEach(s=>obs.observe(s));
+$$('.doc-section table').forEach(t=>{const wrap=document.createElement('div');wrap.className='table-scroll';t.parentNode.insertBefore(wrap,t);wrap.appendChild(t)});
+$$('.copy-btn').forEach(b=>b.addEventListener('click',async()=>{const code=b.closest('.code-window').querySelector('code');try{await navigator.clipboard.writeText(code.textContent);b.textContent='Copiado ✓';setTimeout(()=>b.textContent='Copiar',1800)}catch(e){const ta=document.createElement('textarea');ta.value=code.textContent;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();b.textContent='Copiado ✓';setTimeout(()=>b.textContent='Copiar',1800)}}));
+let ticking=false;function progress(){if(ticking)return;ticking=true;requestAnimationFrame(()=>{const total=document.documentElement.scrollHeight-innerHeight;$('#reading-progress').style.width=(total>0?Math.min(100,scrollY/total*100):0)+'%';ticking=false})}window.addEventListener('scroll',progress,{passive:true});progress();
+})();
+</script>
+</body></html>
