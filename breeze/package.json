@@ -1,0 +1,35 @@
+{
+  "name": "breezecss-cli",
+  "version": "1.0.0",
+  "description": "CLI que varre os HTML do projecto e gera o CSS estático do BreezeCSS + o runtime JavaScript dos plugins (usa o motor real breeze.bundle.js). Zero dependências npm.",
+  "bin": {
+    "breeze": "bin/breeze.js"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test \"test/*.test.js\""
+  },
+  "keywords": [
+    "breezecss",
+    "breeze",
+    "css",
+    "cli",
+    "utility-first",
+    "static-site",
+    "runtime",
+    "plugins"
+  ],
+  "author": "Pedro de Oliveira",
+  "license": "MIT",
+  "files": [
+    "bin",
+    "lib",
+    "vendor",
+    "exemplo",
+    "test",
+    "README.md"
+  ]
+}

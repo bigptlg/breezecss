@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="pt">
+<head><meta charset="utf-8"><title>Init compat — teste browser</title><link rel="stylesheet" href="../../css/test_fixtures_init.css" data-breeze-cli="css">
+  <!-- breeze:css -->
+</head>
+<body class="p[20px]">
+  <div id="alvo" class="glass rounded-lg p[16px]">init compatível</div>
+  <script src="../../js/breeze.shared.runtime.js" data-breeze-cli="runtime"></script>
+  <!-- breeze:runtime -->
+  <script>
+    window.BreezeConfig = { plugins: [BreezeGlass], log: false, tema: { cores: { primaria: '#003' } } }
+  </script>
+</body>
+</html>

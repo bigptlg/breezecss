@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="pt">
+<head><meta charset="utf-8"><title>Componentes — teste browser</title><link rel="stylesheet" href="../../css/test_fixtures_componentes.css" data-breeze-cli="css">
+  <!-- breeze:css -->
+</head>
+<body class="bg[#0b1220] text[#e2e8f0] min-h[100vh] p[30px]">
+  <div class="card" id="card1">componente card (glass via membros)</div>
+  <div class="card-refract" id="card2">componente com refracção</div>
+  <script src="../../js/test_fixtures_componentes.runtime.js" data-breeze-cli="runtime"></script>
+  <!-- breeze:runtime -->
+  <script>
+    BreezeCSS.addComponent('card', ['glass', 'glass-dark', 'rounded[16px]', 'p[20px]'])
+    BreezeCSS.addComponent('card-refract', ['card', 'glass-refract[28]'])
+  </script>
+</body>
+</html>

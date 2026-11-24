@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt">
+<head><meta charset="utf-8"><title>SPA dinâmico — teste browser</title><link rel="stylesheet" href="../../css/test_fixtures_spa.css" data-breeze-cli="css">
+  <!-- breeze:css -->
+<script src="../../js/breeze.shared.runtime.js" defer data-breeze-cli="runtime"></script>
+  <!-- breeze:runtime -->
+</head>
+<body class="p[20px]">
+  <div id="raiz"></div>
+  <script>
+    // simula uma SPA: monta/desmonta elementos com classes de plugins
+    window.__montar = function () {
+      const el = document.createElement('section')
+      el.className = 'progress progress-lg progress-color[#22d3ee]'
+      el.id = 'spa-prog'
+      el.getBoundingClientRect = el.getBoundingClientRect.bind(el)
+      document.getElementById('raiz').appendChild(el)
+    }
+    window.__desmontar = function () {
+      const el = document.getElementById('spa-prog')
+      if (el) el.remove()
+    }
+  </script>
+</body>
+</html>

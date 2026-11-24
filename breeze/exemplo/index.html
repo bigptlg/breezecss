@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt" class="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Início — Exemplo Breeze</title><link rel="stylesheet" href="css/index.css" data-breeze-cli="css">
+  <!-- breeze:css -->
+<script src="js/breeze.shared.runtime.js" defer data-breeze-cli="runtime"></script>
+  <!-- breeze:runtime -->
+</head>
+<body class="bg[#0b1220] text[#e2e8f0] font-family[system-ui,_sans-serif]">
+
+  <header class="fixed top[0] w[100%] z[50]">
+    <nav class="glass glass-lg mx[auto] mt[16px] max-w[60rem] rounded-full px[24px] py[12px] flex items-center justify-between">
+      <a class="font-size[1.1rem] fw[700] no-underline text[#7dd3fc]" href="index.html">Breeze</a>
+      <div class="flex gap[20px] items-center">
+        <a class="text[#94a3b8] hover:text[#e2e8f0] transition no-underline" href="index.html">Início</a>
+        <a class="text[#94a3b8] hover:text[#e2e8f0] transition no-underline" href="doc.html">Documentação</a>
+        <a class="text[#94a3b8] hover:text[#e2e8f0] transition no-underline" href="settings.html">Definições</a>
+        <a class="rounded-full px[18px] py[8px] bg[#38bdf8] text[#0b1220] fw[600] hover:bg[#7dd3fc] transition no-underline" href="settings.html">Começar</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="pt[120px] pb[0]">
+    <section class="flex flex-col items-center justify-center min-h[70vh] px[24px] text-center">
+      <span class="rounded-full border[solid_1px_#1e293b] px[14px] py[6px] text[#7dd3fc] bg[rgb(56_189_248/_.08)]">utility-first, em português</span>
+      <h1 class="mt[20px] font-size[clamp(2.4rem,_6vw,_4.5rem)] fw[800] leading[1.05] max-w[42rem]">
+        CSS estático, gerado a partir dos teus HTML
+      </h1>
+      <p class="mt[16px] max-w[38rem] font-size[1.05rem] leading[1.7] text[#94a3b8]">
+        O <b>breeze</b> varre o projecto, extrai as classes do BreezeCSS e gera
+        ficheiros .css prontos a ligar — sem JavaScript no cliente, se assim preferires.
+      </p>
+      <div class="mt[28px] flex gap[14px] flex-wrap justify-center">
+        <a class="rounded-xl px[22px] py[12px] bg-gradient[to_right,#38bdf8,#818cf8] text[#0b1220] fw[700] shadow-lg hover:shadow-xl hover:translate-y[-2px] transition-transform no-underline"
+           href="settings.html">Ver definições</a>
+        <a class="rounded-xl px[22px] py[12px] border[solid_1px_#334155] text[#e2e8f0] hover:bg[rgb(148_163_184/_.1)] transition no-underline"
+           href="#cartao">Transform combinado ↓</a>
+      </div>
+    </section>
+
+    <section id="cartao" class="grid px[24px] gap[24px] max-w[64rem] mx[auto] md:cols[2] pb[80px]">
+      <article class="glass rounded-2xl p[28px] shadow-md hover:shadow-2xl transition">
+        <h2 class="font-size[1.3rem] fw[700]">Build estático</h2>
+        <p class="mt[10px] leading[1.65] text[#cbd5e1]">
+          O CSS gerado cobre classes fixas, valores arbitrários, variantes
+          (hover:, focus:, dark:), breakpoints (sm: md: lg: xl: 2xl:) e plugins.
+        </p>
+        <div class="mt[16px] flex items-center gap[10px]">
+          <span class="inline-block h[36px] w[36px] rounded-full bg[#38bdf8] rotate[45deg] scale[1.15] hover:rotate[135deg] transition-transform"></span>
+          <span class="text[#94a3b8]">rotate + scale combinados no mesmo elemento</span>
+        </div>
+      </article>
+
+      <article class="glass rounded-2xl p[28px] shadow-md hover:shadow-2xl transition">
+        <h2 class="font-size[1.3rem] fw[700]">Plugins incluídos</h2>
+        <p class="mt[10px] leading[1.65] text[#cbd5e1]">
+          glass · dividers · progress · scrollbar · preloader · backgrounds —
+          as classes passam para o CSS gerado.
+        </p>
+        <div class="mt[16px] h[10px] rounded-full bg[#1e293b] mask-fade-r overflow-hidden">
+          <div class="h[100%] w[62%] rounded-full bg-gradient[to_right,#38bdf8,#818cf8]"></div>
+        </div>
+      </article>
+    </section>
+
+    <div class="h[80px] w[100%] bg[#0b1220] divider-wave"></div>
+  </main>
+
+  <footer class="bg[#111c31] pt[40px] pb[60px] px[24px] text-center">
+    <p class="text[#64748b]">Exemplo do breeze CLI — <span class="animate-spin inline-block">↻</span> regenerado com <b>npx breeze</b></p>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt">
+<head>
+<meta charset="utf-8"><title>Plugins — Exemplo Breeze</title>
+  <style>.fixtures-nav{position:fixed;bottom:12px;right:12px;z-index:99999}</style>
+<link rel="stylesheet" href="css/plugins.css" data-breeze-cli="css">
+  <!-- breeze:css -->
+<script src="js/plugins.runtime.js" defer data-breeze-cli="runtime"></script>
+  <!-- breeze:runtime -->
+</head>
+<body class="bg[#0b1220] text[#e2e8f0] min-h[200vh] p[30px]">
+  <nav class="fixtures-nav flex gap[14px] text[#7dd3fc]">
+    <a href="index.html" class="no-underline text[#94a3b8] hover:text[#e2e8f0]">Início</a>
+    <a href="doc.html" class="no-underline text[#94a3b8] hover:text[#e2e8f0]">Documentação</a>
+    <a href="settings.html" class="no-underline text[#94a3b8] hover:text[#e2e8f0]">Definições</a>
+  </nav>
+  <h1 class="font-size[1.6rem] fw[700] mb[20px]">Os seis plugins em acção</h1>
+  <div id="glass-base" class="glass glass-lg rounded-xl p[20px]">glass base</div>
+  <div id="glass-refract" class="glass glass-refract[24] rounded-xl p[20px] mt[20px]">refracção</div>
+  <div id="scroll-el" class="scrollbar scrollbar-thin scrollbar-thumb[#6366f1] h[120px] overflow-auto mt[20px]">
+    <div class="h[400px]">conteúdo com scroll</div>
+  </div>
+  <div id="bg-el" class="custom-bg[topo] h[200px] mt[20px] rounded-xl">fundo animado</div>
+  <div id="prog-el" class="progress progress-lg progress-color[#e11d48] mt[20px]">artigo com progresso</div>
+  <div id="spa-alvo"></div>
+</body>
+</html>

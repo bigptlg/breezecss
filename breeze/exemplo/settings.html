@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Definições — Exemplo Breeze</title><link rel="stylesheet" href="css/settings.css" data-breeze-cli="css">
+  <!-- breeze:css -->
+<script src="js/settings.runtime.js" defer data-breeze-cli="runtime"></script>
+  <!-- breeze:runtime -->
+</head>
+<body class="bg[#f8fafc] text[#0f172a] font-family[system-ui,_sans-serif]">
+
+  <nav class="max-w[52rem] mx[auto] px[24px] pt[20px] flex gap[16px] font-size[0.92rem]">
+    <a class="text[#64748b] hover:text[#0f172a] transition no-underline" href="index.html">Início</a>
+    <a class="text[#64748b] hover:text[#0f172a] transition no-underline" href="doc.html">Documentação</a>
+    <a class="text[#38bdf8] fw[600] no-underline" href="settings.html">Definições</a>
+  </nav>
+
+  <main class="max-w[52rem] mx[auto] px[24px] py[48px]">
+    <h1 class="font-size[2rem] fw[800]">Definições</h1>
+    <p class="mt[8px] text[#64748b]">Página de demonstração para o modo <b>--split</b> do breeze.</p>
+
+    <form class="mt[32px] grid gap[22px] md:cols[2] gap-x[28px]">
+      <label class="block">
+        <span class="block mb[6px] fw[600] font-size[0.92rem]">Nome</span>
+        <input class="w[100%] h[44px] rounded-lg border[solid_1px_#cbd5e1] px[14px] bg[white]
+                      focus:border-color[#38bdf8] focus:outline-none focus:ring[3px] transition"
+               type="text" placeholder="Maria Silva">
+      </label>
+
+      <label class="block">
+        <span class="block mb[6px] fw[600] font-size[0.92rem]">Email</span>
+        <input class="w[100%] h[44px] rounded-lg border[solid_1px_#cbd5e1] px[14px] bg[white]
+                      focus:border-color[#38bdf8] focus:outline-none focus:ring[3px] transition"
+               type="email" placeholder="maria@exemplo.pt">
+      </label>
+
+      <label class="block md:col-span[2]">
+        <span class="block mb[6px] fw[600] font-size[0.92rem]">Tema</span>
+        <select class="w[100%] h[44px] rounded-lg border[solid_1px_#cbd5e1] px[10px] bg[white] cursor-pointer">
+          <option>Claro</option>
+          <option>Escuro (classe .dark no html)</option>
+        </select>
+      </label>
+
+      <fieldset class="md:col-span[2] border-none p[0] m[0]">
+        <legend class="fw[600] mb[10px]">Notificações</legend>
+        <div class="flex flex-col gap[10px]">
+          <label class="flex items-center gap[10px] cursor-pointer">
+            <input type="checkbox" class="h[18px] w[18px]" checked>
+            <span>Email sobre novidades</span>
+          </label>
+          <label class="flex items-center gap[10px] cursor-pointer">
+            <input type="checkbox" class="h[18px] w[18px]">
+            <span>Resumo semanal</span>
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="md:col-span[2] flex gap[12px] justify-end">
+        <button type="reset" class="h[44px] px[20px] rounded-lg border[solid_1px_#cbd5e1] bg[white] hover:bg[#f1f5f9] transition cursor-pointer">Cancelar</button>
+        <button type="submit" class="h[44px] px[22px] rounded-lg bg[#38bdf8] text[white] fw[700] hover:bg[#0ea5e9] active:scale[0.98] transition cursor-pointer">Guardar</button>
+      </div>
+    </form>
+
+    <section class="mt[48px]">
+      <h2 class="font-size[1.2rem] fw[700]">Scroll personalizado (plugin scrollbar)</h2>
+      <div class="mt[12px] h[180px] overflow-auto rounded-xl border[solid_1px_#e2e8f0] p[16px]
+                  scrollbar scrollbar-thin scrollbar-thumb[#94a3b8] scrollbar-track[rgb(0_0_0/_.04)]">
+        <p class="leading[1.7] text[#334155]">…as classes scrollbar-thumb e scrollbar-track são geradas como CSS estático; a barra fica personalizada mesmo sem JavaScript.</p>
+        <p class="mt[10px] leading[1.7] text[#334155]">Faz scroll nesta caixa para ver o trilho e o polegar personalizados.</p>
+        <p class="mt[10px] leading[1.7] text[#334155]">O resto do comportamento dos plugins (progress, preloader, refracção do glass) continua a precisar do breeze.bundle.js em runtime.</p>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

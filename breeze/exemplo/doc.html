@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Documentação — breeze CLI</title><link rel="stylesheet" href="css/doc.css" data-breeze-cli="css">
+  <!-- breeze:css -->
+<script src="js/breeze.shared.runtime.js" defer data-breeze-cli="runtime"></script>
+  <!-- breeze:runtime -->
+</head>
+<body class="bg[#0b1220] text[#e2e8f0] font-family[system-ui,_sans-serif]">
+
+  <header class="fixed top[0] w[100%] z[50]">
+    <nav class="glass glass-lg mx[auto] mt[16px] max-w[60rem] rounded-full px[24px] py[12px] flex items-center justify-between">
+      <a class="font-size[1.1rem] fw[700] no-underline text[#7dd3fc]" href="index.html">Breeze</a>
+      <div class="flex gap[20px] items-center">
+        <a class="text[#94a3b8] hover:text[#e2e8f0] transition no-underline" href="index.html">Início</a>
+        <a class="text[#7dd3fc] fw[600] no-underline" href="doc.html">Documentação</a>
+        <a class="rounded-full px[18px] py[8px] bg[#38bdf8] text[#0b1220] fw[600] hover:bg[#7dd3fc] transition no-underline" href="settings.html">Começar</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="pt[120px] pb[80px] max-w[64rem] mx[auto] px[24px]">
+
+    <section class="text-center">
+      <span class="rounded-full border[solid_1px_#1e293b] px[14px] py[6px] text[#7dd3fc] bg[rgb(56_189_248/_.08)]">doc.html — documentação viva</span>
+      <h1 class="mt[20px] font-size[clamp(2rem,_5vw,_3.4rem)] fw[800] leading[1.1]">Documentação do breeze</h1>
+      <p class="mt[14px] max-w[40rem] mx[auto] font-size[1.05rem] leading[1.7] text[#94a3b8]">
+        Esta página é ela própria uma demonstração: todo o estilo vem de classes
+        do Breeze extraídas daqui pelo <b>breeze --split</b>.
+      </p>
+    </section>
+
+    <section class="mt[40px] glass rounded-2xl p[28px]">
+      <h2 id="indice" class="font-size[1.3rem] fw[700]">Índice</h2>
+      <ol class="mt[12px] leading[2] text[#cbd5e1]">
+        <li><a class="text[#7dd3fc] hover:underline no-underline" href="#instalacao">Instalação</a></li>
+        <li><a class="text[#7dd3fc] hover:underline no-underline" href="#inicio-rapido">Início rápido</a></li>
+        <li><a class="text[#7dd3fc] hover:underline no-underline" href="#modos">Modos de saída</a></li>
+        <li><a class="text[#7dd3fc] hover:underline no-underline" href="#opcoes">Todas as opções</a></li>
+        <li><a class="text[#7dd3fc] hover:underline no-underline" href="#inject">Injecção do &lt;link&gt;</a></li>
+        <li><a class="text[#7dd3fc] hover:underline no-underline" href="#watch">Modo watch</a></li>
+        <li><a class="text[#7dd3fc] hover:underline no-underline" href="#prefix">Prefixo de classes</a></li>
+        <li><a class="text[#7dd3fc] hover:underline no-underline" href="#tema">Tema e breeze.config.js</a></li>
+        <li><a class="text[#7dd3fc] hover:underline no-underline" href="#componentes">Componentes (addComponent)</a></li>
+        <li><a class="text[#7dd3fc] hover:underline no-underline" href="#avancado">Safelist, plugins e motor</a></li>
+      </ol>
+    </section>
+
+    <section id="instalacao" class="mt[32px]">
+      <h2 class="font-size[1.6rem] fw[800]">1. Instalação</h2>
+      <p class="mt[10px] leading[1.7] text[#cbd5e1]">
+        O breeze não tem dependências — só Node.js 18 ou superior. Instala localmente
+        no projecto e usa-o via <b>npx</b>:
+      </p>
+      <pre class="mt[14px] rounded-xl bg[#0f172a] border[solid_1px_#1e293b] p[16px_20px] font-family[monospace] font-size[0.92rem] text[#a5f3fc] overflow-auto">npm install --save-dev breeze
+npx breeze</pre>
+      <p class="mt[10px] leading[1.7] text[#cbd5e1]">
+        Também funciona sem instalação alguma, correndo directamente o <b>bin/breeze.js</b>
+        dentro da pasta do pacote.
+      </p>
+    </section>
+
+    <section id="inicio-rapido" class="mt[32px]">
+      <h2 class="font-size[1.6rem] fw[800]">2. Início rápido</h2>
+      <p class="mt[10px] leading[1.7] text[#cbd5e1]">
+        Três passos e o CSS está pronto: escreve HTML com classes do Breeze,
+        corre o comando e liga o ficheiro gerado.
+      </p>
+      <pre class="mt[14px] rounded-xl bg[#0f172a] border[solid_1px_#1e293b] p[16px_20px] font-family[monospace] font-size[0.92rem] text[#a5f3fc] overflow-auto"># 1. varre todos os **/*.html do projecto
+npx breeze
+
+# 2. resultado: css/breeze.css com tudo o que foi usado
+#    liga-o nas páginas:
+&lt;link rel="stylesheet" href="css/breeze.css"&gt;
+
+# 3. reconstrói automaticamente ao guardar
+npx breeze --watch --inject</pre>
+    </section>
+
+    <section id="modos" class="mt[32px]">
+      <h2 class="font-size[1.6rem] fw[800]">3. Modos de saída</h2>
+      <div class="mt[14px] grid gap[16px] md:cols[2]">
+        <article class="rounded-xl bg[#0f172a] border[solid_1px_#1e293b] p[20px]">
+          <h3 class="fw[700] text[#7dd3fc]">Ficheiro único (omissão)</h3>
+          <p class="mt[8px] font-size[0.95rem] leading[1.65] text[#cbd5e1]">
+            Todas as páginas contribuem para um só <b>css/breeze.css</b>.
+            Ideal para sites pequenos e para cache partilhada entre páginas.
+          </p>
+        </article>
+        <article class="rounded-xl bg[#0f172a] border[solid_1px_#1e293b] p[20px]">
+          <h3 class="fw[700] text[#7dd3fc]">--split (por página)</h3>
+          <p class="mt[8px] font-size[0.95rem] leading[1.65] text[#cbd5e1]">
+            Gera <b>css/index.css</b>, <b>css/settings.css</b>, <b>css/doc.css</b>…
+            cada página recebe apenas as classes de que precisa.
+          </p>
+        </article>
+        <article class="rounded-xl bg[#0f172a] border[solid_1px_#1e293b] p[20px]">
+          <h3 class="fw[700] text[#7dd3fc]">--file (página única)</h3>
+          <p class="mt[8px] font-size[0.95rem] leading[1.65] text[#cbd5e1]">
+            Processa só o HTML indicado — útil em pipelines que constroem
+            página a página. Repetível: <b>--file a.html --file b.html</b>.
+          </p>
+        </article>
+        <article class="rounded-xl bg[#0f172a] border[solid_1px_#1e293b] p[20px]">
+          <h3 class="fw[700] text[#7dd3fc]">Combinações</h3>
+          <p class="mt[8px] font-size[0.95rem] leading[1.65] text[#cbd5e1]">
+            <b>npx breeze --split --minify -o dist/css</b> — saída minificada
+            numa pasta de distribuição, pronta a publicar.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section id="opcoes" class="mt[32px]">
+      <h2 class="font-size[1.6rem] fw[800]">4. Todas as opções</h2>
+      <div class="mt[14px] overflow-auto">
+        <table class="w[100%] border-collapse font-size[0.92rem]">
+          <thead>
+            <tr>
+              <th class="text-left p[10px_14px] border[solid_1px_#1e293b] bg[#0f172a] text[#7dd3fc] fw[700]">Opção</th>
+              <th class="text-left p[10px_14px] border[solid_1px_#1e293b] bg[#0f172a] text[#7dd3fc] fw[700]">Efeito</th>
+            </tr>
+          </thead>
+          <tbody class="text[#cbd5e1]">
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">-o, --out</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Pasta de saída (omissão: css/)</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">-n, --name</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Nome do CSS único (omissão: breeze)</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--split</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Um CSS por página HTML</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">-f, --file</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Processa apenas este(s) HTML (repetível)</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--include / --exclude</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Globs de inclusão/exclusão (repetíveis)</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">-p, --prefix</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Prefixo das classes, ex.: bz-</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--minify</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">CSS minificado numa linha só</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--no-reset / --no-smooth</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Sem reset / sem scroll-behavior</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--safelist</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Força classes mesmo sem uso no HTML</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--plugins / --no-plugins</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Regista plugins (glass, dividers, progress, scrollbar, preloader, backgrounds)</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--all-plugin-css</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">CSS completo de todos os plugins, mesmo sem uso nas páginas</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--tema</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Tema igual ao BreezeCSS.init: JSON ou secção.nome=valor (repetível)</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--config</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Ficheiro de config (por omissão breeze.config.js)</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--engine</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Caminho alternativo do breeze.bundle.js</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--inject</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Insere o &lt;link&gt; nos HTML (idempotente)</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">-w, --watch</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Reconstrói ao guardar</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--clean</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Apaga a pasta de saída antes de gerar</td>
+            </tr>
+            <tr>
+              <td class="p[10px_14px] border[solid_1px_#1e293b] font-family[monospace] text[#a5f3fc]">--verbose</td>
+              <td class="p[10px_14px] border[solid_1px_#1e293b]">Páginas, classes desconhecidas e avisos</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="inject" class="mt[32px]">
+      <h2 class="font-size[1.6rem] fw[800]">5. Injecção do &lt;link&gt;</h2>
+      <p class="mt[10px] leading[1.7] text[#cbd5e1]">
+        Com <b>--inject</b>, o breeze insere ou actualiza o &lt;link rel="stylesheet"&gt;
+        em cada HTML, com caminho relativo correcto mesmo com <b>--split</b> e
+        <b>-o</b> personalizada. A marca <b>&lt;!-- breeze:css --&gt;</b> torna a
+        operação idempotente: correr duas vezes não duplica nada.
+      </p>
+      <pre class="mt[14px] rounded-xl bg[#0f172a] border[solid_1px_#1e293b] p[16px_20px] font-family[monospace] font-size[0.92rem] text[#a5f3fc] overflow-auto">&lt;!-- breeze:css --&gt;
+&lt;link rel="stylesheet" href="css/doc.css"&gt;
+&lt;!-- /breeze:css --&gt;</pre>
+    </section>
+
+    <section id="watch" class="mt[32px]">
+      <h2 class="font-size[1.6rem] fw[800]">6. Modo watch</h2>
+      <p class="mt[10px] leading[1.7] text[#cbd5e1]">
+        <b>npx breeze --watch --inject</b> mantém-se activo e reconstrói o CSS
+        assim que qualquer HTML monitorizado muda — as novas classes aparecem
+        no ficheiro gerado no instante seguinte. Combina bem com a extensão
+        Live Server do VS Code para um fluxo utility-first sem build step manual.
+      </p>
+    </section>
+
+    <section id="prefix" class="mt[32px]">
+      <h2 class="font-size[1.6rem] fw[800]">7. Prefixo de classes</h2>
+      <p class="mt[10px] leading[1.7] text[#cbd5e1]">
+        <b>-p bz-</b> gera <b>.bz-mt[16px]</b> em vez de <b>.mt[16px]</b> —
+        evita colisões com outras frameworks no mesmo projecto. As variantes
+        (hover:, md:, dark:) e os transform combinados são prefixados com
+        segurança; regras de transform sem função gerada pelo motor são
+        substituídas por versões correctas.
+      </p>
+    </section>
+
+    <section id="tema" class="mt[32px]">
+      <h2 class="font-size[1.6rem] fw[800]">8. Tema e breeze.config.js</h2>
+      <p class="mt[10px] leading[1.7] text[#cbd5e1]">
+        Se o teu projecto chama <b>BreezeCSS.init</b> no browser com tema e plugins,
+        o CLI exporta exactamente o mesmo — de duas formas: <b>automaticamente</b>,
+        procurando o init nos .js/.mjs/.cjs e nos &lt;script&gt; dos .html do projecto
+        (os identificadores BreezeGlass, BreezePreloader… são convertidos para os
+        nomes certos), ou com um ficheiro de config explícito.
+      </p>
+      <pre class="mt[14px] rounded-xl bg[#0f172a] border[solid_1px_#1e293b] p[16px_20px] font-family[monospace] font-size[0.92rem] text[#a5f3fc] overflow-auto">// breeze.config.js (opcional) — o mesmo objecto do BreezeCSS.init
+module.exports = {
+  log: false,
+  plugins: 'all',
+  allPluginCss: true,
+  tema: {
+    cores: { primaria: '#003', secundaria: '#005', tercearia: '#fff' },
+  },
+}</pre>
+      <p class="mt[12px] leading[1.7] text[#cbd5e1]">
+        Resultado: <b>bg[primaria]</b> gera <b>background: #003</b> e o CSS inclui
+        <b>:root</b> com <b>--breeze-primaria</b> e companhia. Sem ficheiro de config,
+        também dá pela linha de comandos:
+      </p>
+      <pre class="mt[14px] rounded-xl bg[#0f172a] border[solid_1px_#1e293b] p[16px_20px] font-family[monospace] font-size[0.92rem] text[#a5f3fc] overflow-auto">npx breeze --tema cores.primaria=#003 --tema cores.secundaria=#005
+npx breeze --tema '{"cores":{"primaria":"#003"}}' --all-plugin-css</pre>
+      <div class="mt[16px] rounded-xl bg[rgb(56_189_248/_.06)] border[solid_1px_#1e293b] p[16px_20px]">
+        <p class="font-size[0.92rem] leading[1.65] text[#94a3b8]">
+          <b class="text[#7dd3fc]">Nota:</b> os valores do tema resolvem nas classes de
+          valor simples — bg[primaria], text[secundaria], border-color[secundaria],
+          p[nome] com espacamento, font-family[nome] com fontes. O shorthand
+          border[solid_2px_secundaria] não resolve nomes do tema (limitação do motor):
+          usa border[solid_2px] + border-color[secundaria].
+        </p>
+        <p class="mt[10px] font-size[0.92rem] leading[1.65] text[#94a3b8]">
+          <b class="text[#7dd3fc]">Plugins em runtime:</b> o CSS de suporte dos plugins sai
+          com --all-plugin-css, mas as peças criadas em runtime — o fundo do
+          custom-bg, o DOM do preloader, a barra do progress e a refracção do glass —
+          continuam a precisar do breeze.bundle.js + init na página.
+        </p>
+      </div>
+    </section>
+
+    <section id="componentes" class="mt[32px]">
+      <h2 class="font-size[1.6rem] fw[800]">9. Componentes (addComponent)</h2>
+      <p class="mt[10px] leading[1.7] text[#cbd5e1]">
+        Componentes registados no browser com <b>BreezeCSS.addComponent("btn", […])</b>
+        são descobertos automaticamente nos &lt;script&gt; inline dos HTML processados e
+        nos ficheiros .js do projecto — nada é executado, a extração é textual. O CSS
+        exportado passa a incluir <b>.btn { … }</b>, as variantes
+        <b>.btn:hover { transform: … }</b> e as @media dos membros com breakpoints.
+      </p>
+      <pre class="mt[14px] rounded-xl bg[#0f172a] border[solid_1px_#1e293b] p[16px_20px] font-family[monospace] font-size[0.92rem] text[#a5f3fc] overflow-auto">&lt;script&gt;
+  BreezeCSS.addComponent("btn", [
+    "no-underline", "text[tercearia]", "p[15px]", "inline-block",
+    "rounded[10px]", "hover:translate-x[3px]", "hover:translate-y[-3px]",
+    "rounded-full",
+  ]);
+&lt;/script&gt;</pre>
+      <p class="mt[12px] leading[1.7] text[#cbd5e1]">
+        Também podem ficar no <b>breeze.config.js</b> com a chave
+        <b>componentes</b> (alias <b>components</b>) — útil quando os componentes
+        vêm de um JS externo que o CLI não vê:
+      </p>
+      <pre class="mt[14px] rounded-xl bg[#0f172a] border[solid_1px_#1e293b] p[16px_20px] font-family[monospace] font-size[0.92rem] text[#a5f3fc] overflow-auto">// breeze.config.js
+module.exports = {
+  componentes: {
+    btn:  ['no-underline', 'p[15px]', 'hover:translate-x[3px]'],
+    card: ['glass', 'glass-md', 'rounded[20px]', 'md:p[64px]'],
+  },
+}</pre>
+      <div class="mt[16px] rounded-xl bg[rgb(56_189_248/_.06)] border[solid_1px_#1e293b] p[16px_20px]">
+        <p class="font-size[0.92rem] leading[1.65] text[#94a3b8]">
+          <b class="text[#7dd3fc]">Notas:</b> em --split, cada página só traz os
+          componentes que usa. Os nomes registados deixam de aparecer na lista
+          “classes não geradas”. Com --prefix, os membros são prefixados
+          automaticamente (p[15px] → bz-p[15px]) e o componente também responde
+          a bz-btn. O relatório mostra “componentes exportados: …” com a origem.
+        </p>
+      </div>
+    </section>
+
+    <section id="avancado" class="mt[32px]">
+      <h2 class="font-size[1.6rem] fw[800]">10. Safelist, plugins e motor</h2>
+      <ul class="mt[10px] leading[1.9] text[#cbd5e1]">
+        <li><b>--safelist p[99px],hidden</b> — inclui classes mesmo que nenhum HTML as use (conteúdo dinâmico em JS/PHP).</li>
+        <li><b>--plugins glass,dividers</b> — regista só estes plugins; <b>--no-plugins</b> desliga todos. O CSS dos plugins não usados é filtrado fora.</li>
+        <li><b>--engine ./breeze.bundle.js</b> — resolve o motor por esta ordem: caminho dado, projecto, pastas acima, cópia incluída em <b>vendor/</b>.</li>
+        <li><b>--verbose</b> — mostra as páginas processadas e qualquer classe não reconhecida, ideal para apanhar gralhas.</li>
+      </ul>
+    </section>
+
+    <section class="mt[40px] glass rounded-2xl p[24px] flex items-center gap[16px] justify-between flex-wrap">
+      <p class="leading[1.6] text[#cbd5e1]">
+        Pronto a experimentar? Corre <b class="text[#a5f3fc]">npx breeze --split</b>
+        dentro deste exemplo e abre as páginas — o CSS já vem gerado em <b>css/</b>.
+      </p>
+      <a class="rounded-full px[22px] py[10px] bg-gradient[to_right,#38bdf8,#818cf8] text[#0b1220] fw[700] hover:translate-y[-2px] transition-transform no-underline" href="index.html">Voltar ao início</a>
+    </section>
+
+    <footer class="mt[48px] text-center font-size[0.85rem] text[#64748b]">
+      breeze v1.1.0 · documentação gerada à mão, CSS gerado pelo breeze · MIT
+    </footer>
+  </main>
+</body>
+</html>
