@@ -1,141 +1,129 @@
-# Breeze (BreezeCSS) — DOC.AI.md
+# BreezeCSS 2.3.0 — BREEZE.DOC.AI.md
 
-> **Público-alvo: modelos de IA / agentes de código.** Substitui a leitura do código-fonte (~3,4 mil linhas).
-> Versões documentadas: **BreezeCSS 2.2.5** · BreezeGlass 1.0.0 · BreezeDividers 1.2.0 · BreezeProgress 1.0.0 · BreezeScrollbar 1.0.0.
-> Tudo aqui foi extraído do código do bundle. Se algo contradisser seu palpite (especialmente seu conhecimento de Tailwind), **este documento vence**. Não invente classes: use apenas as listadas ou a sintaxe `prefixo[valor]` com os prefixos da seção 4.
-
----
-
-## 0. TL;DR — as regras que mais quebram código gerado por IA
-
-1. **Breeze é um motor CSS utilitário em runtime (JIT no navegador).** Ele lê o atributo `class` de todos os elementos, gera as regras CSS e as insere num `<style id="breeze-v2-estilos">`. Não há arquivo `.css` para linkar.
-2. **NÃO é Tailwind.** Não existe escala (`p-4`, `text-lg`, `w-full`, `h-screen`, `text-gray-500`, `container`). Quase tudo é **valor arbitrário com colchetes e unidade explícita**: `p[16px]`, `w[100%]`, `h[100vh]`, `text[#6b7280]`, `text-size[1.125rem]`.
-3. **Unidade sempre explícita.** `p[16]` gera `padding: 16` (inválido). Use `p[16px]` / `p[1rem]`. Exceções sem unidade: `z[10]`, `opacity[0.5]`, `grow[1]`, `order[2]`, `cols[3]`, `col-span[2]`, `fw[700]`, `leading[1.5]`, `scale[1.1]`.
-4. **`_` vira espaço dentro dos colchetes:** `border[1px_solid_#ccc]`, `shadow[0_4px_12px_rgba(0,0,0,.2)]`, `w[calc(100%_-_20px)]`. Exceto dentro de `url()`, `var()`, `env()`, `attr()`, `src()` (aí `_` é literal).
-5. **Cor de texto é `text[...]`; tamanho de fonte é `text-size[...]`.** `text[center]` está errado (use `text-center`).
-6. **Ordem das classes importa** (não há ordenação do CSS gerado; vence a regra inserida por último): escreva **sempre a classe base ANTES das variantes/breakpoints** — `w[100%] md:w[50%]`, nunca o contrário. Veja seção 6.3.
-7. **Plugins (Glass, Dividers, Progress, Scrollbar) estão embutidos no bundle mas NÃO são registrados automaticamente neste bundle.** Você deve registrá-los (seção 2.2). Sem registro, `glass`, `divider-wave`, `progress`, `scrollbar` etc. não fazem nada (sem erro).
-8. **Nunca chame `BreezeCSS.addComponent/addMapping/addVariant/addFixedClass/...` antes do `init`.** Chamar antes força um init padrão e **ignora o `BreezeConfig`** (seção 2.3).
-9. **Reset global vem ligado:** `* { margin:0; padding:0 }` + `box-sizing` herdado. Desligue com `reset: false`.
-10. **FOUC:** o CSS só existe depois do JS rodar. Para produção sem flash, gere CSS estático (seção 8.4).
+> **Referência técnica para agentes de IA, geradores de código e assistentes de programação.**
+> **Fonte de verdade consultada:** `vendor/breeze.bundle.js` do pacote BreezeCSS 2.3.0 + BreezeCLI 1.0.3 (ficheiros de distribuição fornecidos pelo projecto). A documentação HTML SPA é material complementar.
+> **Plugins no bundle:** BreezeGlass **1.0.0**, BreezeDividers **1.2.0**, BreezeProgress **1.0.0**, BreezeScrollbar **1.0.0**, BreezePreloader **1.6.0**, BreezeBackgrounds **1.5.0**.
+> **Regra principal:** não inferir API de Tailwind. Usar os prefixos/classes desta referência ou confirmar directamente no bundle da versão instalada. O bundle actual, não os módulos históricos `core/`, é a referência do motor.
 
 ---
 
-## 1. Arquivos e globais
+## 0. Contrato de geração — ler antes de produzir HTML
 
-| Item | URL | Observação |
-|---|---|---|
-| Bundle (CDN oficial) | `https://cdn.pedrodeoliveira.me/js/breeze.bundle.js` | BreezeCSS + 4 plugins num arquivo. **Único arquivo necessário.** Não há CSS separado. |
-| GitHub | `bigptlg/breezecss` (`https://github.com/bigptlg/breezecss`) | Código-fonte. |
-
-**Use sempre a CDN oficial** (`cdn.pedrodeoliveira.me`): as versões novas são publicadas lá primeiro.
-
-**Alternativa: jsDelivr** (direto do repositório `bigptlg/breezecss`, sem fork):
-```
-https://cdn.jsdelivr.net/gh/bigptlg/breezecss@latest/js/breeze.bundle.js
-```
-O jsDelivr guarda cache e pode demorar a refletir uma versão nova. Para fixar uma versão, ela vai **depois do repositório** (`gh/bigptlg/breezecss@<versão>/js/breeze.bundle.js`, exige a tag correspondente no GitHub), nunca no fim do nome do arquivo. Em produção prefira a CDN oficial ou uma versão fixada em vez de `@latest`.
-
-Globais criadas pelo bundle: `BreezeCSS` (motor), `BreezeGlass`, `BreezeDividers`, `BreezeProgress`, `BreezeScrollbar` (plugins). Auto-init: o bundle chama `BreezeCSS.init(window.BreezeConfig || {})` sozinho (em `DOMContentLoaded` se o documento ainda estiver carregando; imediatamente se não).
+1. **Breeze é um motor CSS de valores explícitos**, com duas estratégias: runtime (JIT no browser) ou CSS compilado pelo BreezeCLI. Não é apenas um utilitário para protótipos, nem uma cópia de Tailwind.
+2. **Classes arbitrárias:** `p[16px]`, `w[100%]`, `bg[#003]`, `text[#fff]`, `text-size[18px]`. Não gerar `p-4`, `w-full`, `h-screen`, `text-gray-500`, `bg-blue-500` ou outras classes de escala Tailwind.
+3. **Unidades:** dimensões precisam de unidade CSS (`p[16px]`, não `p[16]`). Valores sem unidade são válidos quando a propriedade permite: `opacity[0.5]`, `z[10]`, `cols[3]`, `fw[700]`, `scale[1.1]`.
+4. **Underscore:** `_` é convertido em espaço dentro de `[...]`, incluindo `calc()`, `rgb()`, gradientes; é preservado em `url()`, `var()`, `env()`, `attr()`, `src()`.
+5. **`text[...]` define cor; `text-size[...]` define tamanho.** `text[center]` não alinha; usa `text-center`.
+6. **Variantes 2.3.0:** `focus-within`, `group-hover`, `group-focus-within`, `peer-hover/focus/checked/disabled/invalid`, `max-*`, `motion-reduce`, `motion-safe`, `print` são nativas, além de `hover`, `focus`, `dark`, etc. **Não** inventar `peer-placeholder-shown`, `group/foo`, `aria-*` ou `data-*`.
+7. **Cascata:** a versão 2.3.0 ordena regras base, `max-*` decrescente, `min-*` crescente, movimento e impressão. A antiga regra «a ordem das classes determina a precedência entre breakpoints» está **obsoleta**. Especificidade CSS e `!important` continuam válidos.
+8. **Seis plugins no bundle, mas não activados automaticamente:** registar explicitamente em `BreezeConfig.plugins` ou com `BreezeCSS.use(...)` após init. `glass`, `progress`, `preloader`, `custom-bg[...]` exigem o plugin correspondente.
+9. **`transition[...]` não existe no mapa de prefixos:** usar `transition duration[200ms]`, `ease[ease]` ou `transition-prop[all_0.2s_ease]`.
+10. **`prefix: 'bz-'` foi corrigido:** prefixa também processadores e transforms; por exemplo `hover:bz-blur[4px]`, `bz-cols[3]`, `bz-rotate[45deg]`. Não prefixar os qualificadores (`hover:`) nem os marcadores relacionais `.group`/`.peer`.
+11. **Acessibilidade:** `scrollSmooth` automático só actua sob `prefers-reduced-motion: no-preference`. `motion-reduce:` e `motion-safe:` não requerem JavaScript adicional.
+12. **Não assumir CSS novo no runtime compilado:** JSX/Vue/Angular/Svelte podem ser analisados estaticamente pelo CLI, mas classes construídas dinamicamente precisam de safelist ou novo build.
 
 ---
 
-## 2. Instalação
+## 1. Distribuição e versões
 
-### 2.1 Mínimo (só o motor, sem plugins)
+| Recurso | Valor |
+|---|---|
+| Motor actual | BreezeCSS **2.3.0** |
+| Bundle IIFE | `breeze.bundle.js` — ficheiro único para `<script src>` |
+| CDN do projecto | `https://cdn.pedrodeoliveira.me/js/breeze.bundle.js` (confirmar publicação da versão 2.3.0 antes de afirmar que a CDN a serve) |
+| Repositório | https://github.com/bigptlg/breezecss |
+| Documentação | https://bigptlg.github.io/breezecss/ |
+| CLI | `breezecss-cli` **1.0.3** · Node.js ≥18 · zero dependências npm de runtime |
+| Motor do CLI | `vendor/breeze.bundle.js` e `breeze_bundle.js` no pacote de distribuição |
+| Licença | MIT |
+
+**Não misturar versões:** BreezeCSS 2.3.0 é a versão do motor; BreezeCLI 1.0.3 é a versão do compilador. Os seis plugins têm versões próprias.
+
+A documentação HTML `index.html` e `cli.html` é apresentada como duas SPAs independentes, com navegação por secções sem recarregamento, URLs com `#fragmento` e histórico. **Isto é uma característica da documentação, não uma dependência de execução do BreezeCSS.**
+
+## 2. Instalação, init e plugins
+
+### 2.1 Runtime mínimo
+
 ```html
-<script src="https://cdn.pedrodeoliveira.me/js/breeze.bundle.js"></script>   <!-- síncrono; sem defer/async/type=module -->
-<!-- pronto: classes já funcionam em todo o documento e em elementos inseridos depois -->
-<div class="flex items-center gap[16px] p[24px] bg[#0f172a] text[#fff] rounded-lg">Olá</div>
+<script src="https://cdn.pedrodeoliveira.me/js/breeze.bundle.js"></script>
+<div class="p[24px] bg[#0f172a] text[#fff] rounded-xl">Olá BreezeCSS</div>
 ```
 
-### 2.2 Com plugins (padrão recomendado)
-Registre os plugins **depois do bundle e antes do `DOMContentLoaded`**, via `window.BreezeConfig`. Snippet universal (funciona mesmo se o documento já terminou de carregar):
+O bundle define `window.BreezeCSS`, os seis objectos globais de plugin e agenda o auto-init em `DOMContentLoaded` se o documento ainda estiver a carregar. Se já estiver pronto, inicializa imediatamente. Em produção, recomenda-se verificar a versão efectivamente publicada na CDN.
+
+### 2.2 Activação recomendada de plugins
+
+```html
+<!-- No <head>, carregamento síncrono, antes do DOMContentLoaded: -->
+<script src="https://cdn.pedrodeoliveira.me/js/breeze.bundle.js"></script>
+<script>
+  window.BreezeConfig = {
+    log: false,
+    plugins: [
+      BreezeGlass, BreezeDividers, BreezeProgress,
+      BreezeScrollbar, BreezePreloader, BreezeBackgrounds
+    ]
+  };
+</script>
+```
+
+Regista apenas os plugins usados. `BreezeConfig.plugins` deve existir **antes do auto-init**. Se o documento já inicializou, usa `BreezeCSS.use(BreezeGlass)` etc. Evita `BreezeCSS.add*` antes do init: o motor pode fazer uma inicialização implícita com config padrão. Não é necessário carregar scripts individuais dos plugins quando se usa o bundle completo.
+
+Para pré-carregamento de página, `BreezePreloader.iniciar()` pode ser chamado antes do init para evitar flash, depois de o bundle definir o global. A inicialização antecipada do overlay é opcional.
+
+### 2.3 Configuração (chaves verificadas)
+
+| Chave | Padrão | Efeito |
+|---|---|---|
+| `log` | `true` | Mensagens no console (`false` silencia) |
+| `debug` | `false` | Log detalhado |
+| `reset` | `true` | Reset global de margin/padding e box-sizing |
+| `scrollSmooth` | `true` | `scroll-behavior: smooth` apenas com `no-preference` |
+| `tema` | vazio | `{ cores, espacamento, fontes }` |
+| `breakpoints` | sm 640 · md 768 · lg 1024 · xl 1280 · 2xl 1536 px | Extensível |
+| `variantes` | ver secção 6 | Selectores CSS personalizados |
+| `classesFixas` | internas | Classes adicionais `{nome: 'prop: valor'}` |
+| `mapaPropriedades` | interno | Prefixos arbitrários `{prefixo: 'propriedade'}` |
+| `processadoresEspeciais` | internos | Processadores `(valor) => valorCSS` |
+| `regrasGlobais` | reset interno | Regras globais adicionais |
+| `plugins` | `[]` | Lista de objectos plugin |
+| `safelist` | `[]` | Pré-gerar classes |
+| `prefix` | `''` | Prefixar classes fixas, mapeamentos, processadores e transforms |
 
 ```html
 <script src="https://cdn.pedrodeoliveira.me/js/breeze.bundle.js"></script>
 <script>
-  (function () {
-    var plugins = [BreezeGlass, BreezeDividers, BreezeProgress, BreezeScrollbar]; // só os que usar
-    if (document.readyState === "loading") {
-      // init ainda não rodou: o bundle lerá BreezeConfig no DOMContentLoaded
-      window.BreezeConfig = Object.assign(window.BreezeConfig || {}, { plugins: plugins });
-    } else {
-      // init já rodou: aplique direto
-      plugins.forEach(function (p) { BreezeCSS.use(p); });
-    }
-  })();
+  window.BreezeConfig = {
+    tema: {
+      cores: { primario: '#00ee99', fundo: '#0b1220' },
+      espacamento: { secao: '24px' },
+      fontes: { corpo: 'Inter, sans-serif' }
+    },
+    breakpoints: { tablet: '900px' },
+    safelist: ['hidden', 'tablet:p[32px]'],
+    plugins: [BreezeBackgrounds]
+  };
 </script>
 ```
-Regras:
-- O `<script>` do bundle deve ser **síncrono** (sem `defer`/`async`/`type="module"`), para o registro rodar antes do init. Se precisar carregar de outra forma, use o ramo `else` (`BreezeCSS.use`).
-- **Nunca** chame `BreezeCSS.use(...)` enquanto `document.readyState === "loading"`: o init posterior recria a config e **descarta** o plugin.
-- Registrar o mesmo plugin duas vezes é inofensivo; registrar a instância padrão **e** uma criada com `.criar()` do mesmo plugin cria dois motores (evite).
-- O comentário final do arquivo do bundle fala em "registar o plugin antes do init", mas **não há código de registro** nele. Se a sua versão publicada na CDN já registrar sozinha, o snippet acima continua seguro.
 
-### 2.3 Configuração e ordem de chamadas (`BreezeConfig`)
-Defina `window.BreezeConfig = {...}` **antes do init** (veja 2.2: depois do bundle, antes de `DOMContentLoaded`). Chaves aceitas (todas opcionais):
+**Importante:** a opção `reset: false` remove o reset; não desliga o resto do motor. `regrasGlobais` são aplicadas na inicialização quando `reset` está activo. Os valores de tema são substituídos quando o valor completo coincide com a chave (`bg[primario]`, não `border[1px_solid_primario]`).
 
-| Chave | Padrão | Função |
-|---|---|---|
-| `log` | `true` | `false` silencia o console. |
-| `debug` | `false` | `true` loga cada regra gerada. |
-| `reset` | `true` | Injeta `* {margin:0;padding:0}`, `html{box-sizing:border-box}`, `*,*::before,*::after{box-sizing:inherit}`. |
-| `scrollSmooth` | `true` | Injeta `html { scroll-behavior: smooth }`. |
-| `tema` | `{}` | `{ cores, espacamento, fontes }` — veja 8.1. |
-| `breakpoints` | sm 640px · md 768px · lg 1024px · xl 1280px · 2xl 1536px | Mesclado com o padrão. |
-| `variantes` | veja 6.1 | Mesclado. Valor com `&` = seletor completo (`".dark &"`); sem `&` = sufixo (`":hover"`). |
-| `classesFixas` | — | `{ "minha-classe": "prop: valor; prop2: valor2" }`. |
-| `mapaPropriedades` | — | `{ "meu-prefixo": "css-property" }` (habilita `meu-prefixo[valor]`). Várias props separadas por `;`. |
-| `processadoresEspeciais` | — | `{ "meu-prefixo": v => "valor-css" }`. |
-| `regrasGlobais` | — | `{ "seletor": { prop: valor } }` injetadas se `reset` ligado. |
-| `plugins` | `[]` | Lista de plugins (seção 9). |
-| `safelist` | `[]` | Classes pré-geradas mesmo sem estar no DOM. |
-| `prefix` | `""` | Prefixo (ex.: `"bz-"`). **Veja o aviso na seção 10 — tem limitações.** |
+## 3. Modelo mental e parsing
 
-**Funções `BreezeCSS.add*` / `.use` só DEPOIS do init.** Padrão seguro:
-```js
-function aoBreezePronto(fn) {
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", fn); // registrado depois do bundle → roda depois do init
-  else fn();
-}
-aoBreezePronto(function () {
-  BreezeCSS.addComponent("btn", ["inline-flex", "items-center", "px[16px]", "py[8px]", "rounded-lg", "bg[#3b82f6]", "text[#fff]", "hover:bg[#2563eb]"]);
-});
-```
-Se `add*` for chamado antes do init, o motor inicializa com config padrão, marca-se como iniciado e o `init` real vira no-op ("já foi inicializado") → **BreezeConfig ignorado e observer nunca inicia**.
+```text
+[breakpoint:][max-breakpoint:][motion-...:][print:][variante:]*utilitario[!]
 
-### 2.4 Requisitos
-Navegadores modernos (usa `MutationObserver`, `insertRule`, `CSS.escape`). Plugins: Glass (refração) só Chromium não-iOS (`ResizeObserver`, SVG `feDisplacementMap`); Progress/Scrollbar usam `CSS.registerProperty` quando disponível; Scrollbar usa `::-webkit-scrollbar` (Chromium/Safari) e `scrollbar-color/width` (Firefox).
-
----
-
-## 3. Modelo mental: como uma classe vira CSS
-
-Cada token de `class` é tentado nesta ordem:
-1. **Componente** registrado (`btn`, `btn!`).
-2. **Classe fixa** (`flex`, `items-center`, `rounded-lg`, `glass`…) → declarações prontas.
-3. **Classe arbitrária** `prefixo[valor]` → `propriedade: valor`, com o `prefixo` procurado em `mapaPropriedades`.
-
-Anatomia completa: `[breakpoint:][variante:]*classeBase[!]`
-
-```
-md:hover:bg[#2563eb!]
-│  │     │   │       └─ ! no fim do valor = !important
-│  │     │   └─ valor (sem ], com _ no lugar de espaços)
-│  │     └─ prefixo (letras e hífens apenas; sem dígitos)
-│  └─ variante(s)
-└─ breakpoint (@media min-width)
+md:max-xl:group-hover:p[20px]
+└─ mínimo 768px  └─ máximo abaixo de xl  └─ antepassado .group:hover  └─ padding
 ```
 
-- Prefixo: só letras/hífens (`[a-zA-Z-]`). Valor: **não pode conter `]`**.
-- Classe fixa com importante: `flex!`, `hover:flex!`. Arbitrária: `bg[red!]`. Componente: `btn!` (marca todas as props do componente como `!important`).
-- Qualificador desconhecido (`foo:flex`) → aviso no console e classe ignorada.
-- Prefixo desconhecido (`xyz[1]`) → aviso "Prefixo desconhecido" e ignorada.
-- **Tema:** se o valor inteiro coincide com uma chave de `tema.cores/espacamento/fontes`, é substituído (`bg[primary]` → cor definida). Só vale para o valor **inteiro**, não para trechos.
-- **Processadores especiais** transformam o valor (ex.: `blur[4px]` → `blur(4px)`; `cols[3]` → `repeat(3, 1fr)`). Listados na seção 4.
-- Cada classe gera uma regra de **mesma especificidade** (`.classe { }`); variantes pseudo adicionam especificidade natural (`:hover`, `.dark .x`).
-- Elementos novos e mudanças de `class` são detectados por `MutationObserver` (agrupados por `requestAnimationFrame`). Classes montadas dinamicamente em JS funcionam — não há "purge".
+- Uma classe pode ser **fixa** (`flex`, `rounded-xl`), **arbitrária** (`p[20px]`) ou **componente** (`card` definido por `addComponent`).
+- `!important`: `p[20px!]`, `hidden!`, `md:flex!`, `card!`.
+- O parser separa qualificadores por `:` **fora** de colchetes. Qualificadores desconhecidos não são aplicados.
+- A `class` de elementos inseridos depois do arranque é observada por `MutationObserver` com agrupamento por `requestAnimationFrame`.
+- A cache evita recompilar classes e regras já conhecidas; os transforms de um elemento podem receber `data-breeze-id` para combinar transformações.
+- Os marcadores `group` e `peer` não são classes de estilo: são âncoras usadas nos selectores CSS relacionais.
 
 ---
 
@@ -194,7 +182,7 @@ Formato da coluna "Propriedade CSS". `✱` = o valor é transformado por process
 | `cursor` `content` `columns` `order` | idem | `content['']` |
 | `mix-blend` / `bg-blend` | `mix-blend-mode` / `background-blend-mode` | `mix-blend[difference]` |
 
-### 4.5 Filtros (todos escrevem `filter` — veja a armadilha 9.3)
+### 4.5 Filtros (todos escrevem `filter` — ver secção 7)
 | Prefixo | Resultado |
 |---|---|
 | `blur[4px]` ✱ | `filter: blur(4px)` |
@@ -222,8 +210,8 @@ Formato da coluna "Propriedade CSS". `✱` = o valor é transformado por process
 | `col-span[2]` ✱ | `grid-column: span 2 / span 2` |
 | `row-span[2]` ✱ | `grid-row: span 2 / span 2` |
 
-### 4.8 Transforms (combinam entre si — seção 7)
-`rotate[45deg]` · `scale[1.1]` · `scale-x[...]` · `scale-y[...]` · `translate-x[10px]` · `translate-y[-4px]` · `skew-x[10deg]` · `skew-y[10deg]`.
+### 4.8 Transforms (combinam entre si — secção 7)
+`rotate[45deg]` · `scale[1.1]` · `scale-x[...]` · `scale-y[...]` · `translate-x[10px]` · `translate-y[-4px]` · `skew-x[10deg]` · `skew-y[10deg]`. A propriedade CSS individual `translate[10px_20px]` é independente e **não** entra na composição `transform`.
 
 ### 4.9 Transição e animação
 | Prefixo | Propriedade | Exemplo |
@@ -235,7 +223,7 @@ Formato da coluna "Propriedade CSS". `✱` = o valor é transformado por process
 | `animate` | `animation` | `animate[meu-kf_2s_ease_infinite]` |
 | `animate-delay` / `animate-duration` | `animation-delay/duration` | |
 
-> **Não existe `transition[...]` arbitrário** (apesar de comentários de versão antiga). Use a fixa `transition` + `duration[..]`/`ease[..]`, ou `transition-prop[...]`.
+> **Não existe `transition[...]` arbitrário** no mapa actual do motor. Usa a classe fixa `transition` com `duration[..]`/`ease[..]`, ou `transition-prop[...]` para o shorthand.
 
 ### 4.10 Mask (sempre emitido com e sem `-webkit-`)
 `mask[...]` · `mask-image[...]` · `mask-gradient[to_bottom,#000,transparent]` ✱ (embrulha em `linear-gradient`) · `mask-size[...]` · `mask-pos[...]`/`mask-position[...]` · `mask-repeat[...]` · `mask-mode[...]` · `mask-clip[...]` · `mask-origin[...]` · `mask-composite[...]` · `mask-border[...]`.
@@ -272,101 +260,157 @@ Formato da coluna "Propriedade CSS". `✱` = o valor é transformado por process
 
 ---
 
-## 6. Variantes, breakpoints e cascata
+## 6. Variantes, breakpoints, contextos e cascata (2.3.0)
 
-### 6.1 Variantes disponíveis
-`hover` `active` `focus` `focus-visible` `visited` `disabled` `checked` `first` (`:first-child`) `last` (`:last-child`) `even` `odd` `placeholder` (`::placeholder`) `before` (`::before`) `after` (`::after`) `dark` (`.dark &` → exige a classe `dark` num **ancestral** do elemento, ex.: `<html class="dark">`).
+### 6.1 Estados do próprio elemento
 
-**Não existem:** `group-hover`, `peer-*`, `focus-within`, `aria-*`, `data-*`, `print`, `motion-safe/reduce`, `max-*`, `first-of-type`… Para criar: `variantes: { "group-hover": ".group:hover &" }` na config (ou `BreezeCSS.addVariant(...)` pós-init).
+`hover`, `active`, `focus`, `focus-visible`, `focus-within`, `visited`, `disabled`, `checked`, `first` (`:first-child`), `last` (`:last-child`), `even`, `odd`, `placeholder` (`::placeholder`), `before`, `after`, `dark` (`.dark &`).
 
-### 6.2 Breakpoints
-Mobile-first, `@media (min-width: …)`: `sm` 640 · `md` 768 · `lg` 1024 · `xl` 1280 · `2xl` 1536. Combine: `md:hover:bg[#000]`.
-- Variantes empilham na ordem escrita: `hover:before:` → `.x:hover::before` ✔. **Pseudo-elemento por último** (`before:hover:` gera seletor estranho).
-- `before:`/`after:` precisam de `content['']` (aspas simples dentro do colchete).
+### 6.2 Variantes relacionais
 
-### 6.3 ⚠️ Ordem das classes (cascata)
-O Breeze insere regras com `insertRule` **na ordem em que descobre as classes** (ordem do `class` de cada elemento, na ordem do DOM). Não há ordenação por breakpoint. Todas têm a mesma especificidade (media queries não aumentam). Consequência: **a regra inserida por último vence**.
+| Variante | Selector simplificado | Condição |
+|---|---|---|
+| `group-hover:` | `.group:hover .ALVO` | Hover num antepassado `.group` |
+| `group-focus-within:` | `.group:focus-within .ALVO` | Foco dentro de `.group` |
+| `peer-hover:` | `.peer:hover ~ .ALVO` | Irmão anterior com hover |
+| `peer-focus:` | `.peer:focus ~ .ALVO` | Irmão anterior focado |
+| `peer-checked:` | `.peer:checked ~ .ALVO` | Irmão anterior seleccionado |
+| `peer-disabled:` | `.peer:disabled ~ .ALVO` | Irmão anterior desactivado |
+| `peer-invalid:` | `.peer:invalid ~ .ALVO` | Irmão anterior inválido |
+| `focus-within:` | `.ALVO:focus-within` | Foco no próprio ou num descendente |
+
+`group` é **antepassado**, `peer` é **irmão anterior**. O combinador `~` não encontra irmãos anteriores nem descendentes. Não existem variantes `peer-placeholder-shown:`, `group/name:`, `aria-*`, `data-*` ou `has-*` predefinidas.
 
 ```html
-<!-- ❌ md:w[50%] é inserida ANTES de w[100%] → w[100%] vence em todas as larguras -->
-<div class="md:w[50%] w[100%]"></div>
-
-<!-- ✔ base primeiro, depois sm → md → lg → xl, depois hover/focus/dark -->
-<div class="w[100%] md:w[50%] lg:w[33%]"></div>
+<div class="group">
+  <h3 class="text[gray] group-hover:text[green]">Título</h3>
+</div>
+<input id="ok" type="checkbox" class="peer">
+<label for="ok">Aceito</label>
+<p class="hidden peer-checked:block">Confirmado</p>
 ```
-Regras práticas:
-- **Escreva sempre `base`, depois breakpoints crescentes** em cada elemento.
-- Cuidado entre elementos: se um elemento **anterior no DOM** usa só `md:w[50%]` e um posterior usa `w[100%] md:w[50%]`, a regra `md:` já foi inserida antes da base `w[100%]`. Para a mesma propriedade, mantenha a base presente em todos os elementos que usam a variante, ou pré-gere na ordem certa com `safelist: ["w[100%]", "md:w[50%]"]` (a safelist é processada em ordem, antes do DOM).
-- `hover:`/`focus:`/`dark:` têm especificidade maior que a base (pseudo-classe/ancestral), então **não** sofrem esse problema.
-- Evite dois utilitários da mesma propriedade no mesmo elemento sem breakpoint (`p[8px] p[16px]`): vence o último inserido, não o último escrito.
+
+### 6.3 Breakpoints e media
+
+| Família | Exemplos | Semântica |
+|---|---|---|
+| Min-width | `sm:`, `md:`, `lg:`, `xl:`, `2xl:` | Largura >= limite |
+| Max-width | `max-sm:`, `max-md:`, `max-lg:`, `max-xl:`, `max-2xl:` | Abaixo do limite, exclusivo |
+| Movimento | `motion-reduce:`, `motion-safe:` | `prefers-reduced-motion: reduce/no-preference` |
+| Impressão | `print:` | `@media print` |
+
+Os breakpoints padrão são `640`, `768`, `1024`, `1280`, `1536` px. `max-md` gera `max-width: 767.98px`; com unidades `rem`/`em`, usa `calc(limite - 0.02px)`. Breakpoints personalizados também geram `max-*` correspondente.
+
+```html
+<section class="p[12px] md:p[24px] max-md:bg[#eef] print:p[0]">
+  <div class="md:max-xl:group-hover:p[20px]">…</div>
+</section>
+```
+
+### 6.4 Cascata: comportamento novo
+
+O BreezeCSS **2.3.0 ordena as regras**, independentemente da ordem de descoberta: **base → `max-*` (larguras maiores antes das menores) → `min-*` (menores antes das maiores) → movimento → impressão**. A ordenação vale no browser e na compilação. Dentro do mesmo nível de rank, a inserção é estável.
+
+**Não repetir a recomendação antiga de que `md:w[50%]` precisa vir depois de `w[100%]` para funcionar.** O motor corrigiu essa precedência. Porém, `hover`, `dark`, `group-*`, `peer-*` e `focus-*` mudam a **especificidade**; `!important` continua a vencer declarações normais. Não existem `@layer` automáticas.
+
+### 6.5 Floating label (equivalente a `input:focus ~ label`)
+
+```html
+<div class="relative">
+  <input id="email" type="email" class="peer w[100%] h[64px] p[22px_12px_8px]" placeholder=" ">
+  <label for="email" class="absolute left[12px] top[50%] translate-y[-50%] pointer-events-none transition duration[200ms] peer-focus:top[8px] peer-focus:translate-y[0] peer-focus:text-size[12px]">Email</label>
+</div>
+```
+
+Este exemplo move o label **durante o foco**. Para persistir o estado quando o input tem conteúdo e perde foco, é preciso JS ou CSS nativo adicional: `peer-placeholder-shown:` não é uma variante do Breeze 2.3.0.
 
 ---
 
-## 7. Transforms e filtros (combinação)
+## 7. Transforms, filtros e inserção eficiente
 
-**Transforms** (`rotate scale scale-x scale-y translate-x translate-y skew-x skew-y`) são **combinados num único `transform`** por elemento e contexto (breakpoint+variantes), sempre na ordem fixa: `translateX → translateY → rotate → scale → scaleX → scaleY → skewX → skewY`, independente da ordem das classes. Para isso o Breeze adiciona `data-breeze-id="bN"` ao elemento (não remova).
-```html
-<div class="translate-x[10px] rotate[45deg] hover:scale[1.1] transition"></div>
-```
-- Cada contexto (base, `hover:`, `md:`…) gera sua própria regra `transform` (o `hover:` **substitui**, não soma com o base).
-- ⚠️ `dark:rotate[...]` (e qualquer variante com `&`) **ignora a condição** nos transforms e se aplica sempre. Evite `dark:` com transforms.
-
-**Filtros:** `blur`, `brightness`, `contrast`, `grayscale`, `saturate`, `drop-shadow`, `filter` escrevem a **mesma propriedade `filter`** — usar duas classes seguidas faz **uma sobrescrever a outra**. Combine num único `filter[blur(4px)_brightness(1.1)]`.
-O mesmo vale para `shadow`/`ring` (ambos `box-shadow`): `ring[2px]` anula `shadow-md` e vice-versa; combine com `shadow[0_0_0_2px_#00f,0_8px_24px_#0003]`.
+- `rotate`, `scale`, `scale-x/y`, `translate-x/y`, `skew-x/y` são combinados em `transform` por **elemento e contexto** (breakpoint, media e variantes). A ordem de composição é fixa: translateX → translateY → rotate → scale → scaleX → scaleY → skewX → skewY.
+- O motor pode atribuir `data-breeze-id` ao elemento para identificar o transform combinado. Não remover esse atributo manualmente.
+- Transforms de contextos diferentes (base e `hover`, por exemplo) são regras separadas: a regra de hover pode substituir o transform base; repete no hover os efeitos que precisas manter.
+- Os selectores relacionais e de `dark` são aplicados aos transforms pelo mesmo mecanismo de variantes; o problema antigo que ignorava `&` em transforms foi corrigido.
+- A inserção live usa **rank em cache**, **pesquisa binária** para posicionamento e `Map` para localizar regras anteriores de transform. Não varre a folha lendo `cssText` a cada classe. Ainda existe custo de inserção e deslocação de entradas no CSSOM/array: não prometer complexidade total O(log n).
+- O modo offline ordena regras antes da exportação. A compilação CLI trata contextos e especificidade para preservar o resultado do runtime.
+- `translate[10px_20px]` escreve a propriedade CSS individual `translate` e não se combina com `transform`.
+- Filtros (`blur`, `brightness`, `contrast`, etc.) escrevem todos `filter`: para combinar, usar `filter[blur(4px)_brightness(1.1)]`.
+- `ring` e `shadow` escrevem `box-shadow`: para combinar, usar uma declaração `shadow[...]` com múltiplas sombras.
 
 ---
 
-## 8. Tema, componentes, build estático, API
+## 8. Temas, componentes, API e modo compilado
 
-### 8.1 Tema
+### 8.1 Temas
+
 ```js
 window.BreezeConfig = {
   tema: {
-    cores:       { primary: "#6366f1", surface: "#0f172a" },
-    espacamento: { gutter: "24px" },
-    fontes:      { body: "Inter, sans-serif" }
+    cores: { primario: '#00ee99', superficie: '#0f172a' },
+    espacamento: { secao: '24px' },
+    fontes: { corpo: 'Inter, sans-serif' }
   }
 };
 ```
-- Gera `:root { --breeze-primary: #6366f1; --breeze-spacing-gutter: 24px; --breeze-font-body: … }`.
-- Uso: `bg[primary]`, `p[gutter]`, `font-family[body]` (substituição do valor inteiro). Para trechos use a variável: `border[1px_solid_var(--breeze-primary)]`.
+
+O motor gera variáveis CSS `--breeze-*` e resolve valores inteiros de tema em `bg[primario]`, `p[secao]`, `font-family[corpo]`. Em `border[1px_solid_primario]` o nome não é resolvido por ser parte de um shorthand: usar `border[1px_solid] border-color[primario]` ou valor literal.
 
 ### 8.2 Componentes
-```js
-// somente após o init (seção 2.3)
-BreezeCSS.addComponent("card", ["p[24px]", "rounded-xl", "bg[#fff]", "shadow-md", "hover:shadow-lg", "md:p[32px]"]);
-```
-- `<div class="card">` aplica tudo (variantes e breakpoints incluídos). `card!` aplica tudo como `!important`.
-- Respeite a regra de ordem da seção 6.3 dentro da lista (base antes das variantes).
-- Componentes não recebem o `prefix`.
 
-### 8.3 API pública (`BreezeCSS`)
+```js
+// Após o init:
+BreezeCSS.addComponent('card', [
+  'p[24px]', 'rounded-xl', 'bg[#17243b]',
+  'hover:shadow-lg', 'md:p[32px]'
+]);
+```
+
+`<article class="card">` expande a lista; `card!` marca as declarações com `!important`. O prefixo de utilitários não deve ser confundido com o nome do componente. O CLI detecta componentes declarados em código quando estaticamente analisáveis.
+
+### 8.3 API pública
+
 | Método | Função |
 |---|---|
-| `init(config?)` | Inicializa. Chamado automaticamente; segunda chamada só avisa. |
-| `reiniciar()` | Para observer, limpa estilos e cache (permite novo `init`). |
-| `processar()` | Reprocessa todo o DOM (use após mudanças fora do observer). |
-| `use(plugin)` | Registra plugin (**só após init**). |
-| `addMapping(prefixo, prop)` · `addVariant(nome, seletor)` · `addBreakpoint(nome, tam)` · `addFixedClass(nome, "p: v; p2: v2")` · `addProcessor(prefixo, fn)` · `addComponent(nome, [classes])` | Extensões em runtime (**só após init**); cada uma reprocessa o DOM. |
-| `build(html, {minificar})` | Gera CSS estático (string) para um HTML, sem DOM vivo. |
-| `exportar({nome, minificar, incluirCabecalho})` | Baixa o CSS **realmente gerado** na página como `.css` e devolve a string. |
-| `stats()` | Cache (hits/misses) e contagem de config. |
-| `versao` | `"2.2.5"`. |
+| `init(config?)` | Inicialização; o bundle já faz auto-init |
+| `reiniciar()` | Pára observer, limpa cache e folha CSS |
+| `processar()` | Reprocessa o DOM |
+| `use(plugin)` | Regista plugin |
+| `addMapping(prefixo, prop)` | Prefixo arbitrário novo |
+| `addProcessor(prefixo, fn)` | Processador de valores |
+| `addFixedClass(nome, regras)` | Classe fixa nova |
+| `addVariant(nome, selector)` | Contexto novo; aceita `&` |
+| `addBreakpoint(nome, tamanho)` | Breakpoint novo |
+| `addComponent(nome, lista)` | Componente por composição |
+| `build(html, {minificar})` | CSS estático em ambiente com `DOMParser` |
+| `exportar(opcoes)` | Exporta CSS gerado na página |
+| `exportarPlugins(opcoes)` | Exporta CSS de cada plugin |
+| `stats()` | Estatísticas |
+| `versao` | `2.3.0` |
 
-### 8.4 Evitar FOUC / produção estática
-1. Abra a página, deixe renderizar e rode `BreezeCSS.exportar({ nome: "site", minificar: true })` → baixa `site.css` portável (seletores `data-breeze-id` são convertidos em seletores de classe).
-2. Linke esse CSS e remova o bundle (perde as classes dinâmicas e os **plugins com JS**: Glass/Progress/Scrollbar precisam do JS em runtime; Dividers e as classes CSS puras exportam bem).
-3. Ou use `BreezeCSS.build(htmlString)` em Node com `jsdom`.
-Para atenuar o flash sem exportar: carregue o bundle síncrono no `<head>` e, se necessário, esconda `body` até pronto (`body{visibility:hidden}` + mostrar após `DOMContentLoaded`/`requestAnimationFrame`).
+### 8.4 Runtime versus BreezeCLI
 
-### 8.5 O que NÃO existe (não gere)
-`w-full`, `h-screen`, `container`, escala numérica (`p-4`), paleta (`bg-blue-500`), `space-x/y-*`, `divide-*`, `bg-clip-text`/`bg-clip`, `fill-*`/`stroke-*`, `overflow[...]`/`display[...]` arbitrários (só fixas), `transition[...]`, `group-hover`, `peer`. Para o que falta, use CSS próprio ou adicione com `addFixedClass`/`addMapping`.
+**Runtime:** o bundle é carregado no browser, cria o `<style id="breeze-v2-estilos">`, observa classes e aplica plugins registados. Adequado a HTML que muda dinamicamente. A inicialização gera estilos depois do JS; pode existir FOUC.
+
+**Compilado:** `breezecss-cli` v1.0.3 executa o motor real numa VM Node para produzir CSS estático. Pode dividir por HTML (`--split`), injectar links/scripts (`--inject`), detectar plugins (`--plugins auto`), compilar classes de templates (`--tpl`) e criar um runtime JS **dos plugins necessários**, sem levar o motor JIT inteiro para o browser.
+
+```bash
+npm install -D breezecss-cli
+npx breezecss-cli --split --plugins auto --inject
+npx breezecss-cli --watch --split --plugins auto --inject
+```
+
+Outras opções: `--safelist`, `--tema`, `--prefix`, `--config`, `--engine`, `--web-root`, `--no-runtime`, `--runtime`, `--minify`, `--no-reset`, `--no-smooth`, `--clean`. `--clean` usa manifesto e hashes para não apagar ficheiros do utilizador e recusa limpar a raiz de trabalho, antepassados ou caminhos fora do projecto. Não atribuir CSS automático a classes geradas dinamicamente depois do build.
+
+### 8.5 Limites de geração
+
+**Não inventar:** `p-4`, `w-full`, `h-screen`, `container`, `bg-blue-500`, `transition[...]`, `peer-placeholder-shown:`, `group/foo:`, `aria-*`, `data-*`, `has-*` e variantes arbitrárias não suportadas. Para requisitos não cobertos, usar CSS nativo ou `addMapping`, `addFixedClass`, `addVariant`.
 
 ---
 
-## 9. Plugins
+## 9. Plugins incluídos no bundle (registo explícito)
 
-Todos seguem o mesmo contrato: objeto `{ nome, versao, setup(ctx), actualizar() }`, com `.criar(opcoes)` para uma instância configurada. `ctx` expõe `addMapping`, `addFixedClass`, `addVariant`, `addBreakpoint`, `addProcessor`, `config`. Variantes/breakpoints funcionam com as classes de plugin (`md:glass-lg`, `hover:divider-curve`). Todos respeitam `prefix` (aplicado também às classes do plugin).
+Todos estão disponíveis como globais, mas só funcionam depois de registados com `BreezeConfig.plugins` antes do init ou `BreezeCSS.use(...)` depois. Objectos de plugin usam `setup(ctx)`; muitos oferecem `.criar(opcoes)` para instância configurada. **Não presumir que plugins individuais precisam de scripts adicionais quando o bundle completo está carregado.**
 
 ### 9.1 BreezeGlass — vidro (glassmorphism)
 **Camada 1 (todos os navegadores):** `backdrop-filter` + tint + brilho especular + rebordo. **Camada 2 (só Chromium, não iOS):** refração real via SVG `feDisplacementMap`; nos outros degrada para a camada 1. Precisa de **conteúdo/fundo atrás** do elemento para o efeito aparecer.
@@ -459,55 +503,111 @@ Classe na página (`<html>` ou `<body>`) ou em qualquer elemento rolável.
 Firefox: só cores, `scrollbar-none` e fino (padrão)/normal (`-lg`, `-xl`); raio, folga e hover não existem lá. Se a classe estiver no `<body>`, o plugin espelha as variáveis para o `<html>`.
 Opções: `BreezeScrollbar.criar({ tamanho: 8, thumb: "rgb(128 128 128 / .5)", thumbHover: "rgb(128 128 128 / .8)" })`.
 
-### 9.5 Criando um plugin próprio
+### 9.5 BreezePreloader — 1.6.0
+
+Preloader de **página** (`body`/`html` ou `preloader-target[page]`) e de **elemento** (`preloader` num elemento normal). O plugin cria o overlay, define `aria-busy` e pode ocultá-lo automaticamente no `load` da página ou manualmente via API. Um preloader local não desaparece apenas por a página terminar de carregar.
+
+| Classe/família | Efeito |
+|---|---|
+| `preloader` | Activa (obrigatória) |
+| `preloader-ring`, `-dots`, `-bars`, `-pulse`, `-bar`, `-orbit`, `-speeder`, `-words` | Tipo de animação |
+| `preloader-words[Carregar,Preparar,Concluir]` | Palavras alternadas |
+| `preloader-words-speed[750ms]` | Intervalo de troca |
+| `preloader-sm`, `-md`, `-lg`, `-xl`, `preloader-size[64px]` | Tamanho |
+| `preloader-color[#fff]`, `preloader-bg[#003]` | Cores do overlay |
+| `preloader-min[800ms]`, `preloader-max[10000ms]` | Duração mínima e máxima |
+| `preloader-duration[400ms]`, `preloader-instant` | Duração da saída |
+| `preloader-fade`, `-curtain`, `-curtain-down`, `-slide-left`, `-slide-right`, `-zoom`, `-blur`, `-iris`, `-wipe`, `-corner`, `-cinematic` | Efeito de saída |
+| `preloader-target[page]`, `preloader-target[local]` | Força o alvo |
+| `preloader-manual`, `preloader-z[99999]` | Controlo manual e camada |
+
+```html
+<body class="preloader preloader-target[page] preloader-speeder preloader-min[800ms] preloader-bg[#003]">
+<div class="preloader preloader-target[local] preloader-words[Carregar,Preparar] preloader-words-speed[700ms]">…</div>
+```
+
+API: `BreezePreloader.iniciar()`, `mostrar(el)`, `ocultar(el, imediato?)`, `alternar(el, activo?)`, `estado(el)`, `remover(el)`, `criar({ cor, fundo, tamanho, z, minimo, fade, maximo })`. Evento `breeze:preloader` com `detail.estado`. Em página, `iniciar()` antecipado pode reduzir flash. Para `preloader-words[...]` o motor lê o token directamente do atributo `class`; não trocar por `preloader-words[palavra palavra]`.
+
+### 9.6 BreezeBackgrounds — 1.5.0
+
+Fundos SVG procedurais aplicados via pseudo-elemento (normalmente `::before`) atrás do conteúdo. Não exige imagens externas. O plugin regenera o SVG quando o elemento muda de tamanho; animações SVG/SMIL são opcionais e respeitam `prefers-reduced-motion`, além de pausar fora da viewport.
+
+**Estilos:** `topo`, `waves`, `flow`, `ripples`, `ridges`, `picos`, `espiral`, `grelha`, `interferencia`, `marmore`, `colmeia`, `celulas`, `agata`, `dunas`, `raios`, `pontos`, `mosaico`, `aurora`, `cubo`, `estrelas`.
+
+| Classe | Função |
+|---|---|
+| `custom-bg` / `custom-bg[topo]` | Activa fundo (topo por omissão) |
+| `custom-bg[estrelas]`, `[cubo]`, `[mosaico]`, `[aurora]` | Estilos específicos |
+| `custom-bg-color[#003]` | Cor base |
+| `custom-bg-glow[#0053cf]` | Brilho opcional (`none` desactiva) |
+| `custom-bg-line[#087cff]`, `custom-bg-line-soft[#0753bd]` | Cores de linhas |
+| `custom-bg-levels[18]`, `custom-bg-scale[1.4]` | Densidade e escala |
+| `custom-bg-seed[42]`, `custom-bg-width[1.2]` | Semente e espessura |
+| `custom-bg-opacity[0.8]`, `custom-bg-center[50%_53%]`, `custom-bg-angle[30]` | Aparência |
+| `custom-bg-animate` | Activa movimento por omissão |
+| `custom-bg-anim[drift_pulse]` | Tipos: `drift`, `rotate`, `breathe`, `pulse`, `none` |
+| `custom-bg-anim-speed[0.7]`, `custom-bg-anim-amount[1.2]` | Velocidade e amplitude |
+
+```html
+<section class="custom-bg[estrelas] custom-bg-color[#090a0f] custom-bg-line[#ffffff] custom-bg-animate">…</section>
+<section class="custom-bg[aurora] custom-bg-anim[drift_pulse] custom-bg-anim-speed[0.6]">…</section>
+```
+
+API: `BreezeBackgrounds.criar({ presets: {...}, pseudo: 'before'|'after' })`, `BreezeBackgrounds.registar(nome, preset)`, `BreezeBackgrounds.gerar(...)`. Se o elemento já usar `::before` para outro efeito, considerar `pseudo: 'after'`. O brilho **não** está activo por omissão. `custom-bg-clear` e presets `topo-emerald` etc. foram removidos em versões anteriores: **não gerar**.
+
+### 9.7 Plugin próprio
+
 ```js
 const MeuPlugin = {
-  nome: "meu-plugin", versao: "1.0.0",
+  nome: 'meu-plugin', versao: '1.0.0',
   setup(ctx) {
-    ctx.addFixedClass("card-pro", "background-color: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.1)");
-    ctx.addMapping("accent", "--accent");                       // accent[#f0f] → --accent: #f0f
-    ctx.addProcessor("accent", v => v);                          // opcional
-    ctx.addVariant("group-hover", ".group:hover &");
-    ctx.addBreakpoint("3xl", "1920px");
-    // se precisar reprocessar elementos existentes após use():
-    if (window.BreezeCSS) Promise.resolve().then(() => BreezeCSS.processar());
+    ctx.addFixedClass('card-pro', 'background-color: #fff; border-radius: 12px');
+    ctx.addMapping('accent', '--accent');
+    ctx.addVariant('group-active', '.group:active &');
+    ctx.addBreakpoint('wide', '1600px');
   }
 };
-// registrar: BreezeConfig.plugins = [MeuPlugin]  (antes do init)  ou  BreezeCSS.use(MeuPlugin)  (depois)
+// Em BreezeConfig.plugins antes do init, ou BreezeCSS.use(MeuPlugin) depois.
 ```
-Regra importante: o Breeze **separa declarações por `;`** e o nome da propriedade pelo **primeiro `:`**. Nunca use `;` dentro de um valor (use `encodeURIComponent`, como o Dividers faz em data-URIs).
+
+Os mapeamentos e regras de plugins podem conter declarações separadas por `;`; evita `;` dentro de valores de CSS que o motor separa ingenuamente. Não confundir um plugin JS dinâmico com uma classe CSS fixa.
 
 ---
 
-## 10. Armadilhas e diagnóstico
+## 10. Diagnóstico: problemas actuais e limitações
 
-| Sintoma | Causa | Correção |
+| Sintoma | Causa provável | Correcção |
 |---|---|---|
-| Nada estilizado | Bundle não carregou, ou erro antes do init | Console: `BreezeCSS.stats()`; confirme `<style id="breeze-v2-estilos">` no `<head>`. |
-| `glass`/`divider-*`/`progress`/`scrollbar` não fazem nada | Plugins não registrados | Snippet da seção 2.2. |
-| Plugin registrado e continua sem efeito | `BreezeCSS.use()` chamado cedo demais (perdido) | Use `BreezeConfig.plugins` (cedo) ou `use` (após init). |
-| `BreezeConfig` ignorado | `add*`/`use`/`addComponent` chamados antes do init | Só depois do init (2.3). |
-| `p[16]` / `w[100]` não aplicam | Sem unidade | `p[16px]`, `w[100%]`. |
-| `text[18px]` não muda o tamanho | `text` é cor | `text-size[18px]`. |
-| Borda não aparece | `border[1px]` sem estilo | `border[1px_solid_#ccc]`. |
-| `md:` não vence a base | Ordem das classes/inserção (6.3) | Base antes das variantes; considere `safelist`. |
-| Dois filtros/dois shadows se anulam | Mesma propriedade (`filter`/`box-shadow`) | Um único `filter[...]` / `shadow[...]`. |
-| `hover:` de transform substitui o base | Contextos independentes | Repita no `hover:` os transforms desejados (ex.: `hover:translate-x[10px] hover:scale[1.1]`). |
-| `dark:rotate[...]` sempre ativo | Variantes com `&` ignoradas em transforms | Evite; use outra propriedade. |
-| `before:`/`after:` sem conteúdo | Falta `content` | `before:content['']`. |
-| Margens/paddings "sumiram" em `h1`, `p`, `ul` | Reset global ligado | Defina `m[..]`/`p[..]` ou `reset: false`. |
-| `transition[...]` ignorado ("Prefixo desconhecido") | Não existe | `transition` + `duration[..]`, ou `transition-prop[...]`. |
-| Classe com `]` no valor falha | Regex não aceita `]` | Use `var()` ou CSS próprio. |
-| Warnings "Prefixo desconhecido"/"Qualificador desconhecido" | Classe inventada/estilo Tailwind | Consulte seções 4–6; silencie com `log: false` só depois de corrigir. |
-| `prefix: "bz-"` quebra `blur`, `rotate`, `cols`, `ring`, `aspect`, `fw`, `bg-gradient`, `divider-*[n]`… | **O prefixo é aplicado só a `classesFixas` e `mapaPropriedades`; processadores e lista de transforms ficam sem prefixo.** | Evite `prefix` quando usar esses utilitários. |
-| Flash de conteúdo sem estilo | CSS gerado em runtime | Seção 8.4. |
-| `exportar()` não baixa | Ambiente sem DOM, ou regras vazias | Rode no navegador após o init. |
+| Nenhum estilo | Bundle ausente ou init falhou | Confirmar `BreezeCSS.versao` e `<style id="breeze-v2-estilos">` |
+| Plugin sem efeito | Não registado | `BreezeConfig.plugins` antes do init ou `BreezeCSS.use` depois |
+| Configuração ignorada | `add*` antes do init, ou configuração tardia | Declarar `BreezeConfig` antes do auto-init |
+| `p[16]` inválido | Unidade em falta | `p[16px]` |
+| `text[18px]` não altera tamanho | `text` é cor | `text-size[18px]` |
+| Borda invisível | `border[1px]` só largura | `border[1px_solid_#ccc]` |
+| `peer-focus:` não actua | `.peer` não é irmão anterior | Colocar input `.peer` antes do alvo, no mesmo pai |
+| `group-hover:` não actua | `.group` não é antepassado | Colocar `.group` no contentor pai |
+| Floating label desce após blur | Só `peer-focus` está activo | JS/CSS nativo para estado preenchido; `peer-placeholder-shown` não existe |
+| `max-md:` inesperado | Limite exclusivo | `max-md` acaba antes de `md` (767.98px por omissão) |
+| Regras com estados competem | Especificidade CSS | Inspeccionar selector e `!important`, não atribuir à ordem do DOM |
+| Dois filtros ou sombras se anulam | Mesma propriedade CSS | Usar um `filter[...]` / `shadow[...]` combinado |
+| `transition[...]` não funciona | Prefixo não registado | `transition duration[...]` ou `transition-prop[...]` |
+| Fundo animado não aparece | Plugin não registado ou sem altura visível | Registar BreezeBackgrounds, verificar tamanho do elemento e reduced-motion |
+| Preloader local não desaparece | Modo local é manual | `BreezePreloader.ocultar(el)` ou remover classe |
+| FOUC | CSS é gerado no browser | Pré-compilar com BreezeCLI ou exportar CSS |
+| Classe dinâmica não aparece no compilado | Não foi detectada no build | `--safelist`, `--tpl` ou novo build |
+| `--clean` recusa directório | Protecção de paths | Usar saída dedicada dentro do projecto, nunca a raiz |
 
-**Depuração rápida:**
+**Não repetir bugs históricos como se ainda existissem:** `bz-blur`/`bz-rotate` quebrados, ordenação base/min-width dependente da descoberta, transform `dark:` sem condição. Foram alvo de correcções na linha 2.2.5→2.3.0; para regressões, confirmar no código e testar.
+
+**Debug rápido:**
+
 ```js
-BreezeCSS.stats();            // cache e config
-BreezeCSS.reiniciar(); BreezeCSS.init({ debug: true });   // loga cada regra gerada
-document.getElementById("breeze-v2-estilos").sheet.cssRules.length;
+BreezeCSS.versao;
+BreezeCSS.stats();
+document.getElementById('breeze-v2-estilos')?.sheet?.cssRules?.length;
+// Em desenvolvimento, após init:
+BreezeCSS.reiniciar();
+BreezeCSS.init({ debug: true });
 ```
 
 ---
@@ -543,7 +643,7 @@ document.getElementById("breeze-v2-estilos").sheet.cssRules.length;
   <article class="p[20px] rounded-xl bg[#fff] shadow-md transition hover:shadow-xl hover:translate-y[-4px]">…</article>
 </section>
 ```
-> `cols[1]` precisa vir antes de `sm:`/`lg:` (6.3). Alternativa sem breakpoints: `cols[repeat(auto-fit,minmax(240px,1fr))]`.
+> O motor ordena as media queries; a ordem textual das classes já não determina a precedência entre base e breakpoints. Alternativa sem breakpoints: `cols[repeat(auto-fit,minmax(240px,1fr))]`.
 
 ### 11.3 Navbar vidro fixa
 ```html
@@ -584,7 +684,7 @@ document.querySelector("article").addEventListener("breeze:progress", e => conso
 
 ---
 
-## 12. Tradução rápida Tailwind → Breeze
+## 12. Referência de equivalências (não é compatibilidade Tailwind)
 
 | Tailwind | Breeze |
 |---|---|
@@ -610,17 +710,32 @@ document.querySelector("article").addEventListener("breeze:progress", e => conso
 
 ---
 
-## 13. Checklist antes de entregar código ao usuário
+## 13. Checklist de entrega para agentes
 
-1. [ ] Bundle carregado de forma **síncrona**; URL oficial da CDN (seção 1).
-2. [ ] Se usei algum plugin (`glass`, `divider-*`, `progress`, `scrollbar`): snippet de registro da seção 2.2 presente.
-3. [ ] Nenhum `BreezeCSS.add*`/`use` executando antes do init.
-4. [ ] Todas as medidas têm **unidade** (`px`, `rem`, `%`, `vh`…); `text[...]` só para **cor**, `text-size[...]` para tamanho.
-5. [ ] Espaços dentro de colchetes escritos como `_`; nenhum `]` dentro de valor.
-6. [ ] Em cada elemento: **base → sm → md → lg → xl → hover/focus/dark**.
-7. [ ] `border[...]` com estilo (`1px_solid_cor`) ou classe `solid`.
-8. [ ] Sem classes inexistentes (`w-full`, `h-screen`, `container`, `bg-blue-500`, `transition[...]`, `group-hover`).
-9. [ ] Filtros em um único `filter[...]`; `shadow` e `ring` não combinados em classes separadas.
-10. [ ] Divisores com `w`, `h` e `bg`; Glass com algo visível atrás; Progress/Scrollbar na classe do elemento certo.
-11. [ ] Considerei o reset global (margens/paddings zerados) e o FOUC (seção 8.4).
-12. [ ] Não usei `prefix` junto com utilitários processados.
+- [ ] O bundle usado é 2.3.0 e a CDN foi confirmada/publicada; CLI 1.0.3 documentado separadamente.
+- [ ] O HTML não contém classes inventadas de Tailwind (`p-4`, `w-full`, `bg-blue-500`).
+- [ ] Prefixos arbitrários pertencem ao mapa real; unidades CSS estão correctas.
+- [ ] `text[...]` para cor, `text-size[...]` para font-size; `_` nos espaços dos valores.
+- [ ] Plugins necessários registados no momento certo; seis plugins disponíveis.
+- [ ] `group-*` tem antepassado `.group`; `peer-*` tem irmão anterior `.peer`.
+- [ ] Não usei `peer-placeholder-shown:`, `transition[...]` ou variantes inexistentes.
+- [ ] `max-*`, `motion-*` e `print:` usados com condições e limites correctos.
+- [ ] Não imponho ordem textual base→breakpoint como requisito de funcionamento: cascata 2.3.0 é ordenada.
+- [ ] `border[...]` inclui estilo e largura; filtros e sombras concorrentes são combinados.
+- [ ] Transforms por contexto incluem todas as transformações que devem persistir naquele estado.
+- [ ] `scrollSmooth` automático respeita movimento reduzido; animações opcionais quando necessário.
+- [ ] CSS compilado inclui classes de templates e safelist necessárias; não assumo JIT no cliente.
+- [ ] Preloader de página vs local foi escolhido correctamente; fundos têm altura e plugin activo.
+- [ ] Documentação de SPA (`index.html`, `cli.html`, `spa.js`) não foi confundida com API do motor.
+- [ ] Em caso de divergência, inspeccionei o bundle actual e testei, sem inferir pelo Tailwind ou por documentação 2.2.x.
+
+---
+
+## 14. Referência rápida de fontes
+
+- Motor: `breeze.bundle.js` (bundle IIFE BreezeCSS **2.3.0**).
+- Compilador: `breezecss-cli` **1.0.3**, especialmente `bin/breeze.js`, `lib/cssgen.js`, `lib/runtime.js`, `vendor/breeze.bundle.js`.
+- Documentação visual: `index.html` e `cli.html` (SPAs independentes), sem alterar o contrato de classes do motor.
+- Projecto: https://github.com/bigptlg/breezecss
+
+**Âmbito:** esta referência descreve a versão indicada, não garante comportamento de versões anteriores, CDN ainda não publicada ou alterações posteriores.
