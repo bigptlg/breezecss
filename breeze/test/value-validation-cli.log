@@ -1,0 +1,17 @@
+BreezeCLI 1.1.1
+
+✓ todas as páginas (1)
+  CSS: css/breeze.css
+  Plugins: nenhum
+
+✓ 1 página · 13 regras · 1,5 KB CSS · 21 ms · motor 2.3.1
+✓ Zero dependências npm externas
+⚠ diagnóstico: 4 erro(s), 0 aviso(s) em 1 ficheiro(s)
+  (motor)
+    (motor) [erro] valor-css-invalido: Valor CSS inválido: p[banana] (padding: banana) — Valor CSS inválido: p[banana] (padding: banana)
+    (motor) [erro] valor-css-invalido: Valor CSS inválido: p[-20px] (padding: -20px) — Valor CSS inválido: p[-20px] (padding: -20px)
+    (motor) [erro] valor-css-invalido: Valor CSS inválido: bg[banana] (background-color: banana) — Valor CSS inválido: bg[banana] (background-color: banana)
+    (motor) [erro] valor-css-invalido: Valor CSS inválido: rotate[banana] (transform: rotate(banana)) — Valor CSS inválido: rotate[banana] (transform: rotate(banana))
+  nota: 3 classe(s) parecem usar nomes do tema (bg[banana], p[banana], rotate[banana]) mas nenhum tema foi aplicado
+        → cria um breeze.config.js com o tema, usa --tema, ou garante o
+          BreezeCSS.init(…) no projecto (é descoberto automaticamente)

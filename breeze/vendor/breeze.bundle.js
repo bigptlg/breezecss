@@ -1,4 +1,4 @@
-/*! Breeze bundle — BreezeCSS 2.2.5 + BreezeGlass 1.0.0 + BreezeDividers 1.2.0 + BreezeProgress 1.0.0 + BreezeScrollbar 1.0.0 + BreezePreloader 1.6.0 + BreezeBackgrounds 1.5.0 (ficheiro único) */
+/*! Breeze bundle — BreezeCSS 2.3.1 + BreezeGlass 1.0.0 + BreezeDividers 1.2.0 + BreezeProgress 1.0.0 + BreezeScrollbar 1.0.0 + BreezePreloader 1.6.0 + BreezeBackgrounds 1.5.0 (ficheiro único) */
 /*!
  * BreezeGlass v1.0.0 — plugin "glass" para o BreezeCSS (>= 2.2)
  *
@@ -3441,9 +3441,15 @@
 ;/* Regista o plugin antes do init do Breeze, preservando a BreezeConfig do utilizador.
    Para desactivar: window.BreezeConfig = { Glass: false } */
 /**
- * BreezeCSS v2.2.5 – breeze.bundle.js
+ * BreezeCSS v2.3.1 – breeze.bundle.js
  * Bundle sem módulos ES – compatível com <script src="...">
  * Autor: Pedro de Oliveira
+ *
+ * Novidades v2.3.1:
+ *  • Variantes contextuais: focus-within, group-hover, group-focus-within,
+ *    peer-hover/focus/checked/disabled/invalid.
+ *  • Media contextuais: max-<breakpoint>, motion-reduce, motion-safe, print.
+ *  • Ordenação estável das media queries com inserção live optimizada.
  *
  * Novidades v2.2.5:
  *  • "_" vira espaço também dentro de calc(), clamp(), min(), max(), gradientes,
@@ -3497,6 +3503,17 @@
 
 (function (global) {
   "use strict";
+
+  const cacheValidacaoCSS = new Map();
+  function suportaValorCSS(prop, valor) {
+    if (prop.startsWith("--") || typeof CSS === "undefined" || typeof CSS.supports !== "function") return true;
+    const chave = prop + "\0" + valor;
+    if (cacheValidacaoCSS.has(chave)) return cacheValidacaoCSS.get(chave);
+    const valido = CSS.supports(prop, valor);
+    if (cacheValidacaoCSS.size >= 4096) cacheValidacaoCSS.clear();
+    cacheValidacaoCSS.set(chave, valido);
+    return valido;
+  }
 
   const cssEscape =
     typeof CSS !== "undefined" && typeof CSS.escape === "function"
@@ -3661,6 +3678,7 @@
       temClasse,
       obterClasse,
       registarClasse,
+      apagarTransform: (chave) => transformsPorChave.delete(chave),
       obterTransforms,
       atualizarTransform,
       construirTransform,
@@ -3682,6 +3700,34 @@
     let _sheet = null;
     let _modoOffline = false;
     let _regrasOffline = [];
+    let _globaisLive = 0;
+    let _globaisOffline = 0;
+    // Índice das regras de classe da folha live (a partir de _globaisLive), na
+    // mesma ordem que sheet.cssRules. Guarda o rank de cada regra (calculado uma
+    // só vez, sem ler cssText) e, nas transforms, a chave para as substituir.
+    let _entradasLive = [];
+    const _transformLive = new Map(); // chaveTransform -> entrada em _entradasLive
+
+    // Ordem da cascata: base → max (larguras decrescentes) → min
+    // (larguras crescentes) → motion → print. Só analisa cada regra UMA
+    // vez, na inserção; a pesquisa binária usa os ranks em cache.
+    function _rankRegra(regra) {
+      if (!regra.startsWith("@media")) return 0;
+      const min = /\(min-width:\s*([\d.]+)(px|rem|em)\)/i.exec(regra);
+      const max = /\(max-width:\s*(?:calc\()?([\d.]+)(px|rem|em)/i.exec(regra);
+      const px = (m) => Number(m[1]) * (m[2].toLowerCase() === "px" ? 1 : 16);
+      const largura = min ? px(min) : max ? 0.5 - Math.min(px(max), 1000000) / 10000000 : 0.75;
+      if (/\bprint\b/i.test(regra.split("{")[0])) return 3000000 + largura;
+      if (/prefers-reduced-motion:\s*(?:reduce|no-preference)/i.test(regra.split("{")[0])) return 2000000 + largura;
+      return largura;
+    }
+
+    function _ordenarOffline() {
+      const globais = _regrasOffline.slice(0, _globaisOffline);
+      const classes = _regrasOffline.slice(_globaisOffline);
+      // sort estável (ES2019+) mantém a ordem de chegada dentro do rank.
+      return globais.concat(classes.sort((a, b) => _rankRegra(a) - _rankRegra(b)));
+    }
 
     function inicializar(config) {
       _config = config;
@@ -3689,12 +3735,13 @@
     function ativarModoOffline() {
       _modoOffline = true;
       _regrasOffline = [];
+      _globaisOffline = 0;
     }
     function desativarModoOffline() {
       _modoOffline = false;
     }
     function obterRegrasOffline() {
-      return [..._regrasOffline];
+      return _ordenarOffline();
     }
 
     function _obterSheet() {
@@ -3707,40 +3754,74 @@
       return _sheet;
     }
 
-    function _inserirRegra(regra) {
+    // Insere uma regra de classe na posição ordenada por rank (estável: depois
+    // de todas as regras com rank <= ao dela). Pesquisa binária sobre os ranks
+    // em cache: O(log n) comparações e nenhuma leitura de cssText.
+    function _inserirOrdenadoLive(sheet, regra, chaveTransform) {
+      const rank = _rankRegra(regra);
+      let lo = 0;
+      let hi = _entradasLive.length;
+      while (lo < hi) {
+        const meio = (lo + hi) >>> 1;
+        if (_entradasLive[meio].rank <= rank) lo = meio + 1;
+        else hi = meio;
+      }
+      sheet.insertRule(regra, _globaisLive + lo); // pode lançar: o índice só é actualizado depois
+      const entrada = { rank };
+      _entradasLive.splice(lo, 0, entrada);
+      if (chaveTransform) _transformLive.set(chaveTransform, entrada);
+    }
+
+    function _inserirRegra(regra, global = false) {
       if (Cache.temRegra(regra)) return;
       Cache.registarRegra(regra);
       if (_modoOffline) {
-        _regrasOffline.push(regra);
+        if (global) _regrasOffline.splice(_globaisOffline++, 0, regra);
+        else _regrasOffline.push(regra);
         return;
       }
       const sheet = _obterSheet();
       try {
-        sheet.insertRule(regra, sheet.cssRules.length);
+        if (global) {
+          sheet.insertRule(regra, _globaisLive);
+          _globaisLive++;
+        } else {
+          _inserirOrdenadoLive(sheet, regra, null);
+        }
         Logger.debug("Regra → " + regra);
       } catch (e) {
         Logger.erro("Falha: " + regra, e);
       }
     }
 
-    function _construirSeletor(classeOriginal, variantes) {
-      let seletor = "." + cssEscape(classeOriginal);
-      if (!variantes || variantes.length === 0) return seletor;
-      for (const v of variantes) {
+    function _aplicarVariantes(seletor, variantes) {
+      for (const v of variantes || []) {
         const pseudo = _config.variantes[v];
         if (!pseudo) continue;
-        if (pseudo.includes("&")) {
-          seletor = pseudo.replace(/&/g, seletor);
-        } else {
-          seletor = seletor + pseudo;
-        }
+        seletor = pseudo.includes("&") ? pseudo.replace(/&/g, seletor) : seletor + pseudo;
       }
       return seletor;
     }
 
-    function _comMediaQuery(bp, regra) {
-      const tam = _config.breakpoints[bp];
-      return tam ? `@media (min-width: ${tam}) { ${regra} }` : regra;
+    function _construirSeletor(classeOriginal, variantes) {
+      return _aplicarVariantes("." + cssEscape(classeOriginal), variantes);
+    }
+
+    function _comMediaQuery(bp, regra, medias = []) {
+      const condicoes = [];
+      if (bp && _config.breakpoints[bp]) condicoes.push(`(min-width: ${_config.breakpoints[bp]})`);
+      for (const m of medias) {
+        if (m === "print") condicoes.unshift("print");
+        else if (m === "motion-reduce") condicoes.push("(prefers-reduced-motion: reduce)");
+        else if (m === "motion-safe") condicoes.push("(prefers-reduced-motion: no-preference)");
+        else if (m.startsWith("max-") && _config.breakpoints[m.slice(4)]) {
+          const largura = _config.breakpoints[m.slice(4)];
+          const px = /^([\d.]+)px$/.exec(largura);
+          // Exclusivo: max-md acaba imediatamente antes de md.
+          condicoes.push(`(max-width: ${px ? (Number(px[1]) - 0.02).toFixed(2) + "px" : `calc(${largura} - 0.02px)`})`);
+        }
+      }
+      return condicoes.length ? `@media ${condicoes.join(" and ")} { ${regra} }` : regra;
     }
 
     function renderizar(resultados, classeOriginal, elemento) {
@@ -3759,32 +3840,34 @@
         .filter(Boolean);
       const sufixo = r.importante ? " !important" : "";
       props.forEach((prop) => {
+        if (r.tipo === "arbitrario" && !suportaValorCSS(prop, r.valor)) return;
         let regra = `${seletor} { ${prop}: ${r.valor}${sufixo}; }`;
-        if (r.breakpoint)
-          regra = _comMediaQuery(
-            r.breakpoint,
-            `${seletor} { ${prop}: ${r.valor}${sufixo}; }`,
-          );
+        if (r.breakpoint || r.medias?.length)
+          regra = _comMediaQuery(r.breakpoint, regra, r.medias);
         _inserirRegra(regra);
       });
     }
 
+    function limparTransforms(id) {
+      if (_modoOffline || !id) return;
+      const prefixo = `elem:${id}::`;
+      for (const [chave, entrada] of _transformLive) {
+        if (!chave.startsWith(prefixo)) continue;
+        const i = _entradasLive.indexOf(entrada);
+        if (i >= 0) { _sheet.deleteRule(_globaisLive + i); _entradasLive.splice(i, 1); }
+        _transformLive.delete(chave);
+        Cache.apagarTransform(chave);
+      }
+    }
     function _renderizarTransform(r, classeOriginal, elemento) {
-      const chaveContexto = `${r.breakpoint || ""}|${(r.variantes || []).join(",")}`;
+      const chaveContexto = `${r.breakpoint || ""}|${(r.medias || []).join(",")}|${(r.variantes || []).join(",")}`;
       let seletorRegra, chaveTransform;
 
       if (elemento && typeof elemento.getAttribute === "function") {
         const breezeId = elemento.getAttribute("data-breeze-id");
         if (breezeId) {
           chaveTransform = `elem:${breezeId}::${chaveContexto}`;
-          seletorRegra = `[data-breeze-id="${breezeId}"]`;
-          if (r.variantes && r.variantes.length > 0) {
-            const pseudos = r.variantes
-              .map((v) => _config.variantes[v])
-              .filter((p) => p && !p.includes("&"))
-              .join("");
-            seletorRegra += pseudos;
-          }
+          seletorRegra = _aplicarVariantes(`[data-breeze-id="${breezeId}"]`, r.variantes);
         }
       }
 
@@ -3799,33 +3882,37 @@
       if (!transformCombinado) return;
 
       if (!_modoOffline && _sheet) {
-        const rules = Array.from(_sheet.cssRules);
-        for (let i = rules.length - 1; i >= 0; i--) {
-          if (
-            rules[i].selectorText === seletorRegra &&
-            rules[i].style?.transform
-          ) {
-            _sheet.deleteRule(i);
-            break;
+        // A regra anterior desta mesma chave (elemento/classe + contexto) é
+        // localizada pelo Map, sem percorrer a folha nem ler cssText.
+        const anterior = _transformLive.get(chaveTransform);
+        if (anterior) {
+          _transformLive.delete(chaveTransform);
+          const i = _entradasLive.indexOf(anterior);
+          if (i !== -1) {
+            try {
+              _sheet.deleteRule(_globaisLive + i);
+              _entradasLive.splice(i, 1);
+            } catch (e) {
+              /* ignorar */
+            }
           }
         }
       }
 
       const sufixo = r.importante ? " !important" : "";
       let regra = `${seletorRegra} { transform: ${transformCombinado}${sufixo}; }`;
-      if (r.breakpoint)
-        regra = _comMediaQuery(
-          r.breakpoint,
-          `${seletorRegra} { transform: ${transformCombinado}${sufixo}; }`,
-        );
+      if (r.breakpoint || r.medias?.length)
+        regra = _comMediaQuery(r.breakpoint, regra, r.medias);
 
+      // Transforms não usam Cache.temRegra: a combinação muda a cada
+      // classe processada e deve substituir a versão anterior.
       if (_modoOffline) {
         _regrasOffline.push(regra);
         return;
       }
       const sheet = _obterSheet();
       try {
-        sheet.insertRule(regra, sheet.cssRules.length);
+        _inserirOrdenadoLive(sheet, regra, chaveTransform);
         Logger.debug("Transform → " + regra);
       } catch (e) {
         Logger.erro("Falha transform: " + regra, e);
@@ -3835,10 +3922,17 @@
     function inserirRegrasGlobais(regrasGlobais) {
       for (const sel in regrasGlobais) {
         const props = regrasGlobais[sel];
-        const decl = Object.entries(props)
-          .map(([p, v]) => `${p}: ${v}`)
-          .join("; ");
-        _inserirRegra(`${sel} { ${decl}; }`);
+        if (sel.startsWith("@media ")) {
+          for (const seletor in props) {
+            const decl = Object.entries(props[seletor])
+              .map(([p, v]) => `${p}: ${v}`).join("; ");
+            _inserirRegra(`${sel} { ${seletor} { ${decl}; } }`, true);
+          }
+        } else {
+          const decl = Object.entries(props)
+            .map(([p, v]) => `${p}: ${v}`).join("; ");
+          _inserirRegra(`${sel} { ${decl}; }`, true);
+        }
       }
     }
 
@@ -3857,7 +3951,7 @@
         Object.entries(tema.fontes).forEach(([n, v]) =>
           vars.push(`--breeze-font-${n}: ${v}`),
         );
-      if (vars.length > 0) _inserirRegra(`:root { ${vars.join("; ")}; }`);
+      if (vars.length > 0) _inserirRegra(`:root { ${vars.join("; ")}; }`, true);
       _inserirKeyframes();
     }
 
@@ -3875,19 +3969,20 @@
           Cache.registarRegra(kf);
           if (!_modoOffline) {
             try {
-              _obterSheet().insertRule(kf, _obterSheet().cssRules.length);
+              _obterSheet().insertRule(kf, _globaisLive++);
             } catch (e) {
               /* ignorar */
             }
           } else {
-            _regrasOffline.push(kf);
+            _regrasOffline.splice(_globaisOffline++, 0, kf);
           }
         }
       });
     }
 
     function gerarCSSEstatico(minificar = false) {
-      return minificar ? _regrasOffline.join("") : _regrasOffline.join("\n");
+      const regras = _ordenarOffline();
+      return minificar ? regras.join("") : regras.join("\n");
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -3979,11 +4074,15 @@
         _tagEstilo = null;
         _sheet = null;
       }
+      _globaisLive = 0;
+      _entradasLive = [];
+      _transformLive.clear();
     }
 
     return {
       inicializar,
       renderizar,
+      limparTransforms,
       inserirRegrasGlobais,
       inserirVariaveisCSS,
       ativarModoOffline,
@@ -4029,7 +4128,7 @@
     );
   }
 
-  function parsearBorderShorthand(valorBruto, lado = "") {
+  function parsearBorderShorthand(valorBruto, lado = "", resolverCor = (v) => v) {
     const valor = valorBruto.replace(/_/g, " ");
     const partes = _splitRespeitandoParenteses(valor);
 
@@ -4043,14 +4142,15 @@
       temColor = false;
 
     for (const parte of partes) {
+      const corResolvida = resolverCor(parte);
       if (!temStyle && ESTILOS_BORDA.has(parte.toLowerCase())) {
         resultado.push({ prop: propStyle, val: parte });
         temStyle = true;
       } else if (!temWidth && REGEX_LARGURA_BORDA.test(parte)) {
         resultado.push({ prop: propWidth, val: parte });
         temWidth = true;
-      } else if (!temColor && _parece_cor(parte)) {
-        resultado.push({ prop: propColor, val: parte });
+      } else if (!temColor && _parece_cor(corResolvida)) {
+        resultado.push({ prop: propColor, val: corResolvida });
         temColor = true;
       } else {
         Logger.aviso(
@@ -4093,6 +4193,26 @@
   // ═══════════════════════════════════════════════════════════════════════
   // PARSER
   // ═══════════════════════════════════════════════════════════════════════
+  function valorSeguro(valor) {
+  if (/<\/style/i.test(valor)) return false;
+  let aspas = null, pilha = [];
+  for (let i = 0; i < valor.length; i++) {
+    const c = valor[i];
+    if (c === "\\") { if (++i >= valor.length) return false; continue; }
+    if (aspas) { if (c === aspas) aspas = null; continue; }
+    if (c === '"' || c === "'") { aspas = c; continue; }
+    if (c === '(') { pilha.push(/url$/i.test(valor.slice(0,i))); continue; }
+    if (c === ')') { if (!pilha.length) return false; pilha.pop(); continue; }
+    if (pilha.includes(true)) continue;
+    if (c === '/' && valor[i+1] === '*') {
+      const fim = valor.indexOf('*/', i+2); if (fim < 0) return false;
+      i = fim+1; continue;
+    }
+    if (c === '{' || c === '}' || (c === ';' && !pilha.length)) return false;
+  }
+  return !aspas && !pilha.length;
+}
+
   const Parser = (() => {
     let _config = null;
     const REGEX_ARBITRARIO =
@@ -4141,24 +4261,34 @@
         return res;
       }
 
-      const resultado = _parsearClasse(classeOriginal);
+      let resultado = _parsearClasse(classeOriginal);
+      if (resultado && typeof CSS !== "undefined" && typeof CSS.supports === "function") {
+        resultado = resultado.filter(r => {
+          if (r.tipo !== "arbitrario") return true;
+          const props = r.eTransform ? ["transform"] : r.propriedade.split(";").map(p => p.trim()).filter(Boolean);
+          const valido = props.some(p => suportaValorCSS(p, r.valor));
+          if (!valido) Logger.erro(`Valor CSS inválido: ${classeOriginal} (${props.join(", ")}: ${r.valor})`);
+          return valido;
+        });
+      }
       Cache.registarClasse(classeOriginal, resultado);
       return resultado;
     }
 
     function _parsearClasse(classe) {
+      if (/<\/style/i.test(classe)) return null;
       const partes = _separarQualificadores(classe);
       if (!partes) return null;
-      const { breakpoint, variantes, classeBase } = partes;
+      const { breakpoint, medias, variantes, classeBase } = partes;
       return (
-        _resolverClasseFixa(classeBase, breakpoint, variantes) ||
-        _resolverClasseArbitraria(classeBase, breakpoint, variantes)
+        _resolverClasseFixa(classeBase, breakpoint, variantes, medias) ||
+        _resolverClasseArbitraria(classeBase, breakpoint, variantes, medias)
       );
     }
 
     function _separarQualificadores(classe) {
       if (!classe.includes(":") && !classe.includes("[")) {
-        return { breakpoint: null, variantes: [], classeBase: classe };
+        return { breakpoint: null, medias: [], variantes: [], classeBase: classe };
       }
       const segmentos = [];
       let atual = "",
@@ -4173,21 +4303,25 @@
         } else atual += c;
       }
       segmentos.push(atual);
+      if (segmentos.length > 33) return null;
       const classeBase = segmentos.pop();
       let breakpoint = null;
       const variantes = [];
+      const medias = [];
       for (const seg of segmentos) {
         if (_config.breakpoints[seg] !== undefined) breakpoint = seg;
+        else if (seg === "print" || seg === "motion-reduce" || seg === "motion-safe" ||
+                 (seg.startsWith("max-") && _config.breakpoints[seg.slice(4)] !== undefined)) medias.push(seg);
         else if (_config.variantes[seg] !== undefined) variantes.push(seg);
         else {
           Logger.aviso(`Qualificador desconhecido: "${seg}" em "${classe}"`);
           return null;
         }
       }
-      return { breakpoint, variantes, classeBase };
+      return { breakpoint, medias, variantes, classeBase };
     }
 
-    function _resolverClasseFixa(classeBase, breakpoint, variantes) {
+    function _resolverClasseFixa(classeBase, breakpoint, variantes, medias) {
       let importante = false;
       if (classeBase.endsWith("!")) {
         importante = true;
@@ -4207,6 +4341,7 @@
             classeBase,
             breakpoint,
             variantes: variantes || [],
+            medias: medias || [],
             propriedade: d.slice(0, idx).trim(),
             valor: d.slice(idx + 1).trim(),
             importante,
@@ -4216,10 +4351,11 @@
         .filter(Boolean);
     }
 
-    function _resolverClasseArbitraria(classeBase, breakpoint, variantes) {
+    function _resolverClasseArbitraria(classeBase, breakpoint, variantes, medias) {
       const match = classeBase.match(REGEX_ARBITRARIO);
       if (!match) return null;
       let { prefixo, valor } = match.groups;
+      if (!valorSeguro(valor)) return null;
 
       let importante = false;
       if (valor.endsWith("!")) {
@@ -4236,13 +4372,14 @@
         const temCor = partes.some((p) => _parece_cor(p));
         if (partes.length > 1 || temEstilo || temCor) {
           const lado = BORDER_LADO_MAP[prefixo];
-          const declaracoes = parsearBorderShorthand(valor, lado);
+          const declaracoes = parsearBorderShorthand(valor, lado, _resolverValorTema);
           if (declaracoes.length > 0) {
             return declaracoes.map(({ prop, val }) => ({
               tipo: "arbitrario",
               classeBase,
               breakpoint,
               variantes: variantes || [],
+            medias: medias || [],
               prefixo,
               propriedade: prop,
               valor: val,
@@ -4256,6 +4393,7 @@
 
       valor = _resolverValorTema(valor);
       valor = _substituirUnderscoreFora(valor);
+      if (!valorSeguro(valor)) return null;
       const propriedade = _config.mapaPropriedades[prefixo];
       if (!propriedade) {
         Logger.aviso(`Prefixo desconhecido: "${prefixo}"`);
@@ -4277,6 +4415,7 @@
           classeBase,
           breakpoint,
           variantes: variantes || [],
+          medias: medias || [],
           prefixo,
           propriedade,
           valor: valorProcessado,
@@ -4341,7 +4480,9 @@
         "skew-x": { tipo: "skewX", fn: (v) => `skewX(${v})` },
         "skew-y": { tipo: "skewY", fn: (v) => `skewY(${v})` },
       };
-      const cfg = mapa[prefixo];
+      const nome = _config.prefix && prefixo.startsWith(_config.prefix)
+        ? prefixo.slice(_config.prefix.length) : prefixo;
+      const cfg = mapa[nome];
       if (!cfg) return { tipo: prefixo, valorCss: valor };
       return { tipo: cfg.tipo, valorCss: cfg.fn(valor) };
     }
@@ -4395,11 +4536,14 @@
         } else atual += c;
       }
       segmentos.push(atual);
+      if (segmentos.length > 33) return null;
       const classeBase = segmentos.pop();
       for (const seg of segmentos) {
         if (
           _config.breakpoints[seg] === undefined &&
-          _config.variantes[seg] === undefined
+          _config.variantes[seg] === undefined &&
+          seg !== "print" && seg !== "motion-reduce" && seg !== "motion-safe" &&
+          !(seg.startsWith("max-") && _config.breakpoints[seg.slice(4)] !== undefined)
         )
           return null;
       }
@@ -4464,7 +4608,7 @@
       const elementos = new Set();
       for (const m of mutations) {
         if (m.type === "childList") {
-          m.addedNodes.forEach((no) => {
+          [...m.addedNodes, ...(m.removedNodes || [])].forEach((no) => {
             if (no.nodeType === Node.ELEMENT_NODE) {
               elementos.add(no);
               no.querySelectorAll("*").forEach((el) => elementos.add(el));
@@ -4591,7 +4735,7 @@
     let _config = null;
     let _iniciado = false;
     let _idCounter = 0;
-    const _mapaIdsElemento = new WeakMap();
+    let _mapaIdsElemento = new WeakMap();
 
     // Registo permanente: breezeId → array de classes CSS de transform.
     // Usado na exportação para substituir [data-breeze-id="bN"] por seletores
@@ -4607,8 +4751,14 @@
       return _mapaIdsElemento.get(elemento);
     }
 
-    function processarElementos(elementos) {
+    function processarElementos(elementos, observar = false) {
       for (const el of elementos) {
+        const idAnterior = _mapaIdsElemento.get(el);
+        if (idAnterior) {
+          Renderer.limparTransforms(idAnterior);
+          _mapaIdParaClasses.delete(idAnterior);
+        }
+        if (observar && el.isConnected === false) continue;
         if (!el.classList || el.classList.length === 0) continue;
         const classes = Parser.extrairClassesRelevantes(el);
         const classesTransform = [];
@@ -4646,7 +4796,7 @@
             : "info",
         silencioso: _config.log === false,
       });
-      Logger.info("Inicializando BreezeCSS v2.2.5...");
+      Logger.info("Inicializando BreezeCSS v2.3.1...");
       if (_config.plugins) _config.plugins.forEach((p) => _aplicarPlugin(p));
 
       // ── prefix ───────────────────────────────────────────────────
@@ -4663,6 +4813,12 @@
         for (const [k, v] of Object.entries(_config.mapaPropriedades))
           novosMapa[pf + k] = v;
         _config.mapaPropriedades = novosMapa;
+
+        const novosProcessadores = {};
+        for (const [k, fn] of Object.entries(_config.processadoresEspeciais))
+          novosProcessadores[pf + k] = fn;
+        _config.processadoresEspeciais = novosProcessadores;
+        _config.transformPrefixos = _config.transformPrefixos.map((k) => pf + k);
         Logger.info(`Prefix activo: "${pf}"`);
       }
 
@@ -4672,11 +4828,14 @@
       Renderer.inserirVariaveisCSS(_config.tema);
 
       // ── scrollSmooth ─────────────────────────────────────────────
-      // Injeta html { scroll-behavior: smooth } automaticamente.
-      // Desative com scrollSmooth: false na configuração.
+      // Respeita a preferência de movimento reduzido.
       if (_config.scrollSmooth !== false) {
-        Renderer.inserirRegrasGlobais({ html: { "scroll-behavior": "smooth" } });
-        Logger.debug("scrollSmooth activo: html { scroll-behavior: smooth }");
+        Renderer.inserirRegrasGlobais({
+          "@media (prefers-reduced-motion: no-preference)": {
+            html: { "scroll-behavior": "smooth" },
+          },
+        });
+        Logger.debug("scrollSmooth activo quando não há movimento reduzido");
       }
 
       // ── safelist ─────────────────────────────────────────────────
@@ -4691,7 +4850,7 @@
 
       const elementosIniciais = Observer.coletarInicialmente();
       processarElementos(elementosIniciais);
-      Observer.iniciar(processarElementos);
+      Observer.iniciar((elementos) => processarElementos(elementos, true));
       Logger.info(`Pronto. ${elementosIniciais.length} elementos processados.`);
     }
 
@@ -4700,6 +4859,7 @@
       Renderer.limpar();
       Cache.limpar();
       _mapaIdParaClasses.clear();
+      _mapaIdsElemento = new WeakMap();
       _config = null;
       _iniciado = false;
       _idCounter = 0;
@@ -4727,6 +4887,11 @@
       Parser.inicializar(_config);
       if (_config.reset) Renderer.inserirRegrasGlobais(_config.regrasGlobais);
       Renderer.inserirVariaveisCSS(_config.tema);
+      if (_config.scrollSmooth !== false) Renderer.inserirRegrasGlobais({
+        "@media (prefers-reduced-motion: no-preference)": {
+          html: { "scroll-behavior": "smooth" },
+        },
+      });
       processarElementos(elementos);
       const css = Renderer.gerarCSSEstatico(opcoes.minificar ?? false);
       Renderer.desativarModoOffline();
@@ -5063,6 +5228,15 @@
           before: "::before",
           after: "::after",
           dark: ".dark &",
+          // Contextos relacionais mínimos: o marcador group/peer não gera CSS.
+          "focus-within": ":focus-within",
+          "group-hover": ".group:hover &",
+          "group-focus-within": ".group:focus-within &",
+          "peer-hover": ".peer:hover ~ &",
+          "peer-focus": ".peer:focus ~ &",
+          "peer-checked": ".peer:checked ~ &",
+          "peer-disabled": ".peer:disabled ~ &",
+          "peer-invalid": ".peer:invalid ~ &",
         },
 
         regrasGlobais: {
@@ -5682,7 +5856,7 @@
     addFixedClass: (n, e) => Engine.addFixedClass(n, e),
     addProcessor: (p, fn) => Engine.addProcessor(p, fn),
     stats: () => Engine.obterStats(),
-    versao: "2.2.5",
+    versao: "2.3.1",
   };
 
   // Auto-init

@@ -35,6 +35,40 @@ const PLUGIN_GLOBALS = {
   backgrounds: 'BreezeBackgrounds',
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// Versão mínima do motor suportada pelo CLI (política de versões).
+// O motor 2.3.0 introduz group-hover:/peer-*: e breakpoints máximos
+// (max-md: …); com motores anteriores essas classes eram descartadas em
+// silêncio — por isso o CLI recusa motores abaixo desta versão (ver
+// --force-engine no README).
+// ─────────────────────────────────────────────────────────────────────────
+const MOTOR_VERSAO_MINIMA = '2.3.0'
+
+/** Compara duas versões "x.y.z"; devolve -1, 0 ou 1. */
+function compararVersoes(a, b) {
+  const pa = String(a || '0').split('.').map((x) => parseInt(x, 10) || 0)
+  const pb = String(b || '0').split('.').map((x) => parseInt(x, 10) || 0)
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) < (pb[i] || 0) ? -1 : 1
+  }
+  return 0
+}
+
+/**
+ * Lê a versão do motor do cabeçalho do bundle ("BreezeCSS x.y.z").
+ * Devolve a versão como string ou null se não estiver lá escrita.
+ */
+function versaoDeBundle(caminho) {
+  let fonte
+  try {
+    fonte = fs.readFileSync(path.resolve(String(caminho)), 'utf8')
+  } catch (e) {
+    return null
+  }
+  const m = /BreezeCSS\s+(\d+\.\d+\.\d+)/.exec(fonte.slice(0, 4000))
+  return m ? m[1] : null
+}
+
 /** Insere o prefixo no nome-base de uma classe (após hover:/md:, antes do nome). */
 function prefixarClasse(c, pf) {
   if (!pf) return c
@@ -157,9 +191,7 @@ function criarHospedeiro({ caminhoBundle, config, verboso = false }) {
   sandbox.CSS = {
     escape: cssEscape,
     registerProperty() {},
-    supports() {
-      return true
-    },
+    supports: require("./value-validation").supports,
   }
 
   sandbox.document = {
@@ -443,4 +475,11 @@ function criarHospedeiro({ caminhoBundle, config, verboso = false }) {
   }
 }
 
-module.exports = { criarHospedeiro, PLUGIN_GLOBALS, prefixarClasse }
+module.exports = {
+  criarHospedeiro,
+  PLUGIN_GLOBALS,
+  prefixarClasse,
+  MOTOR_VERSAO_MINIMA,
+  compararVersoes,
+  versaoDeBundle,
+}

@@ -1,0 +1,46 @@
+[
+  {
+    "class": "p[10banana]",
+    "exit": 1,
+    "css": [
+      "@keyframes breeze-slide-in { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }",
+      "@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }"
+    ]
+  },
+  {
+    "class": "w[banana]",
+    "exit": 1,
+    "css": [
+      "@keyframes breeze-slide-in { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }",
+      "@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }"
+    ]
+  },
+  {
+    "class": "bg[color-mix(currentcolor_50%,transparent)]",
+    "exit": 1,
+    "css": [
+      "@keyframes breeze-slide-in { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }",
+      "@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }"
+    ]
+  },
+  {
+    "class": "p[banana]",
+    "exit": 1,
+    "css": [
+      "@keyframes breeze-slide-in { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }",
+      "@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }"
+    ]
+  },
+  {
+    "ref": "20736",
+    "incremental_removed_class": true
+  },
+  {
+    "ref": "20446",
+    "watch_latest": true
+  },
+  {
+    "ref": "20137",
+    "watch_restore": true
+  }
+]

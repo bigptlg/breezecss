@@ -1,4 +1,4 @@
-/*! Breeze bundle — BreezeCSS 2.3.0 + BreezeGlass 1.0.0 + BreezeDividers 1.2.0 + BreezeProgress 1.0.0 + BreezeScrollbar 1.0.0 + BreezePreloader 1.6.0 + BreezeBackgrounds 1.5.0 (ficheiro único) */
+/*! Breeze bundle — BreezeCSS 2.3.1 + BreezeGlass 1.0.0 + BreezeDividers 1.2.0 + BreezeProgress 1.0.0 + BreezeScrollbar 1.0.0 + BreezePreloader 1.6.0 + BreezeBackgrounds 1.5.0 (ficheiro único) */
 /*!
  * BreezeGlass v1.0.0 — plugin "glass" para o BreezeCSS (>= 2.2)
  *
@@ -3441,11 +3441,11 @@
 ;/* Regista o plugin antes do init do Breeze, preservando a BreezeConfig do utilizador.
    Para desactivar: window.BreezeConfig = { Glass: false } */
 /**
- * BreezeCSS v2.3.0 – breeze.bundle.js
+ * BreezeCSS v2.3.1 – breeze.bundle.js
  * Bundle sem módulos ES – compatível com <script src="...">
  * Autor: Pedro de Oliveira
  *
- * Novidades v2.3.0:
+ * Novidades v2.3.1:
  *  • Variantes contextuais: focus-within, group-hover, group-focus-within,
  *    peer-hover/focus/checked/disabled/invalid.
  *  • Media contextuais: max-<breakpoint>, motion-reduce, motion-safe, print.
@@ -3503,6 +3503,17 @@
 
 (function (global) {
   "use strict";
+
+  const cacheValidacaoCSS = new Map();
+  function suportaValorCSS(prop, valor) {
+    if (prop.startsWith("--") || typeof CSS === "undefined" || typeof CSS.supports !== "function") return true;
+    const chave = prop + "\0" + valor;
+    if (cacheValidacaoCSS.has(chave)) return cacheValidacaoCSS.get(chave);
+    const valido = CSS.supports(prop, valor);
+    if (cacheValidacaoCSS.size >= 4096) cacheValidacaoCSS.clear();
+    cacheValidacaoCSS.set(chave, valido);
+    return valido;
+  }
 
   const cssEscape =
     typeof CSS !== "undefined" && typeof CSS.escape === "function"
@@ -3667,6 +3678,7 @@
       temClasse,
       obterClasse,
       registarClasse,
+      apagarTransform: (chave) => transformsPorChave.delete(chave),
       obterTransforms,
       atualizarTransform,
       construirTransform,
@@ -3828,6 +3840,7 @@
         .filter(Boolean);
       const sufixo = r.importante ? " !important" : "";
       props.forEach((prop) => {
+        if (r.tipo === "arbitrario" && !suportaValorCSS(prop, r.valor)) return;
         let regra = `${seletor} { ${prop}: ${r.valor}${sufixo}; }`;
         if (r.breakpoint || r.medias?.length)
           regra = _comMediaQuery(r.breakpoint, regra, r.medias);
@@ -3835,6 +3848,17 @@
       });
     }
 
+    function limparTransforms(id) {
+      if (_modoOffline || !id) return;
+      const prefixo = `elem:${id}::`;
+      for (const [chave, entrada] of _transformLive) {
+        if (!chave.startsWith(prefixo)) continue;
+        const i = _entradasLive.indexOf(entrada);
+        if (i >= 0) { _sheet.deleteRule(_globaisLive + i); _entradasLive.splice(i, 1); }
+        _transformLive.delete(chave);
+        Cache.apagarTransform(chave);
+      }
+    }
     function _renderizarTransform(r, classeOriginal, elemento) {
       const chaveContexto = `${r.breakpoint || ""}|${(r.medias || []).join(",")}|${(r.variantes || []).join(",")}`;
       let seletorRegra, chaveTransform;
@@ -4058,6 +4082,7 @@
     return {
       inicializar,
       renderizar,
+      limparTransforms,
       inserirRegrasGlobais,
       inserirVariaveisCSS,
       ativarModoOffline,
@@ -4168,6 +4193,26 @@
   // ═══════════════════════════════════════════════════════════════════════
   // PARSER
   // ═══════════════════════════════════════════════════════════════════════
+  function valorSeguro(valor) {
+  if (/<\/style/i.test(valor)) return false;
+  let aspas = null, pilha = [];
+  for (let i = 0; i < valor.length; i++) {
+    const c = valor[i];
+    if (c === "\\") { if (++i >= valor.length) return false; continue; }
+    if (aspas) { if (c === aspas) aspas = null; continue; }
+    if (c === '"' || c === "'") { aspas = c; continue; }
+    if (c === '(') { pilha.push(/url$/i.test(valor.slice(0,i))); continue; }
+    if (c === ')') { if (!pilha.length) return false; pilha.pop(); continue; }
+    if (pilha.includes(true)) continue;
+    if (c === '/' && valor[i+1] === '*') {
+      const fim = valor.indexOf('*/', i+2); if (fim < 0) return false;
+      i = fim+1; continue;
+    }
+    if (c === '{' || c === '}' || (c === ';' && !pilha.length)) return false;
+  }
+  return !aspas && !pilha.length;
+}
+
   const Parser = (() => {
     let _config = null;
     const REGEX_ARBITRARIO =
@@ -4216,12 +4261,22 @@
         return res;
       }
 
-      const resultado = _parsearClasse(classeOriginal);
+      let resultado = _parsearClasse(classeOriginal);
+      if (resultado && typeof CSS !== "undefined" && typeof CSS.supports === "function") {
+        resultado = resultado.filter(r => {
+          if (r.tipo !== "arbitrario") return true;
+          const props = r.eTransform ? ["transform"] : r.propriedade.split(";").map(p => p.trim()).filter(Boolean);
+          const valido = props.some(p => suportaValorCSS(p, r.valor));
+          if (!valido) Logger.erro(`Valor CSS inválido: ${classeOriginal} (${props.join(", ")}: ${r.valor})`);
+          return valido;
+        });
+      }
       Cache.registarClasse(classeOriginal, resultado);
       return resultado;
     }
 
     function _parsearClasse(classe) {
+      if (/<\/style/i.test(classe)) return null;
       const partes = _separarQualificadores(classe);
       if (!partes) return null;
       const { breakpoint, medias, variantes, classeBase } = partes;
@@ -4248,6 +4303,7 @@
         } else atual += c;
       }
       segmentos.push(atual);
+      if (segmentos.length > 33) return null;
       const classeBase = segmentos.pop();
       let breakpoint = null;
       const variantes = [];
@@ -4299,6 +4355,7 @@
       const match = classeBase.match(REGEX_ARBITRARIO);
       if (!match) return null;
       let { prefixo, valor } = match.groups;
+      if (!valorSeguro(valor)) return null;
 
       let importante = false;
       if (valor.endsWith("!")) {
@@ -4336,6 +4393,7 @@
 
       valor = _resolverValorTema(valor);
       valor = _substituirUnderscoreFora(valor);
+      if (!valorSeguro(valor)) return null;
       const propriedade = _config.mapaPropriedades[prefixo];
       if (!propriedade) {
         Logger.aviso(`Prefixo desconhecido: "${prefixo}"`);
@@ -4478,6 +4536,7 @@
         } else atual += c;
       }
       segmentos.push(atual);
+      if (segmentos.length > 33) return null;
       const classeBase = segmentos.pop();
       for (const seg of segmentos) {
         if (
@@ -4549,7 +4608,7 @@
       const elementos = new Set();
       for (const m of mutations) {
         if (m.type === "childList") {
-          m.addedNodes.forEach((no) => {
+          [...m.addedNodes, ...(m.removedNodes || [])].forEach((no) => {
             if (no.nodeType === Node.ELEMENT_NODE) {
               elementos.add(no);
               no.querySelectorAll("*").forEach((el) => elementos.add(el));
@@ -4676,7 +4735,7 @@
     let _config = null;
     let _iniciado = false;
     let _idCounter = 0;
-    const _mapaIdsElemento = new WeakMap();
+    let _mapaIdsElemento = new WeakMap();
 
     // Registo permanente: breezeId → array de classes CSS de transform.
     // Usado na exportação para substituir [data-breeze-id="bN"] por seletores
@@ -4692,8 +4751,14 @@
       return _mapaIdsElemento.get(elemento);
     }
 
-    function processarElementos(elementos) {
+    function processarElementos(elementos, observar = false) {
       for (const el of elementos) {
+        const idAnterior = _mapaIdsElemento.get(el);
+        if (idAnterior) {
+          Renderer.limparTransforms(idAnterior);
+          _mapaIdParaClasses.delete(idAnterior);
+        }
+        if (observar && el.isConnected === false) continue;
         if (!el.classList || el.classList.length === 0) continue;
         const classes = Parser.extrairClassesRelevantes(el);
         const classesTransform = [];
@@ -4731,7 +4796,7 @@
             : "info",
         silencioso: _config.log === false,
       });
-      Logger.info("Inicializando BreezeCSS v2.3.0...");
+      Logger.info("Inicializando BreezeCSS v2.3.1...");
       if (_config.plugins) _config.plugins.forEach((p) => _aplicarPlugin(p));
 
       // ── prefix ───────────────────────────────────────────────────
@@ -4785,7 +4850,7 @@
 
       const elementosIniciais = Observer.coletarInicialmente();
       processarElementos(elementosIniciais);
-      Observer.iniciar(processarElementos);
+      Observer.iniciar((elementos) => processarElementos(elementos, true));
       Logger.info(`Pronto. ${elementosIniciais.length} elementos processados.`);
     }
 
@@ -4794,6 +4859,7 @@
       Renderer.limpar();
       Cache.limpar();
       _mapaIdParaClasses.clear();
+      _mapaIdsElemento = new WeakMap();
       _config = null;
       _iniciado = false;
       _idCounter = 0;
@@ -5790,7 +5856,7 @@
     addFixedClass: (n, e) => Engine.addFixedClass(n, e),
     addProcessor: (p, fn) => Engine.addProcessor(p, fn),
     stats: () => Engine.obterStats(),
-    versao: "2.3.0",
+    versao: "2.3.1",
   };
 
   // Auto-init

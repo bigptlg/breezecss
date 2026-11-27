@@ -1,4 +1,4 @@
-# breeze — BreezeCLI 1.0.0
+# breeze — BreezeCLI 1.1.1
 
 Gera o **CSS estático** do BreezeCSS **e o runtime JavaScript dos plugins** a
 partir de todos os HTML do projecto — sem o `breeze.bundle.js` no cliente.
@@ -21,7 +21,7 @@ A experiência típica:
 
 ```text
 $ node bin/breeze.js --split --plugins auto --inject
-BreezeCLI 1.0.0
+BreezeCLI 1.1.0
 
 ✓ index.html
   CSS: dist/css/index.css
@@ -35,8 +35,12 @@ BreezeCLI 1.0.0
 
 ✓ CSS e JavaScript injetados
 ✓ Nenhuma referência duplicada
-✓ 2 páginas · 148 regras · 12,4 KB CSS · 38,1 KB runtime · 46 ms
+✓ 2 páginas · 148 regras · 12,4 KB CSS · 38,1 KB runtime · 46 ms · motor 2.3.0
+✓ cache: 2 hits / 0 misses (.breeze-cache/)
 ✓ Zero dependências npm externas
+⚠ diagnóstico: 1 erro(s), 0 aviso(s) em 1 ficheiro(s)
+  dashboard.html
+    dashboard.html:12:30 [erro] variante-desconhecida: aria-expanded:flex — …
 ```
 
 ---
@@ -86,6 +90,16 @@ keyframes e classes do plugin usadas nessa página.
 | `--exclude <glob>` | Padrões a excluir (repetível; omissão: `node_modules`, `.git`, pasta de saída) |
 | `-p, --prefix <pfx>` | Prefixo das classes (ex.: `bz-`) — igual a `BreezeConfig.prefix` |
 | `--safelist <classe>` | Gerar classes mesmo sem uso no HTML (repetível ou separadas por vírgulas) |
+| `--ignore <regex>` | Ignora classes que casem a RegExp nos diagnósticos (repetível; também no `breeze.config.js`, chave `ignore`) |
+
+### Diagnóstico e cache
+| Flag | Descrição |
+| --- | --- |
+| `--strict` | Código de saída **1** quando houver ERROS de diagnóstico (para CI) |
+| `--report text\|json` | Relatório em texto (agrupado por ficheiro, com `ficheiro:linha:coluna`) ou JSON no stdout para CI (avisos continuam no stderr). Por omissão: `text` |
+| `--cache-dir <pasta>` | Pasta da cache incremental (por omissão `.breeze-cache/` — excluída do varrimento) |
+| `--no-cache` | Ignora a cache: build completo, o manifest não é lido nem escrito |
+| `--clean-cache` | Apaga a pasta da cache antes de gerar |
 
 ### CSS
 | Flag | Descrição |
@@ -100,6 +114,7 @@ keyframes e classes do plugin usadas nessa página.
 | `--all-plugin-css` | Inclui o CSS completo de **todos** os plugins registados (glass, scrollbar, preloader), mesmo sem as classes serem usadas |
 | `--tema <tema>` | Tema igual ao `BreezeCSS.init`: JSON completo (`--tema '{"cores":{"primaria":"#003"}}'`) ou pares pontuados repetíveis (`--tema cores.primaria=#003`) |
 | `--engine <ficheiro>` | Caminho do `breeze.bundle.js` (ver “Motor”) |
+| `--force-engine` | Aceita um motor abaixo da versão mínima suportada (ver “Política de versões”) |
 
 ### Configuração
 | Flag | Descrição |
@@ -111,7 +126,10 @@ keyframes e classes do plugin usadas nessa página.
 O `breeze.config.js` aceita **o mesmo objecto que passas ao `BreezeCSS.init`** no browser
 — `tema`, `componentes`, `plugins`, `prefix`, `safelist`, `log` (ignorado) — mais omissões
 de saída do CLI (`out`, `name`, `split`, `minify`, `allPluginCss`, `include`, `exclude`,
-`inject`, `reset`, `smooth`, `engine`).
+`inject`, `reset`, `smooth`, `engine`) e as novas chaves de diagnóstico/cache:
+`strict` (boolean), `report` (`'text'`/`'json'`), `ignore` (lista de regexes),
+`cacheDir` (string), `cache` (boolean; `false` equivale a `--no-cache`) e
+`forceEngine` (boolean).
 
 **Descoberta automática do init:** sem `--config`, sem `--tema` e sem
 `breeze.config.js`, o CLI procura `BreezeCSS.init({…})` e `window.BreezeConfig = {…}`
@@ -155,7 +173,7 @@ para a concatenação nome+alfa (`bg[terceariafff00]` não resolve — usa `bg[#
 
 ## Runtime Builder — JavaScript dos plugins sem o bundle
 
-O CLI 1.0.0 extrai do `breeze.bundle.js` **apenas os IIFEs dos seis plugins**
+O CLI extrai do `breeze.bundle.js` **apenas os IIFEs dos seis plugins**
 (código 1:1, nenhum comportamento reescrito) e gera um ficheiro
 `js/<página>.runtime.js` autónomo:
 
@@ -210,6 +228,95 @@ Os `MutationObserver` dos plugins originais ficam intactos, portanto:
   funcionam — verificado nos testes de navegador (Chromium/playwright).
 
 Exemplos de integração em [`exemplo/spa/`](exemplo/spa/README.md).
+
+## Diagnóstico — fim das falhas silenciosas
+
+O motor descarta classes inválidas **sem dizer nada**. O CLI 1.1 analisa cada
+token do projecto (markup, scripts inline, templates JSX/Vue/Angular/Svelte)
+contra a configuração interna do motor e produz diagnósticos com posição:
+
+| Código | Severidade | Exemplo | O que significa |
+| --- | --- | --- | --- |
+| `prefixo-desconhecido` | erro | `marge[10px]` | O prefixo não existe no motor — a classe é descartada |
+| `variante-desconhecida` | erro | `aria-expanded:flex` | A variante/breakpoint não existe neste motor (ex.: `has-[…]:`) |
+| `sintaxe-invalida` | erro | `p[10px` · `p[]` · `p[1]0]` | Colchetes/parênteses por fechar, valor vazio, `]` dentro do valor |
+| `estilo-tailwind` | aviso | `p-4` · `bg-blue-500` · `w-full` | Classe ao estilo Tailwind — sugere o equivalente Breeze (`p[1rem]`, `bg[#3b82f6]`, `w[100%]`) quando conhecido |
+| `modificador-opacidade-nao-suportado` | erro | `bg[#000]/50` | O Breeze não tem `/50` — sugere o alfa no valor (`bg[#00000080]`) |
+| `classe-dinamica-suspeita` | aviso | `` `p[${n}px]` `` | Template literal — o valor só existe em runtime; sugere `--safelist` |
+| `aviso-motor` | aviso | — | Avisos emitidos pelo próprio motor durante o build |
+| `nao-breeze` | nota | `prose`, `cartao` | Classe própria do utilizador — **só aparece com `--verbose`** |
+
+- **Ruído controlado**: só classes com forma de Breeze (têm `[` ou um
+  qualificador `x:`) dão erro/aviso; palavras simples que não são do Breeze
+  ficam no nível nota (visíveis só com `--verbose`).
+- **Sugestões "querias dizer…?"** por distância de Levenshtein sobre os
+  prefixos, variantes e breakpoints do motor (`hove:bg[red]` → `hover:bg[red]`).
+- **Posições**: `ficheiro:linha:coluna` por classe, agrupadas por ficheiro no
+  relatório de texto.
+- **`--ignore <regex>`** (repetível, também no config) silencia falsos
+  positivos; `--strict` devolve exit 1 se houver erros; `--report json`
+  emite o relatório completo em JSON para CI.
+- **`--watch`**: em cada rebuild só aparecem os diagnósticos **novos ou
+  alterados** — os já conhecidos não são repetidos.
+
+## Cache incremental
+
+Sem cache, o `construir()` lia e compilava tudo em cada execução (500 páginas:
+≈ 6 s em CSS único, ≈ 10 s em `--split`). O CLI 1.1 mantém uma cache em
+`.breeze-cache/` (configurável com `--cache-dir`) que torna os builds
+incrementais **sem alterar o resultado**:
+
+- **Manifest JSON** com número de esquema. Um manifest ausente, corrompido ou
+  de esquema antigo é ignorado e reconstruído — **nunca faz o build falhar**.
+  Escritas atómicas (ficheiro temporário + rename).
+- **Impressão digital global** = sha256 de: versão do CLI, hash do motor,
+  prefix, reset, smooth, minify, split, plugins resolvidos, tema, safelist
+  efectiva, mapa de componentes e ficheiro de config. Se mudar, **invalida
+  tudo**.
+- **Modo `--split`**: chave por página =
+  `sha256(conteúdo normalizado + fantasma de safelist + digital)`. Se a chave
+  coincide e o CSS de saída existe com o hash registado, o `motor.build()` e a
+  escrita são saltados. O mesmo para os ficheiros de runtime JS (agrupados por
+  assinatura de plugins).
+- **Modo CSS único**: guarda a assinatura de classes de cada página; o CSS só
+  é reconstruído quando a união/assinatura de classes ou a digital muda. Uma
+  página que muda **sem classes novas** (só texto) não reescreve nada.
+- **Normalização para o `--inject`**: o hash de cada página ignora tudo o que
+  o próprio inject acrescenta — o `<link>` e o `<script>` geridos (com
+  marcadores), os blocos `js-guard` (desembrulhados: a instrução original
+  fica) e os comentários "bundle substituído". Os `<script src>` externos não
+  têm classes e saem do hash. Sem isto, a segunda execução falharia sempre.
+- **`--inject` continua a correr sempre** (depende dos caminhos, não do
+  conteúdo do CSS) mas só escreve o HTML quando há alteração real.
+- **Páginas apagadas**: as entradas do manifest são removidas e os outputs
+  órfãos (CSS/JS de páginas que já não existem) são apagados.
+- **`--watch`** usa a mesma cache e não entra em loop com as escritas do
+  inject (rebuild sem alterações → 100% hits → zero ficheiros escritos).
+
+O relatório mostra `cache: N hits / M misses` e a lista de órfãos apagados.
+Adiciona `.breeze-cache/` ao `.gitignore` do projecto:
+
+```gitignore
+.breeze-cache/
+```
+
+**Números** (500 páginas sintéticas × 200 elementos, `scripts/bench.js`):
+
+| Cenário | --split | CSS único |
+| --- | --- | --- |
+| Build a frio | 5,7 s | 5,7 s |
+| Quente, sem alterações | 0,33 s (100% hits) | 0,28 s (100% hits) |
+| Quente, 1 página alterada | **0,45 s — 7,9% do frio** ✓ | 3,7 s (65%) |
+
+No modo `--split` o objectivo (< 10% do tempo a frio) fica cumprido: só a
+página alterada é recompilada (o motor arranca uma vez, ≈ 15 ms, e o resto do
+tempo é I/O). No **CSS único** o caso "1 página alterada" não chega a 10%
+**por definição do modo**: a união de classes mudou, o ficheiro inteiro é um
+só artefacto e o motor tem de o regenerar a partir de todas as páginas — o
+ganho fica no caso "sem alterações" (4,9%), em que nada é reescrito. O que a
+cache elimina em ambos os modos é o trabalho redundante: leituras,
+normalizações, detecção de deps, diagnósticos e escritas das páginas
+inalteradas.
 
 ## Inject de CSS + JS
 
@@ -325,9 +432,27 @@ O CLI procura o motor pela ordem:
 
 1. `--engine <caminho>`
 2. `breeze.bundle.js` (ou `breeze.min.js`) na pasta actual e **nas pastas acima**
-3. A cópia incluída no pacote (`vendor/breeze.bundle.js`, v2.2.5)
+3. A cópia incluída no pacote (`vendor/breeze.bundle.js`, motor 2.3.0)
 
 Assim podes actualizar o bundle do projecto sem tocar no CLI.
+
+### Política de versões
+
+- O motor mínimo suportado está na constante `MOTOR_VERSAO_MINIMA`
+  (`lib/engine.js`, actualmente **2.3.0** — é a versão que introduz
+  `group-hover:`/`peer-*:` e os breakpoints máximos `max-md:`; com motores
+  anteriores essas classes eram descartadas em silêncio).
+- Um motor abaixo do mínimo faz o build **falhar com erro**; `--force-engine`
+  contorna a verificação (por tua conta e risco).
+- O relatório mostra sempre `motor X.Y.Z` e, com `--inject`, avisa por página
+  quando o HTML refere um `breeze.bundle.js` cuja versão difere da usada na
+  compilação.
+- **Fonte única da versão do CLI**: `breeze/package.json`. O cabeçalho do CSS,
+  o `--help`/`--version` e os README leem dela. O script
+  `node scripts/sync-engine.js` copia o bundle da raiz do repositório para
+  `vendor/`, **falha se as versões dos cabeçalhos (`BreezeCSS x.y.z`)
+  divergirem** e sincroniza a versão do CLI nos README — corre-o depois de
+  actualizar o motor ou a versão do pacote.
 
 ## Como funciona
 
@@ -372,8 +497,10 @@ complemento), ou remove esses plugins das páginas 100 % estáticas.
 ## Notas
 
 - A variante `dark:` pressupõe `class="dark"` num antepassado (`<html class="dark">`).
-- Classes não-Breeze no HTML (ex.: `prose`, `cartao`) são ignoradas — o `--verbose`
-  lista-as para confirmares que não é um erro de sintaxe.
+- Classes não-Breeze no HTML (ex.: `prose`, `cartao`) são ignoradas — o nível
+  `nao-breeze` dos diagnósticos só aparece com `--verbose`; classes com forma
+  de Breeze que o motor não reconhece (prefixo/variante/sintaxe) dão erro ou
+  aviso no relatório (ver “Diagnóstico”).
 - O CSS gerado tem cabeçalho com data/regras; regenera com `npx breeze` (ou deixa
   o `--watch` a fazê-lo).
 - Sintaxe: `text[...]` é **cor**; para tamanho usa `font-size[...]` / `text-size[...]`.
@@ -385,7 +512,7 @@ complemento), ou remove esses plugins das páginas 100 % estáticas.
 npm test          # node --test test/*.test.js
 ```
 
-50 testes, incluindo **testes de navegador** (Chromium via playwright):
+93 testes, incluindo **testes de navegador** (Chromium via playwright):
 Canvas/SVG da refração do Glass, ResizeObserver/IntersectionObserver,
 scroll real do Progress, overlay do Preloader do load à remoção, fundos do
 Backgrounds, montagem/desmontagem dinâmica estilo-SPA e idempotência do
@@ -399,14 +526,51 @@ pendente de verificação em browser real.
 breeze/
 ├─ bin/breeze.js          CLI
 ├─ lib/glob.js            descoberta de ficheiros (globs zero-deps)
-├─ lib/htmlscan.js        parser HTML + injeção de <link>
-├─ lib/engine.js          hospedeiro VM do motor real
+├─ lib/htmlscan.js        parser HTML (com posições por classe) + injeção de <link>
+├─ lib/engine.js          hospedeiro VM do motor real + política de versões
 ├─ lib/cssgen.js          transforms, componentes, minificador, montagem
+├─ lib/diagnostico.js     fim das falhas silenciosas (códigos, posições, Levenshtein)
+├─ lib/cache.js           cache incremental (manifest, impressão digital, chaves)
 ├─ lib/escape.js          CSS.escape compatível com browsers
 ├─ lib/initscan.js        descoberta do BreezeCSS.init(…) do projecto
 ├─ lib/config.js          breeze.config.js (tema, componentes, omissões)
 ├─ lib/components.js      descoberta dos addComponent(…)
-├─ vendor/breeze.bundle.js  motor BreezeCSS 2.2.5 + plugins
+├─ scripts/sync-engine.js copia o motor da raiz para vendor/ e valida versões
+├─ scripts/bench.js       benchmark da cache (500 páginas × 200 elementos)
+├─ vendor/breeze.bundle.js  motor BreezeCSS 2.3.0 + plugins
 └─ exemplo/               index.html + settings.html + doc.html (demonstração;
                           doc.html é a documentação viva do CLI, já com css/ gerado)
 ```
+
+## Decisões de implementação (1.1)
+
+Escolhas conservadoras tomadas onde a especificação deixava margem:
+
+- **Versão do CLI 1.1.0** — o pacote dizia 1.0.0, o README da raiz 1.0.3 e o
+  cabeçalho do CSS 1.0.0. Como esta versão acrescenta flags novas sem mudar
+  nenhuma existente, fixou-se `1.1.0` em `package.json` (fonte única) e o
+  `scripts/sync-engine.js` propaga-a aos README.
+- **Severidades dos diagnósticos** — são **erro** os códigos que significam
+  "a classe nunca gera CSS": `sintaxe-invalida`, `variante-desconhecida`,
+  `prefixo-desconhecido` e `modificador-opacidade-nao-suportado`; são
+  **aviso** os que significam "provavelmente não é o que queres":
+  `estilo-tailwind`, `classe-dinamica-suspeita` e `aviso-motor`; `nao-breeze`
+  é nota (só com `--verbose`). O `--strict` conta só os erros.
+- **Cache e correcto com byte-a-byte** — quando uma página está em hit, nada
+  é recompilado nem reescrito; quando está em miss, o caminho é exactamente o
+  de sempre. O cabeçalho do CSS leva data/hora (comportamento existente),
+  por isso os testes comparam os ficheiros sem o cabeçalho e os mtimes
+  provam que os hits não reescrevem.
+- **Análises guardadas por página** (deps, componentes, diagnósticos,
+  desconhecidas) são reutilizadas apenas quando o conteúdo normalizado E a
+  impressão digital coincidem — em caso de dúvida, o CLI recalcula.
+- **`scripts/sync-engine.js`** copia sempre a raiz → `vendor/` e falha se, ao
+  fim da cópia, as versões dos cabeçalhos divergirem; `vendor/` é sempre uma
+  cópia da raiz, nunca o contrário.
+- **Modo CSS único com 1 página alterada** não atinge < 10% do frio por
+  definição do modo (a união de classes mudou → o ficheiro único é
+  regenerado a partir de todas as páginas); ver “Cache incremental”.
+
+## Validação semântica (2.3.1 / CLI 1.1.1)
+
+O bundle usa `CSS.supports(propriedade, valor)` após resolver o tema e processadores especiais. Valores inválidos são descartados com diagnóstico. A cache de validação é limitada a 4096 entradas. O CLI inclui verificações conservadoras para espaçamento, cores nomeadas e transforms comuns, sem dependências obrigatórias. Opcionalmente, instala `css-tree` no ambiente do CLI para ampliar a cobertura gramatical (integração opcional não testada nesta entrega). `--strict` devolve 1 perante diagnósticos de valor inválido. A validação não garante valores calculados de variáveis CSS nem cobertura integral no CLI.

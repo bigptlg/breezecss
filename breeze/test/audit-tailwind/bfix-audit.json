@@ -1,0 +1,446 @@
+[
+  {
+    "ref": "20690",
+    "class": "bg[red/*]",
+    "property": "backgroundColor",
+    "expected": "rgba(0, 0, 0, 0)",
+    "runtime": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 198,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 160,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 96,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20691",
+    "class": "bg[</STYLE>]",
+    "property": "backgroundColor",
+    "expected": "rgba(0, 0, 0, 0)",
+    "runtime": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 142,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 85,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 82,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20693",
+    "class": "hover:hover:hover:hover:hover:hover:hove… (391 chars)",
+    "property": "backgroundColor",
+    "expected": "rgba(0, 0, 0, 0)",
+    "runtime": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 133,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 77,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 98,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20699",
+    "class": "bg-image[url(/a/*b.png)]",
+    "property": "backgroundImage",
+    "expected": "url(\"https://example.test/a/*b.png\")",
+    "runtime": {
+      "actual": "url(\"https://example.test/a/*b.png\")",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 127,
+      "declaration": [
+        ".bg-image\\[url\\(\\/a\\/\\*b\\.png\\)\\] { background-image: url(\"/a/*b.png\"); }"
+      ]
+    },
+    "normal": {
+      "actual": "url(\"https://example.test/a/*b.png\")",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 76,
+      "declaration": [
+        ".bg-image\\[url\\(\\/a\\/\\*b\\.png\\)\\] { background-image: url(/a/*b.png); }"
+      ]
+    },
+    "minified": {
+      "actual": "url(\"https://example.test/a/*b.png\")",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 79,
+      "declaration": [
+        "html{scroll-behavior:smooth}*{margin:0;padding:0}html{box-sizing:border-box}*,*::before,*::after{box-sizing:inherit}@keyframes breeze-spin{to{transform:rotate(360deg)}}@keyframes breeze-ping{75%,100%{transform:scale(2);opacity:0}}@keyframes breeze-pu"
+      ]
+    }
+  },
+  {
+    "ref": "20615",
+    "class": "content['min(1,2)']",
+    "property": "content",
+    "expected": "\"min(1,2)\"",
+    "runtime": {
+      "actual": "\"min(1,2)\"",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 134,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "\"min(1,2)\"",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 75,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "\"min(1,2)\"",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 76,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20727",
+    "class": "w[Calc(100px_+_20px)]",
+    "property": "width",
+    "expected": "120px",
+    "runtime": {
+      "actual": "120px",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 128,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "120px",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 81,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "120px",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 85,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20727",
+    "class": "w[calc(100px+20px)]",
+    "property": "width",
+    "expected": "120px",
+    "runtime": {
+      "actual": "1280px",
+      "good": "rgb(0, 0, 255)",
+      "pass": false,
+      "ms": 126,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "1280px",
+      "good": "rgb(0, 0, 255)",
+      "pass": false,
+      "ms": 76,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "1280px",
+      "good": "rgb(0, 0, 255)",
+      "pass": false,
+      "ms": 83,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20658",
+    "class": "bg[color-mix(currentcolor_50%,transparent)]",
+    "property": "backgroundColor",
+    "expected": "rgba(0, 0, 0, 0)",
+    "runtime": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 130,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 74,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 75,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20658",
+    "class": "bg[color-mix(in_srgb,red_50%,blue)]",
+    "property": "backgroundColor",
+    "expected": "color(srgb 0.5 0 0.5)",
+    "runtime": {
+      "actual": "color(srgb 0.5 0 0.5)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 125,
+      "declaration": [
+        ".bg\\[color-mix\\(in_srgb\\,red_50\\%\\,blue\\)\\] { background-color: color-mix(in srgb, red, blue); }"
+      ]
+    },
+    "normal": {
+      "actual": "color(srgb 0.5 0 0.5)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 88,
+      "declaration": [
+        ".bg\\[color-mix\\(in_srgb\\,red_50\\%\\,blue\\)\\] { background-color: color-mix(in srgb,red 50%,blue); }"
+      ]
+    },
+    "minified": {
+      "actual": "color(srgb 0.5 0 0.5)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 84,
+      "declaration": [
+        "html{scroll-behavior:smooth}*{margin:0;padding:0}html{box-sizing:border-box}*,*::before,*::after{box-sizing:inherit}@keyframes breeze-spin{to{transform:rotate(360deg)}}@keyframes breeze-ping{75%,100%{transform:scale(2);opacity:0}}@keyframes breeze-pu"
+      ]
+    }
+  },
+  {
+    "ref": "19986",
+    "class": "content['a__b']",
+    "property": "content",
+    "expected": "\"a  b\"",
+    "runtime": {
+      "actual": "\"a  b\"",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 125,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "\"a  b\"",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 78,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "\"a  b\"",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 88,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "19988",
+    "class": "mt[-20in]",
+    "property": "marginTop",
+    "expected": "-1920px",
+    "runtime": {
+      "actual": "-1920px",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 123,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "-1920px",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 77,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "-1920px",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 80,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20298",
+    "class": "bg[#ABC]",
+    "property": "backgroundColor",
+    "expected": "rgb(170, 187, 204)",
+    "runtime": {
+      "actual": "rgb(170, 187, 204)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 131,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "rgb(170, 187, 204)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 72,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "rgb(170, 187, 204)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 75,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20373",
+    "class": "p[var(--missing,)]",
+    "property": "paddingTop",
+    "expected": "0px",
+    "runtime": {
+      "actual": "0px",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 124,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "0px",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 67,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "0px",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 72,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20717",
+    "class": "justify[baseline]",
+    "property": "justifyContent",
+    "expected": "normal",
+    "runtime": {
+      "actual": "normal",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 126,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "normal",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 77,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "normal",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 73,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20693",
+    "class": "data-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a-a… (10014 chars)",
+    "property": "backgroundColor",
+    "expected": "rgba(0, 0, 0, 0)",
+    "runtime": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 130,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 102,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 91,
+      "declaration": []
+    }
+  },
+  {
+    "ref": "20694",
+    "class": "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[… (10000 chars)",
+    "property": "backgroundColor",
+    "expected": "rgba(0, 0, 0, 0)",
+    "runtime": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 124,
+      "declaration": []
+    },
+    "normal": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 75,
+      "declaration": []
+    },
+    "minified": {
+      "actual": "rgba(0, 0, 0, 0)",
+      "good": "rgb(0, 0, 255)",
+      "pass": true,
+      "ms": 78,
+      "declaration": []
+    }
+  }
+]

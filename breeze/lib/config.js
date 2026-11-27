@@ -30,6 +30,12 @@
 //                            para deps; isto compila-as também)
 //   out, name, split, minify, reset, smooth, inject,
 //   include, exclude, engine                 — omissões para as flags do CLI
+//   strict        boolean — código de saída 1 quando há erros de diagnóstico
+//   report        'text' | 'json' — formato do relatório (json para CI)
+//   ignore        string[] — regexes de classes a ignorar nos diagnósticos
+//   cacheDir      string — pasta da cache (por omissão .breeze-cache)
+//   cache         boolean — false equivale a --no-cache
+//   forceEngine   boolean — aceita motor abaixo da versão mínima
 //   (aceita também os aliases pt: nome, incluir, excluir)
 // ─────────────────────────────────────────────────────────────────────────
 
@@ -62,12 +68,19 @@ const MAPA_ALIAS = {
   jsOut: 'jsOut',
   tpl: 'tpl',
   templates: 'tpl',
+  // diagnósticos e cache (novidade 1.1)
+  strict: 'strict',
+  report: 'report',
+  ignore: 'ignorar',
+  cacheDir: 'cacheDir',
+  cache: 'cache',
+  forceEngine: 'forcarEngine',
 }
 
-const BOLEANAS = new Set(['split', 'minify', 'reset', 'smooth', 'inject', 'allPluginCss', 'runtime', 'tpl'])
+const BOLEANAS = new Set(['split', 'minify', 'reset', 'smooth', 'inject', 'allPluginCss', 'runtime', 'tpl', 'strict', 'forcarEngine', 'cache'])
 const CHAVES_COMPONENTES = new Set(['componentes', 'components'])
-const STRINGS = new Set(['out', 'nome', 'prefix', 'engine', 'jsOut'])
-const LISTAS = new Set(['incluir', 'excluir', 'safelist'])
+const STRINGS = new Set(['out', 'nome', 'prefix', 'engine', 'jsOut', 'report', 'cacheDir'])
+const LISTAS = new Set(['incluir', 'excluir', 'safelist', 'ignorar'])
 
 function falha(msg) {
   throw new Error(msg)
@@ -248,7 +261,15 @@ function carregarConfig(raiz, explicito) {
     }
     if (BOLEANAS.has(alvo)) {
       if (typeof valor !== 'boolean') falha(`"${chave}" deve ser true/false em ${onde}`)
-      valores[alvo] = valor
+      // cache: false equivale a --no-cache (opção interna semCache)
+      valores[alvo === 'cache' ? 'semCache' : alvo] = alvo === 'cache' ? !valor : valor
+      continue
+    }
+    if (alvo === 'report') {
+      if (valor !== 'text' && valor !== 'json') {
+        falha(`"report" deve ser 'text' ou 'json' em ${onde}`)
+      }
+      valores.report = valor
       continue
     }
     if (STRINGS.has(alvo)) {

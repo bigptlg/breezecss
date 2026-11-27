@@ -1,6 +1,6 @@
-/*! breeze runtime v1.0.0 — gerado por BreezeCLI a partir do breeze.bundle.js 2.2.5
+/*! breeze runtime v1.1.0 — gerado por BreezeCLI a partir do breeze.bundle.js 2.3.0
  *  Plugins com JavaScript: nenhum (só compatibilidade BreezeCSS)
- *  Páginas: 4 · gerado em 2026-11-24 09:30
+ *  Páginas: 4 · gerado em 2026-11-27 12:54
  *  NÃO EDITAR — regenerar com: node bin/breeze.js [--watch]
  *  Comportamentos dos plugins: código original do bundle (1:1).
  */
@@ -350,4 +350,4 @@
 })()
 
 
-__breezeNucleo.arrancar({"cli":"1.0.0","motor":"2.2.5","prefix":"","plugins":[],"componentes":{},"paginas":4,"gerado":"2026-11-24 09:30"});
+__breezeNucleo.arrancar({"cli":"1.1.0","motor":"2.3.0","prefix":"","plugins":[],"componentes":{},"paginas":4,"gerado":"2026-11-27 12:54"});

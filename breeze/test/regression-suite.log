@@ -1,0 +1,727 @@
+
+> breezecss-cli@1.1.2 test
+> node --test "test/*.test.js"
+
+TAP version 13
+#   ⚠ testes de navegador PENDENTES — playwright/chromium não encontrado.
+#     Pendente verificar em browser real: Canvas da refracção, ResizeObserver,
+#     IntersectionObserver, animações SVG-SMIL dos backgrounds.
+#     Instalar com: npm i -g playwright && npx playwright install chromium
+# Subtest: navegador: ambiente disponível (chromium)
+    # Subtest: playwright indisponível — testes de navegador pendentes
+    ok 1 - playwright indisponível — testes de navegador pendentes # SKIP
+      ---
+      duration_ms: 0.972654
+      type: 'test'
+      ...
+    1..1
+ok 1 - navegador: ambiente disponível (chromium)
+  ---
+  duration_ms: 2.407122
+  type: 'test'
+  ...
+# Subtest: navegador: plugins activos sem o bundle original e sem erros
+not ok 2 - navegador: plugins activos sem o bundle original e sem erros # SKIP playwright indisponível
+  ---
+  duration_ms: 104.956882
+  type: 'test'
+  location: '/tmp/bval/breeze/test/browser.test.js:109:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of null (reading 'chromium')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    abrir (/tmp/bval/breeze/test/browser.test.js:80:46)
+    async /tmp/bval/breeze/test/browser.test.js:112:31
+    async comBrowser (/tmp/bval/breeze/test/browser.test.js:96:12)
+    async TestContext.<anonymous> (/tmp/bval/breeze/test/browser.test.js:111:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: navegador: glass-refract gera o mapa de deslocamento (Canvas + SVG reais)
+not ok 3 - navegador: glass-refract gera o mapa de deslocamento (Canvas + SVG reais) # SKIP playwright indisponível
+  ---
+  duration_ms: 87.899062
+  type: 'test'
+  location: '/tmp/bval/breeze/test/browser.test.js:133:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of null (reading 'chromium')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    abrir (/tmp/bval/breeze/test/browser.test.js:80:46)
+    async /tmp/bval/breeze/test/browser.test.js:136:31
+    async comBrowser (/tmp/bval/breeze/test/browser.test.js:96:12)
+    async TestContext.<anonymous> (/tmp/bval/breeze/test/browser.test.js:135:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: navegador: barra de progresso segue o scroll da página
+not ok 4 - navegador: barra de progresso segue o scroll da página # SKIP playwright indisponível
+  ---
+  duration_ms: 96.474583
+  type: 'test'
+  location: '/tmp/bval/breeze/test/browser.test.js:151:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of null (reading 'chromium')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    abrir (/tmp/bval/breeze/test/browser.test.js:80:46)
+    async /tmp/bval/breeze/test/browser.test.js:154:31
+    async comBrowser (/tmp/bval/breeze/test/browser.test.js:96:12)
+    async TestContext.<anonymous> (/tmp/bval/breeze/test/browser.test.js:153:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: navegador: scrollbar aplica [data-breeze-scrollbar] e espelha body→html
+not ok 5 - navegador: scrollbar aplica [data-breeze-scrollbar] e espelha body→html # SKIP playwright indisponível
+  ---
+  duration_ms: 98.229854
+  type: 'test'
+  location: '/tmp/bval/breeze/test/browser.test.js:174:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of null (reading 'chromium')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    abrir (/tmp/bval/breeze/test/browser.test.js:80:46)
+    async /tmp/bval/breeze/test/browser.test.js:177:31
+    async comBrowser (/tmp/bval/breeze/test/browser.test.js:96:12)
+    async TestContext.<anonymous> (/tmp/bval/breeze/test/browser.test.js:176:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: navegador: backgrounds gera o fundo (SVG/SMIL reais)
+not ok 6 - navegador: backgrounds gera o fundo (SVG/SMIL reais) # SKIP playwright indisponível
+  ---
+  duration_ms: 92.697243
+  type: 'test'
+  location: '/tmp/bval/breeze/test/browser.test.js:189:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of null (reading 'chromium')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    abrir (/tmp/bval/breeze/test/browser.test.js:80:46)
+    async /tmp/bval/breeze/test/browser.test.js:192:31
+    async comBrowser (/tmp/bval/breeze/test/browser.test.js:96:12)
+    async TestContext.<anonymous> (/tmp/bval/breeze/test/browser.test.js:191:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: navegador: componentes com efeitos dinâmicos (ponte .card → glass-refract)
+not ok 7 - navegador: componentes com efeitos dinâmicos (ponte .card → glass-refract) # SKIP playwright indisponível
+  ---
+  duration_ms: 107.617426
+  type: 'test'
+  location: '/tmp/bval/breeze/test/browser.test.js:210:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of null (reading 'chromium')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    abrir (/tmp/bval/breeze/test/browser.test.js:80:46)
+    async /tmp/bval/breeze/test/browser.test.js:213:31
+    async comBrowser (/tmp/bval/breeze/test/browser.test.js:96:12)
+    async TestContext.<anonymous> (/tmp/bval/breeze/test/browser.test.js:212:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: navegador: preloader cria o overlay e remove-o no load
+not ok 8 - navegador: preloader cria o overlay e remove-o no load # SKIP playwright indisponível
+  ---
+  duration_ms: 85.936498
+  type: 'test'
+  location: '/tmp/bval/breeze/test/browser.test.js:231:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of null (reading 'chromium')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    abrir (/tmp/bval/breeze/test/browser.test.js:80:46)
+    async /tmp/bval/breeze/test/browser.test.js:234:31
+    async comBrowser (/tmp/bval/breeze/test/browser.test.js:96:12)
+    async TestContext.<anonymous> (/tmp/bval/breeze/test/browser.test.js:233:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: navegador: BreezeConfig/BreezeCSS.init do tempo do bundle continua compatível
+not ok 9 - navegador: BreezeConfig/BreezeCSS.init do tempo do bundle continua compatível # SKIP playwright indisponível
+  ---
+  duration_ms: 89.919072
+  type: 'test'
+  location: '/tmp/bval/breeze/test/browser.test.js:253:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of null (reading 'chromium')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    abrir (/tmp/bval/breeze/test/browser.test.js:80:46)
+    async /tmp/bval/breeze/test/browser.test.js:256:39
+    async comBrowser (/tmp/bval/breeze/test/browser.test.js:96:12)
+    async TestContext.<anonymous> (/tmp/bval/breeze/test/browser.test.js:255:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: navegador: SPA — elementos montados/desmontados dinamicamente
+not ok 10 - navegador: SPA — elementos montados/desmontados dinamicamente # SKIP playwright indisponível
+  ---
+  duration_ms: 86.848139
+  type: 'test'
+  location: '/tmp/bval/breeze/test/browser.test.js:268:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of null (reading 'chromium')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    abrir (/tmp/bval/breeze/test/browser.test.js:80:46)
+    async /tmp/bval/breeze/test/browser.test.js:271:31
+    async comBrowser (/tmp/bval/breeze/test/browser.test.js:96:12)
+    async TestContext.<anonymous> (/tmp/bval/breeze/test/browser.test.js:270:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: navegador: recarregar a página não duplica o runtime
+not ok 11 - navegador: recarregar a página não duplica o runtime # SKIP playwright indisponível
+  ---
+  duration_ms: 95.61275
+  type: 'test'
+  location: '/tmp/bval/breeze/test/browser.test.js:289:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of null (reading 'chromium')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    abrir (/tmp/bval/breeze/test/browser.test.js:80:46)
+    async /tmp/bval/breeze/test/browser.test.js:292:39
+    async comBrowser (/tmp/bval/breeze/test/browser.test.js:96:12)
+    async TestContext.<anonymous> (/tmp/bval/breeze/test/browser.test.js:291:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: impressão digital: mudar algo invalida, repetir é estável
+ok 12 - impressão digital: mudar algo invalida, repetir é estável
+  ---
+  duration_ms: 1.685507
+  type: 'test'
+  ...
+# Subtest: manifest corrompido/de esquema antigo é ignorado (e o build não falha)
+ok 13 - manifest corrompido/de esquema antigo é ignorado (e o build não falha)
+  ---
+  duration_ms: 253.066247
+  type: 'test'
+  ...
+# Subtest: a frio vs a quente dão ficheiros idênticos (--split, sem inject)
+ok 14 - a frio vs a quente dão ficheiros idênticos (--split, sem inject)
+  ---
+  duration_ms: 224.403235
+  type: 'test'
+  ...
+# Subtest: a frio vs a quente dão ficheiros idênticos (CSS único, sem inject)
+ok 15 - a frio vs a quente dão ficheiros idênticos (CSS único, sem inject)
+  ---
+  duration_ms: 218.683108
+  type: 'test'
+  ...
+# Subtest: duas execuções seguidas com --inject: 100% hits e ZERO ficheiros escritos
+ok 16 - duas execuções seguidas com --inject: 100% hits e ZERO ficheiros escritos
+  ---
+  duration_ms: 218.565165
+  type: 'test'
+  ...
+# Subtest: idem em CSS único com --inject
+ok 17 - idem em CSS único com --inject
+  ---
+  duration_ms: 151.203285
+  type: 'test'
+  ...
+# Subtest: mudar 1 página em --split só reescreve o CSS dessa página
+ok 18 - mudar 1 página em --split só reescreve o CSS dessa página
+  ---
+  duration_ms: 185.39711
+  type: 'test'
+  ...
+# Subtest: CSS único: página alterada SEM classes novas não reescreve nada
+ok 19 - CSS único: página alterada SEM classes novas não reescreve nada
+  ---
+  duration_ms: 167.612465
+  type: 'test'
+  ...
+# Subtest: CSS único: classes novas numa página reconstroem o CSS
+ok 20 - CSS único: classes novas numa página reconstroem o CSS
+  ---
+  duration_ms: 156.917515
+  type: 'test'
+  ...
+# Subtest: páginas apagadas: entradas do manifest e outputs órfãos removidos
+ok 21 - páginas apagadas: entradas do manifest e outputs órfãos removidos
+  ---
+  duration_ms: 173.17427
+  type: 'test'
+  ...
+# Subtest: runtime JS agrupado também é cacheado
+ok 22 - runtime JS agrupado também é cacheado
+  ---
+  duration_ms: 132.024778
+  type: 'test'
+  ...
+# Subtest: --cache-dir personalizada, --no-cache e --clean-cache
+ok 23 - --cache-dir personalizada, --no-cache e --clean-cache
+  ---
+  duration_ms: 281.848487
+  type: 'test'
+  ...
+# Subtest: impressão digital nova invalida a cache (tema diferente)
+ok 24 - impressão digital nova invalida a cache (tema diferente)
+  ---
+  duration_ms: 143.063485
+  type: 'test'
+  ...
+# Subtest: o js-guard continua a funcionar com a cache activa
+ok 25 - o js-guard continua a funcionar com a cache activa
+  ---
+  duration_ms: 122.484
+  type: 'test'
+  ...
+# Subtest: ficheiros gerados não mudam com a cache activa vs --no-cache (com inject)
+ok 26 - ficheiros gerados não mudam com a cache activa vs --no-cache (com inject)
+  ---
+  duration_ms: 199.355245
+  type: 'test'
+  ...
+# Subtest: compilação base: classes fixas, arbitrárias e transform combinado
+ok 27 - compilação base: classes fixas, arbitrárias e transform combinado
+  ---
+  duration_ms: 94.461958
+  type: 'test'
+  ...
+# Subtest: --plugins auto: só os plugins detectados registam-se e o CSS inclui o suporte
+ok 28 - --plugins auto: só os plugins detectados registam-se e o CSS inclui o suporte
+  ---
+  duration_ms: 72.995008
+  type: 'test'
+  ...
+# Subtest: --plugins glass,progress: lista explícita
+ok 29 - --plugins glass,progress: lista explícita
+  ---
+  duration_ms: 83.384969
+  type: 'test'
+  ...
+# Subtest: componente com membros do plugin leva o CSS/JS do plugin (deteção recursiva)
+ok 30 - componente com membros do plugin leva o CSS/JS do plugin (deteção recursiva)
+  ---
+  duration_ms: 92.333585
+  type: 'test'
+  ...
+# Subtest: protecção contra referências circulares entre componentes
+ok 31 - protecção contra referências circulares entre componentes
+  ---
+  duration_ms: 64.377604
+  type: 'test'
+  ...
+# Subtest: scrollbar: CSS estático (WebKit + Firefox + body + none) incluído
+ok 32 - scrollbar: CSS estático (WebKit + Firefox + body + none) incluído
+  ---
+  duration_ms: 162.517086
+  type: 'test'
+  ...
+# Subtest: tema: variáveis :root e resolução de nomes (bg[primaria])
+ok 33 - tema: variáveis :root e resolução de nomes (bg[primaria])
+  ---
+  duration_ms: 74.218163
+  type: 'test'
+  ...
+# Subtest: prefixo: classes bz-* compiladas e runtime com ctx prefixado
+ok 34 - prefixo: classes bz-* compiladas e runtime com ctx prefixado
+  ---
+  duration_ms: 74.028818
+  type: 'test'
+  ...
+# Subtest: --safelist gera classes sem uso no HTML
+ok 35 - --safelist gera classes sem uso no HTML
+  ---
+  duration_ms: 71.47153
+  type: 'test'
+  ...
+# Subtest: minificação
+ok 36 - minificação
+  ---
+  duration_ms: 83.962076
+  type: 'test'
+  ...
+# Subtest: classes de JSX/Vue (--tpl) entram no CSS
+ok 37 - classes de JSX/Vue (--tpl) entram no CSS
+  ---
+  duration_ms: 83.55249
+  type: 'test'
+  ...
+# Subtest: init automático prioriza o HTML escolhido com --file, sem --init
+ok 38 - init automático prioriza o HTML escolhido com --file, sem --init
+  ---
+  duration_ms: 81.12714
+  type: 'test'
+  ...
+# Subtest: init automático sem --file prefere HTML da raiz a fixtures e JS
+ok 39 - init automático sem --file prefere HTML da raiz a fixtures e JS
+  ---
+  duration_ms: 75.925809
+  type: 'test'
+  ...
+# Subtest: CLI dentro do projecto não compila os próprios exemplos nem usa o init das fixtures
+ok 40 - CLI dentro do projecto não compila os próprios exemplos nem usa o init das fixtures
+  ---
+  duration_ms: 95.083485
+  type: 'test'
+  ...
+# Subtest: códigos de diagnóstico com mensagem e sugestão
+ok 41 - códigos de diagnóstico com mensagem e sugestão
+  ---
+  duration_ms: 3.28901
+  type: 'test'
+  ...
+# Subtest: sugestão "querias dizer…?" por Levenshtein
+ok 42 - sugestão "querias dizer…?" por Levenshtein
+  ---
+  duration_ms: 0.500583
+  type: 'test'
+  ...
+# Subtest: palavras simples só dão "nao-breeze"; Tailwind dá aviso
+ok 43 - palavras simples só dão "nao-breeze"; Tailwind dá aviso
+  ---
+  duration_ms: 2.331969
+  type: 'test'
+  ...
+# Subtest: posições ficheiro:linha:coluna no HTML e nos scripts inline
+ok 44 - posições ficheiro:linha:coluna no HTML e nos scripts inline
+  ---
+  duration_ms: 2.333682
+  type: 'test'
+  ...
+# Subtest: template literals com [${…] → classe-dinamica-suspeita
+ok 45 - template literals com [${…] → classe-dinamica-suspeita
+  ---
+  duration_ms: 0.734786
+  type: 'test'
+  ...
+# Subtest: avisos do motor entram como diagnósticos (aviso-motor)
+ok 46 - avisos do motor entram como diagnósticos (aviso-motor)
+  ---
+  duration_ms: 0.165109
+  type: 'test'
+  ...
+# Subtest: --ignore ignora classes por regex (CLI)
+ok 47 - --ignore ignora classes por regex (CLI)
+  ---
+  duration_ms: 83.167682
+  type: 'test'
+  ...
+# Subtest: --strict devolve exit 1 quando há erros de diagnóstico
+ok 48 - --strict devolve exit 1 quando há erros de diagnóstico
+  ---
+  duration_ms: 138.876369
+  type: 'test'
+  ...
+# Subtest: --report json emite JSON válido para CI (só o JSON no stdout)
+ok 49 - --report json emite JSON válido para CI (só o JSON no stdout)
+  ---
+  duration_ms: 96.937624
+  type: 'test'
+  ...
+# Subtest: prefixo do CLI: dica de escrita com prefixo
+ok 50 - prefixo do CLI: dica de escrita com prefixo
+  ---
+  duration_ms: 0.619903
+  type: 'test'
+  ...
+# Subtest: diff do --watch: só novos/alterados
+ok 51 - diff do --watch: só novos/alterados
+  ---
+  duration_ms: 0.329837
+  type: 'test'
+  ...
+# Subtest: relatório de texto agrupa por ficheiro com ficheiro:linha:coluna
+ok 52 - relatório de texto agrupa por ficheiro com ficheiro:linha:coluna
+  ---
+  duration_ms: 0.237567
+  type: 'test'
+  ...
+# Subtest: --watch: os rebuilds mostram só os diagnósticos novos/alterados
+ok 53 - --watch: os rebuilds mostram só os diagnósticos novos/alterados
+  ---
+  duration_ms: 908.51798
+  type: 'test'
+  ...
+# Subtest: print:, motion-reduce:, motion-safe: e max-<bp>: são válidas (regressão)
+ok 54 - print:, motion-reduce:, motion-safe: e max-<bp>: são válidas (regressão)
+  ---
+  duration_ms: 0.462746
+  type: 'test'
+  ...
+# Subtest: --strict sai com 0 num projecto que só usa variantes de media válidas
+ok 55 - --strict sai com 0 num projecto que só usa variantes de media válidas
+  ---
+  duration_ms: 67.654195
+  type: 'test'
+  ...
+# Subtest: inject: <link> + <script data-breeze-cli="runtime"> inseridos
+ok 56 - inject: <link> + <script data-breeze-cli="runtime"> inseridos
+  ---
+  duration_ms: 77.693112
+  type: 'test'
+  ...
+# Subtest: inject: 2ª execução não duplica e mantém a semântica defer/sync
+ok 57 - inject: 2ª execução não duplica e mantém a semântica defer/sync
+  ---
+  duration_ms: 124.736229
+  type: 'test'
+  ...
+# Subtest: inject: caminhos actualizados quando a pasta de saída muda
+ok 58 - inject: caminhos actualizados quando a pasta de saída muda
+  ---
+  duration_ms: 156.373642
+  type: 'test'
+  ...
+# Subtest: inject: subpastas recebem caminhos relativos correctos
+ok 59 - inject: subpastas recebem caminhos relativos correctos
+  ---
+  duration_ms: 84.893008
+  type: 'test'
+  ...
+# Subtest: inject: BreezeCSS.init() inline continua a funcionar (runtime antes do init)
+ok 60 - inject: BreezeCSS.init() inline continua a funcionar (runtime antes do init)
+  ---
+  duration_ms: 67.348765
+  type: 'test'
+  ...
+# Subtest: inject: página que deixou de precisar de runtime perde o <script>
+ok 61 - inject: página que deixou de precisar de runtime perde o <script>
+  ---
+  duration_ms: 134.635318
+  type: 'test'
+  ...
+# Subtest: inject: referências breeze--*.js (plugins soltos) também são substituídas
+ok 62 - inject: referências breeze--*.js (plugins soltos) também são substituídas
+  ---
+  duration_ms: 68.463793
+  type: 'test'
+  ...
+# Subtest: inject: se runtime não carregar, chamadas BreezeCSS não bloqueiam scripts de terceiros
+ok 63 - inject: se runtime não carregar, chamadas BreezeCSS não bloqueiam scripts de terceiros
+  ---
+  duration_ms: 120.058424
+  type: 'test'
+  ...
+# Subtest: guard: protege apenas chamadas BreezeCSS e preserva scripts no mesmo bloco
+ok 64 - guard: protege apenas chamadas BreezeCSS e preserva scripts no mesmo bloco
+  ---
+  duration_ms: 2.973345
+  type: 'test'
+  ...
+# Subtest: guard: chamadas em linha e sem ponto-e-vírgula
+ok 65 - guard: chamadas em linha e sem ponto-e-vírgula
+  ---
+  duration_ms: 0.660884
+  type: 'test'
+  ...
+# Subtest: guard: idempotente e não mexe em strings, comentários, expressões ou scripts externos
+ok 66 - guard: idempotente e não mexe em strings, comentários, expressões ou scripts externos
+  ---
+  duration_ms: 1.326847
+  type: 'test'
+  ...
+# Subtest: guard: não envolve chamadas que fazem parte de expressões ou retornos
+ok 67 - guard: não envolve chamadas que fazem parte de expressões ou retornos
+  ---
+  duration_ms: 0.150476
+  type: 'test'
+  ...
+# Subtest: progress: barra criada num elemento, evento breeze:progress, limpeza
+ok 68 - progress: barra criada num elemento, evento breeze:progress, limpeza
+  ---
+  duration_ms: 196.032796
+  type: 'test'
+  ...
+# Subtest: progress: elemento adicionado dinamicamente (SPA) ganha barra
+ok 69 - progress: elemento adicionado dinamicamente (SPA) ganha barra
+  ---
+  duration_ms: 91.783428
+  type: 'test'
+  ...
+# Subtest: scrollbar: atributo aplicado ao elemento e espelhado do body para html
+ok 70 - scrollbar: atributo aplicado ao elemento e espelhado do body para html
+  ---
+  duration_ms: 145.053435
+  type: 'test'
+  ...
+# Subtest: scrollbar: atributo removido quando a classe sai do elemento
+ok 71 - scrollbar: atributo removido quando a classe sai do elemento
+  ---
+  duration_ms: 144.430904
+  type: 'test'
+  ...
+# Subtest: preloader: overlay criado, aria-busy, removido após o load
+ok 72 - preloader: overlay criado, aria-busy, removido após o load
+  ---
+  duration_ms: 1008.783715
+  type: 'test'
+  ...
+# Subtest: backgrounds: fundo gerado (SVG) e limpo quando o elemento sai
+ok 73 - backgrounds: fundo gerado (SVG) e limpo quando o elemento sai
+  ---
+  duration_ms: 206.258836
+  type: 'test'
+  ...
+# Subtest: glass: estilos de acessibilidade injectados + refracção registada
+ok 74 - glass: estilos de acessibilidade injectados + refracção registada
+  ---
+  duration_ms: 194.125758
+  type: 'test'
+  ...
+# Subtest: dividers: regista as classes (só CSS) e não cria elementos nem JS
+ok 75 - dividers: regista as classes (só CSS) e não cria elementos nem JS
+  ---
+  duration_ms: 82.77379
+  type: 'test'
+  ...
+# Subtest: runtime com zero plugins (compat): init() não rebenta e nada é executado
+ok 76 - runtime com zero plugins (compat): init() não rebenta e nada é executado
+  ---
+  duration_ms: 83.97964
+  type: 'test'
+  ...
+# Subtest: __breezeRuntime.destruir() restaura o querySelectorAll e limpa registos
+ok 77 - __breezeRuntime.destruir() restaura o querySelectorAll e limpa registos
+  ---
+  duration_ms: 62.748465
+  type: 'test'
+  ...
+# Subtest: extracção: os 6 plugins existem no bundle com as versões certas
+ok 78 - extracção: os 6 plugins existem no bundle com as versões certas
+  ---
+  duration_ms: 2.199089
+  type: 'test'
+  ...
+# Subtest: extracção: nenhum código do motor entra no runtime
+ok 79 - extracção: nenhum código do motor entra no runtime
+  ---
+  duration_ms: 1.58837
+  type: 'test'
+  ...
+# Subtest: geração: runtime com todos os plugins é sintaxe válida e contém os IIFEs
+ok 80 - geração: runtime com todos os plugins é sintaxe válida e contém os IIFEs
+  ---
+  duration_ms: 3.716283
+  type: 'test'
+  ...
+# Subtest: geração: runtime só com os plugins pedidos
+ok 81 - geração: runtime só com os plugins pedidos
+  ---
+  duration_ms: 0.63845
+  type: 'test'
+  ...
+# Subtest: runtime num head-less: BreezeCSS e __breezeRuntime ficam definidos, sem erros
+ok 82 - runtime num head-less: BreezeCSS e __breezeRuntime ficam definidos, sem erros
+  ---
+  duration_ms: 46.285156
+  type: 'test'
+  ...
+# Subtest: BreezeCSS.init() compatível: sem setup duplicado e sem crash
+ok 83 - BreezeCSS.init() compatível: sem setup duplicado e sem crash
+  ---
+  duration_ms: 74.22266
+  type: 'test'
+  ...
+# Subtest: BreezeCSS.init({ log: false }) silencia os avisos do runtime
+ok 84 - BreezeCSS.init({ log: false }) silencia os avisos do runtime
+  ---
+  duration_ms: 73.739102
+  type: 'test'
+  ...
+# Subtest: addComponent em runtime alimenta a ponte de componentes
+ok 85 - addComponent em runtime alimenta a ponte de componentes
+  ---
+  duration_ms: 73.855402
+  type: 'test'
+  ...
+# Subtest: CLI: runtime só nas páginas com plugins dinâmicos; CSS-only não gera runtime
+ok 86 - CLI: runtime só nas páginas com plugins dinâmicos; CSS-only não gera runtime
+  ---
+  duration_ms: 74.772893
+  type: 'test'
+  ...
+# Subtest: CLI: --no-runtime não gera JavaScript
+ok 87 - CLI: --no-runtime não gera JavaScript
+  ---
+  duration_ms: 65.087712
+  type: 'test'
+  ...
+# Subtest: semantic validation: invalid and valid CSS values
+ok 88 - semantic validation: invalid and valid CSS values
+  ---
+  duration_ms: 1.579247
+  type: 'test'
+  ...
+# Subtest: vendor/ e o bundle da raiz têm a mesma versão
+ok 89 - vendor/ e o bundle da raiz têm a mesma versão
+  ---
+  duration_ms: 2.263015
+  type: 'test'
+  ...
+# Subtest: scripts/sync-engine.js copia o motor e sai com 0
+ok 90 - scripts/sync-engine.js copia o motor e sai com 0
+  ---
+  duration_ms: 69.330377
+  type: 'test'
+  ...
+# Subtest: a versão do CLI vem do package.json (--version, --help e README)
+ok 91 - a versão do CLI vem do package.json (--version, --help e README)
+  ---
+  duration_ms: 77.930339
+  type: 'test'
+  ...
+# Subtest: o cabeçalho do CSS gerado mostra a versão do CLI e a do motor
+ok 92 - o cabeçalho do CSS gerado mostra a versão do CLI e a do motor
+  ---
+  duration_ms: 74.70869
+  type: 'test'
+  ...
+# Subtest: motor abaixo da versão mínima → erro; --force-engine passa a verificação
+ok 93 - motor abaixo da versão mínima → erro; --force-engine passa a verificação
+  ---
+  duration_ms: 88.669342
+  type: 'test'
+  ...
+# Subtest: --inject avisa quando a página refere um bundle de outra versão
+ok 94 - --inject avisa quando a página refere um bundle de outra versão
+  ---
+  duration_ms: 74.440481
+  type: 'test'
+  ...
+# Subtest: sync-engine.js: o vendor segue a versão do bundle da raiz
+ok 95 - sync-engine.js: o vendor segue a versão do bundle da raiz
+  ---
+  duration_ms: 30.536113
+  type: 'test'
+  ...
+# Subtest: sync-engine.js --check verifica sem escrever nada
+ok 96 - sync-engine.js --check verifica sem escrever nada
+  ---
+  duration_ms: 26.054725
+  type: 'test'
+  ...
+# Subtest: --watch reconstrói ao guardar o HTML
+ok 97 - --watch reconstrói ao guardar o HTML
+  ---
+  duration_ms: 922.712182
+  type: 'test'
+  ...
+1..97
+# tests 98
+# suites 0
+# pass 87
+# fail 0
+# cancelled 0
+# skipped 11
+# todo 0
+# duration_ms 6893.496099

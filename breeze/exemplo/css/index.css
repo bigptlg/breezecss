@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
- *  CSS gerado por breeze CLI v1.2.0 (motor BreezeCSS 2.2.5)
- *  Páginas: 4 · Regras: 128 · 2026-11-24 09:30
+ *  CSS gerado por breeze CLI v1.1.0 (motor BreezeCSS 2.3.0)
+ *  Páginas: 4 · Regras: 129 · 2026-11-27 12:54
  *  NÃO EDITAR — regenerar com: npx breeze [--watch]
  * ═══════════════════════════════════════════════════════════ */
 html { scroll-behavior: smooth; }
@@ -13,6 +13,7 @@ html { box-sizing: border-box; }
 @keyframes breeze-bounce { 0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8,0,1,1); } 50% { transform: translateY(0); animation-timing-function: cubic-bezier(0,0,0.2,1); } }
 @keyframes breeze-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes breeze-slide-in { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 .bg\[\#0b1220\] { background-color: #0b1220; }
 .text\[\#e2e8f0\] { color: #e2e8f0; }
 .font-family\[system-ui\,_sans-serif\] { font-family: system-ui, sans-serif; }
@@ -94,7 +95,6 @@ html { box-sizing: border-box; }
 .grid { display: grid; }
 .gap\[24px\] { gap: 24px; }
 .max-w\[64rem\] { max-width: 64rem; }
-@media (min-width: 768px) { .md\:cols\[2\] { grid-template-columns: repeat(2, 1fr); } }
 .pb\[80px\] { padding-bottom: 80px; }
 .rounded-2xl { border-radius: 1rem; }
 .p\[28px\] { padding: 28px; }
@@ -123,6 +123,7 @@ html { box-sizing: border-box; }
 .pb\[60px\] { padding-bottom: 60px; }
 .text\[\#64748b\] { color: #64748b; }
 .animate-spin { animation: breeze-spin 1s linear infinite; }
+@media (min-width: 768px) { .md\:cols\[2\] { grid-template-columns: repeat(2, 1fr); } }
 
 /* ── transforms (combinados por elemento) ── */
 .hover\:translate-y\[-2px\]:hover { transform: translateY(-2px); }

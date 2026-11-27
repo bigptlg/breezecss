@@ -62,6 +62,7 @@ function separarQualificadores(classe, breakpoints, variantes) {
     } else atual += c
   }
   segmentos.push(atual)
+  if (segmentos.length > 33) return null
   const classeBase = segmentos.pop()
   let breakpoint = null
   const listaVariantes = []
@@ -102,6 +103,26 @@ function classeRelevante(classe, cfg) {
 }
 
 /** Analisa uma classe de transform (rotate/scale/…) e devolve os seus dados. */
+function valorSeguro(valor) {
+  if (/<\/style/i.test(valor)) return false;
+  let aspas = null, pilha = [];
+  for (let i = 0; i < valor.length; i++) {
+    const c = valor[i];
+    if (c === "\\") { if (++i >= valor.length) return false; continue; }
+    if (aspas) { if (c === aspas) aspas = null; continue; }
+    if (c === '"' || c === "'") { aspas = c; continue; }
+    if (c === '(') { pilha.push(/url$/i.test(valor.slice(0,i))); continue; }
+    if (c === ')') { if (!pilha.length) return false; pilha.pop(); continue; }
+    if (pilha.includes(true)) continue;
+    if (c === '/' && valor[i+1] === '*') {
+      const fim = valor.indexOf('*/', i+2); if (fim < 0) return false;
+      i = fim+1; continue;
+    }
+    if (c === '{' || c === '}' || (c === ';' && !pilha.length)) return false;
+  }
+  return !aspas && !pilha.length;
+}
+
 function analisarTransform(classe, cfg) {
   let importante = false
   let token = classe
@@ -127,10 +148,14 @@ function analisarTransform(classe, cfg) {
   const fn = FUNCOES_TRANSFORM[m.groups.prefixo]
   if (!fn) return null
   let valor = m.groups.valor
+  if (!valorSeguro(valor)) return null
   if (valor.endsWith('!')) {
     importante = true
     valor = valor.slice(0, -1)
   }
+  const tema = cfg.tema || {}
+  valor = tema.cores?.[valor] || tema.espacamento?.[valor] || tema.fontes?.[valor] || valor
+  if (!require("./value-validation").supports("transform", fn + "(" + valor + ")")) return null
   return {
     token: classe,
     breakpoint: partes.breakpoint,
@@ -266,20 +291,34 @@ function construirRegrasTransform(elementos, cfg) {
 // Minificador (preserva strings, url(), data-URIs e calc())
 // ─────────────────────────────────────────────────────────────────────────
 function minificarCSS(css) {
-  let out = ''
+  const parts = []
+  let ultimo = '' // último caractere emitido (evita out.charAt, que achata a rope)
+  const emit = (str) => { parts.push(str); ultimo = str[str.length - 1] }
   let emAspa = null
   const n = css.length
   for (let i = 0; i < n; i++) {
     const c = css[i]
+    if (c === '\\' && i + 1 < n) { emit(c + css[++i]); continue }
     if (emAspa) {
-      out += c
-      if (c === emAspa && css[i - 1] !== '\\') emAspa = null
+      emit(c)
+      if (c === emAspa) emAspa = null
       continue
     }
     if (c === '"' || c === "'") {
       emAspa = c
-      out += c
+      emit(c)
       continue
+    }
+    if ((i === 0 || !/[\w-]/.test(css[i-1])) && /^url\(/i.test(css.slice(i,i+4))) {
+      let j = i + 4, quote = null
+      for (; j < n; j++) {
+        const ch = css[j]
+        if (ch === '\\') { j++; continue }
+        if (quote) { if (ch === quote) quote = null; continue }
+        if (ch === '"' || ch === "'") { quote = ch; continue }
+        if (ch === ')') break
+      }
+      emit(css.slice(i, j+1)); i = j; continue
     }
     if (c === '/' && css[i + 1] === '*') {
       const fim = css.indexOf('*/', i + 2)
@@ -290,12 +329,12 @@ function minificarCSS(css) {
       let j = i
       while (j < n && /\s/.test(css[j])) j++
       i = j - 1
-      const antes = out.charAt(out.length - 1)
+      const antes = ultimo
       const depois = css[j] || ''
-      if (!antes) continue // início do output
-      if ('{};:,('.includes(antes)) continue // após pontuação/abertura: sem espaço
-      if ('{};:,)'.includes(depois) || depois === '') continue // antes de fecho: sem espaço
-      out += ' '
+      if (!antes) continue
+      if ('{};:,('.includes(antes)) continue
+      if ('{};:,)'.includes(depois) || depois === '') continue
+      emit(' ')
       continue
     }
     if (c === ';') {
@@ -305,12 +344,12 @@ function minificarCSS(css) {
         i = j - 1
         continue
       }
-      out += c
+      emit(c)
       continue
     }
-    out += c
+    emit(c)
   }
-  return out.trim()
+  return parts.join('').trim()
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -490,6 +529,7 @@ function pareceClasseTema(t, prefixo) {
 module.exports = {
   separarQualificadores,
   classeRelevante,
+  analisarTransform,
   construirRegrasTransform,
   construirRegrasTransformComponentes,
   minificarCSS,

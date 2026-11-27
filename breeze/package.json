@@ -1,6 +1,6 @@
 {
   "name": "breezecss-cli",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "CLI que varre os HTML do projecto e gera o CSS estático do BreezeCSS + o runtime JavaScript dos plugins (usa o motor real breeze.bundle.js). Zero dependências npm.",
   "bin": {
     "breeze": "bin/breeze.js"
@@ -30,6 +30,7 @@
     "vendor",
     "exemplo",
     "test",
+    "scripts",
     "README.md"
   ]
 }

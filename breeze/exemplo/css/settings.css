@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════
- *  CSS gerado por breeze CLI v1.2.0 (motor BreezeCSS 2.2.5)
- *  Páginas: 4 · Regras: 90 · 2026-11-24 09:30
+ *  CSS gerado por breeze CLI v1.1.0 (motor BreezeCSS 2.3.0)
+ *  Páginas: 4 · Regras: 91 · 2026-11-27 12:54
  *  NÃO EDITAR — regenerar com: npx breeze [--watch]
  * ═══════════════════════════════════════════════════════════ */
 html { scroll-behavior: smooth; }
@@ -13,6 +13,7 @@ html { box-sizing: border-box; }
 @keyframes breeze-bounce { 0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8,0,1,1); } 50% { transform: translateY(0); animation-timing-function: cubic-bezier(0,0,0.2,1); } }
 @keyframes breeze-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes breeze-slide-in { from { transform: translateY(-10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 .bg\[\#f8fafc\] { background-color: #f8fafc; }
 .text\[\#0f172a\] { color: #0f172a; }
 .font-family\[system-ui\,_sans-serif\] { font-family: system-ui, sans-serif; }
@@ -38,7 +39,6 @@ html { box-sizing: border-box; }
 .mt\[32px\] { margin-top: 32px; }
 .grid { display: grid; }
 .gap\[22px\] { gap: 22px; }
-@media (min-width: 768px) { .md\:cols\[2\] { grid-template-columns: repeat(2, 1fr); } }
 .gap-x\[28px\] { column-gap: 28px; }
 .block { display: block; }
 .mb\[6px\] { margin-bottom: 6px; }
@@ -54,7 +54,6 @@ html { box-sizing: border-box; }
 .focus\:outline-none:focus { outline: 2px solid transparent; }
 .focus\:outline-none:focus { outline-offset: 2px; }
 .focus\:ring\[3px\]:focus { box-shadow: 0 0 0 3px currentColor; }
-@media (min-width: 768px) { .md\:col-span\[2\] { grid-column: span 2 / span 2; } }
 .px\[10px\] { padding-inline: 10px; }
 .cursor-pointer { cursor: pointer; }
 .border-none { border: none; }
@@ -92,6 +91,8 @@ html { box-sizing: border-box; }
 .leading\[1\.7\] { line-height: 1.7; }
 .text\[\#334155\] { color: #334155; }
 .mt\[10px\] { margin-top: 10px; }
+@media (min-width: 768px) { .md\:cols\[2\] { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 768px) { .md\:col-span\[2\] { grid-column: span 2 / span 2; } }
 
 /* ── transforms (combinados por elemento) ── */
 .active\:scale\[0\.98\]:active { transform: scale(0.98); }

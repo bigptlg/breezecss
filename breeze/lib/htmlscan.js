@@ -37,7 +37,7 @@ function analisarAtributos(bruto) {
   return attrs
 }
 
-function criarElemento(tag, attrs) {
+function criarElemento(tag, attrs, posicoesClasses) {
   const classList = (attrs.class || '').trim().split(/\s+/).filter(Boolean)
   classList.contains = (c) => classList.indexOf(c) !== -1
   return {
@@ -45,6 +45,9 @@ function criarElemento(tag, attrs) {
     tagName: tag,
     attrs,
     classList,
+    // posição (linha/coluna, base 1) de cada classe no HTML de origem —
+    // usada pelos diagnósticos; o motor e o CSS gerado não mudam.
+    _posicoesClasses: posicoesClasses || new Map(),
     getAttribute(n) {
       const v = attrs[String(n).toLowerCase()]
       return v === undefined ? null : v
@@ -59,14 +62,61 @@ function criarElemento(tag, attrs) {
 }
 
 /**
+ * Tabela de inícios de linha (índice absoluto de cada '\n' + 1) para
+ * converter índices absolutos em {linha, coluna} (base 1).
+ */
+function criarTabelaLinhas(html) {
+  const inicios = [0]
+  for (let i = 0; i < html.length; i++) {
+    if (html[i] === '\n') inicios.push(i + 1)
+  }
+  return {
+    de(abs) {
+      // procura binária: última linha cujo início <= abs
+      let lo = 0
+      let hi = inicios.length - 1
+      while (lo < hi) {
+        const meio = (lo + hi + 1) >> 1
+        if (inicios[meio] <= abs) lo = meio
+        else hi = meio - 1
+      }
+      return { linha: lo + 1, coluna: abs - inicios[lo] + 1 }
+    },
+  }
+}
+
+/**
+ * Encontra o valor do 1.º atributo class num bloco de atributos bruto e
+ * devolve o índice absoluto (dentro do HTML) do primeiro caractere do valor,
+ * ou -1. Aspas simples/duplas ou valor nu.
+ */
+function inicioValorClass(brutoAttrs, baseAbs) {
+  const m = /(^|\s)class\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]*))/i.exec(brutoAttrs)
+  if (!m) return -1
+  const valor = m[2] !== undefined ? m[2] : m[3] !== undefined ? m[3] : m[4] || ''
+  if (!valor) return -1
+  if (m[2] !== undefined || m[3] !== undefined) {
+    // valor citado: começa 1 carácter antes do fim do match (a aspa de fecho)
+    return baseAbs + m.index + m[0].length - valor.length - 1
+  }
+  return baseAbs + m.index + m[0].length - valor.length
+}
+
+/**
  * Analisa HTML e devolve a lista de elementos que têm atributo class.
  * Ignora comentários, doctype e o conteúdo de <script>/<style>.
  * Elementos dentro de <template> SÃO lidos (as classes acabam no DOM).
+ * Cada elemento traz _posicoesClasses: Map<classe, {linha, coluna}>.
  */
 function parseHTML(html) {
   const elementos = []
   const n = html.length
   let i = 0
+  let linhas = null // tabela de linhas preguiçosa (só com atributos class)
+  const linhaCol = (abs) => {
+    if (!linhas) linhas = criarTabelaLinhas(html)
+    return linhas.de(abs)
+  }
 
   while (i < n) {
     const lt = html.indexOf('<', i)
@@ -134,7 +184,23 @@ function parseHTML(html) {
     }
 
     if (attrs.class && attrs.class.trim()) {
-      elementos.push(criarElemento(nome, attrs))
+      // posições por classe: percorre o valor bruto do atributo class
+      const posicoes = new Map()
+      const valAbs = inicioValorClass(brutoAttrs, k)
+      if (valAbs >= 0) {
+        const valor = attrs.class
+        let j = 0
+        while (j < valor.length) {
+          while (j < valor.length && /\s/.test(valor[j])) j++
+          const s = j
+          while (j < valor.length && !/\s/.test(valor[j])) j++
+          if (j > s) {
+            const token = valor.slice(s, j)
+            if (!posicoes.has(token)) posicoes.set(token, linhaCol(valAbs + s))
+          }
+        }
+      }
+      elementos.push(criarElemento(nome, attrs, posicoes))
     }
   }
 
@@ -372,6 +438,89 @@ function contarGeridos(html) {
   return { css, js }
 }
 
+// bloco de protecção js-guard → desembrulhar mantém a instrução original
+const RE_GUARDA_DES =
+  /\/\* breeze:cli-guard:start \*\/\s*if \(typeof BreezeCSS !== 'undefined'\) \{\s*([\s\S]*?)\s*\}\s*\/\* breeze:cli-guard:end \*\//g
+
+/**
+ * Desembrulha os blocos de protecção do js-guard (`/* breeze:cli-guard:start
+ * *\/* … *\/* breeze:cli-guard:end *\/`), mantendo a instrução original —
+ * é o que existia antes do --inject.
+ */
+function desembrulharGuardas(texto) {
+  return String(texto).replace(RE_GUARDA_DES, '$1')
+}
+
+// padrões geridos (para a normalização de cache de conteúdo)
+const RE_EXISTENTE_N =
+  /[ \t\n]*<!--\s*breeze:css\s*-->\s*<link[^>]*>|[ \t\n]*<link[^>]*>\s*<!--\s*breeze:css\s*-->/g
+const RE_COMENTARIO_SUBSTITUIDO_N = /<!--\s*breeze:cli\s*[\u2014\u2013-][\s\S]*?-->/g
+const RE_MARCADORES_N = /<!--\s*breeze:(?:css|runtime)\s*-->/g
+const RE_SCRIPTS_EXTERNOS_N = /[ \t\n]*<script\b[^>]*\ssrc\s*=[^>]*>\s*<\/script>[ \t]*\n?/gi
+
+/**
+ * Normaliza o conteúdo de uma página para o HASH da cache: remove o que o
+ * próprio --inject acrescenta/altera (link/script geridos com marcadores,
+ * blocos js-guard — desembrulhados, comentários "bundle substituído") e
+ * todos os <script src> externos (nenhum tem classes; não alteram o CSS).
+ * Os <script> INLINE ficam (as classes citadas alimentam as dependências).
+ * Por fim colapsa o whitespace — mudanças de whitespace nunca alteram o CSS
+ * gerado. A chave da página = sha256(normalizado + digital).
+ */
+function normalizarParaCache(html) {
+  return String(html)
+    .replace(RE_EXISTENTE_N, '')
+    .replace(RE_GUARDA_DES, '$1')
+    .replace(RE_COMENTARIO_SUBSTITUIDO_N, '')
+    .replace(RE_MARCADORES_N, '')
+    .replace(RE_SCRIPTS_EXTERNOS_N, '')
+    .replace(/[ \t]*\n[ \t\n]*/g, '\n')
+    .replace(/^[ \t\n]+/, '')
+    .replace(/[ \t\n]+$/, '')
+}
+
+/**
+ * Assinatura de uma página para a CACHE incremental: só o que influencia o
+ * CSS gerado —
+ *   • as classes de cada elemento, por ordem de documento (o motor gera as
+ *     regras por classe; a ordem define a ordem das regras no ficheiro);
+ *   • o conteúdo dos <script> inline (alimenta as dependências de plugins),
+ *     com as guardas js-guard desembrulhadas e o whitespace colapsado.
+ * Tudo o que o --inject acrescenta (<link>/<script src> geridos — sem
+ * classes —, marcadores e comentários) fica FORA por construção: os
+ * <script> com src não têm conteúdo e o <link> não tem classe. Por isso a
+ * 2.ª execução com --inject dá sempre hit, mesmo depois de injetar.
+ */
+function assinaturaPagina(html) {
+  const els = []
+  for (const el of parseHTML(html)) els.push([...el.classList].sort())
+  const scripts = []
+  const RE_BLOCO = /<script\b[^>]*>([\s\S]*?)<\/script>/gi
+  let m
+  while ((m = RE_BLOCO.exec(html))) {
+    const c = m[1]
+    if (!c.trim()) continue // bloco vazio (ex.: <script src=…></script>)
+    scripts.push(desembrulharGuardas(c).replace(/\s+/g, ' ').trim())
+  }
+  return { els, scripts }
+}
+
+/**
+ * Lista os valores src de <script> que apontam para o bundle original do
+ * BreezeCSS (breeze.bundle.js / breeze.min.js) — para avisar quando a
+ * versão do bundle referido difere da do motor usado na compilação.
+ */
+function referenciasBundle(html) {
+  const lista = []
+  const re = /<script\b[^>]*\ssrc\s*=[^>]*>\s*<\/script>/gi
+  let m
+  while ((m = re.exec(html))) {
+    const src = srcDe(m[0])
+    if (src && RE_SCRIPT_BREEZE.test(baseFicheiro(src))) lista.push(src)
+  }
+  return lista
+}
+
 /** Tokens de classe de todos os elementos (com duplicados já removidos). */
 function tokensClasses(html) {
   const set = new Set()
@@ -389,6 +538,10 @@ module.exports = {
   removerRuntime,
   contarGeridos,
   tokensClasses,
+  desembrulharGuardas,
+  normalizarParaCache,
+  assinaturaPagina,
+  referenciasBundle,
   MARCADOR,
   MARCADOR_JS,
 }
