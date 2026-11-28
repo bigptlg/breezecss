@@ -3461,34 +3461,74 @@ const css <span class="text[#64748b]">=</span> BreezeCSS<span class="text[#64748
 </div>
 </section>
 <section class="px[20px] md:px[48px] py[56px] md:py[72px] border-t[1px_solid_rgba(148,163,184,0.08)]" id="playground" hidden>
-<div class="max-w[960px] mx[auto]">
-<p class="bdoc-eyebrow inline-flex items-center gap[8px] px[12px] py[5px] rounded-full bg[rgba(0,255,136,0.08)] border[1px_solid_rgba(0,255,136,0.20)] text-size[11px] uppercase tracking[0.16em] fw[700] text[#00ff88] m[0]"><span aria-hidden="true" class="size[6px] rounded-full bg[#00ff88] inline-block shadow[0_0_8px_#00ff88]"></span>Laboratório</p><h2 class="font-family['Plus_Jakarta_Sans','Inter',system-ui,sans-serif] text-size[30px] md:text-size[38px] fw[800] tracking[-0.02em] text[#f2f7ff] mt[10px] mb[16px]">
- Playground</h2>
-<p class="text-size[15.5px] leading[1.75] text[#9db0cc] max-w[760px]">
- Escreve classes no campo (a sintaxe é a real: <span class="mono text[#7ee787] font-family['JetBrains_Mono',ui-monospace,monospace]">prefixo[valor]</span>, com
- <span class="mono text[#7ee787] font-family['JetBrains_Mono',ui-monospace,monospace]">_</span> nos espaços) e vê o resultado e o CSS gerado em tempo real
- —
- é o próprio motor desta página a trabalhar à tua frente.
- </p>
-<div class="grid gap[16px] lg:cols[2] mt[24px] items-start cols[minmax(0,1fr)]">
+<div class="max-w[1060px] mx[auto]">
+<div class="flex flex-col lg:flex-row lg:items-end justify-between gap[18px] mb[24px]">
 <div>
-<label class="text-size[12px] uppercase tracking[0.1em] fw[700] text[#7f92b3]" for="pg-input">Classes</label>
-<input class="w[100%] mt[8px] bg[#0c1322] border[1px_solid_#1e2a44] rounded-xl p[14px] text-size[13.5px] mono text[#00ff88] outline-none transition focus:border-color[#00ff88] font-family['JetBrains_Mono',ui-monospace,monospace]" data-sharkid="__1" id="pg-input" spellcheck="false" type="text" value="glass glass-lg rounded-2xl p[28px] rotate[-2deg] hover:scale[1.05]">
-<div class="flex flex-wrap gap[8px] mt[12px]" id="pg-chips"><button class="glass glass-sm rounded-full px[12px] py[6px] text-size[12px] fw[600] text[#c9d6e8] cursor-pointer transition hover:glass-light" type="button">Cartão glass</button><button class="glass glass-sm rounded-full px[12px] py[6px] text-size[12px] fw[600] text[#c9d6e8] cursor-pointer transition hover:glass-light" type="button">Botão gradiente</button><button class="glass glass-sm rounded-full px[12px] py[6px] text-size[12px] fw[600] text[#c9d6e8] cursor-pointer transition hover:glass-light" type="button">Pílula glass</button><button class="glass glass-sm rounded-full px[12px] py[6px] text-size[12px] fw[600] text[#c9d6e8] cursor-pointer transition hover:glass-light" type="button">Transform combinado</button><button class="glass glass-sm rounded-full px[12px] py[6px] text-size[12px] fw[600] text[#c9d6e8] cursor-pointer transition hover:glass-light" type="button">Máscara</button><button class="glass glass-sm rounded-full px[12px] py[6px] text-size[12px] fw[600] text[#c9d6e8] cursor-pointer transition hover:glass-light" type="button">Barra de progresso</button><button class="glass glass-sm rounded-full px[12px] py[6px] text-size[12px] fw[600] text[#c9d6e8] cursor-pointer transition hover:glass-light" type="button">Scrollbar</button></div>
-<div class="relative mt[14px] h[300px] rounded-2xl border[1px_solid_#16203a] bg[#0c1322] overflow-hidden flex items-center justify-center" id="pg-palco">
-<div class="absolute w[210px] h[210px] rounded-full bg-gradient[135deg,#00ff88,#0b8f5b] opacity[0.5] blur[55px] top[-50px] right[-40px]">
+<p class="bdoc-eyebrow inline-flex items-center gap[8px] px[12px] py[5px] rounded-full bg[rgba(0,255,136,0.08)] border[1px_solid_rgba(0,255,136,0.20)] text-size[11px] uppercase tracking[0.16em] fw[700] text[#00ff88] m[0]"><span aria-hidden="true" class="size[6px] rounded-full bg[#00ff88] inline-block shadow[0_0_8px_#00ff88]"></span>Laboratório</p>
+<h2 class="font-family['Plus_Jakarta_Sans','Inter',system-ui,sans-serif] text-size[30px] md:text-size[38px] fw[800] tracking[-0.02em] text[#f2f7ff] mt[10px] mb[10px]">Playground</h2>
+<p class="text-size[15px] leading[1.7] text[#9db0cc] m[0] max-w[640px]">Escreve classes no editor com a sintaxe real (<span class="mono text[#7ee787] font-family['JetBrains_Mono',ui-monospace,monospace]">prefixo[valor]</span> e <span class="mono text[#7ee787] font-family['JetBrains_Mono',ui-monospace,monospace]">_</span> nos espaços) e acompanha o resultado e o CSS compilado em tempo real.</p>
 </div>
-<div class="absolute w[190px] h[190px] rounded-full bg-gradient[135deg,#b18cff,#4f7cff] opacity[0.5] blur[55px] bottom[-60px] left[-30px]">
+<div class="flex flex-wrap gap[8px]" id="pg-chips" role="group" aria-label="Exemplos rápidos">
+<button class="bdoc-pg-chip bdoc-pg-chip-active rounded-xl px[12px] py[7px] text-size[12px] fw[700] bg-gradient[135deg,#00ff88,#22d3ee] text[#04121f] border-none cursor-pointer transition" type="button">Cartão glass</button>
+<button class="bdoc-pg-chip rounded-xl px[12px] py[7px] text-size[12px] fw[600] bg[#0d1526] text[#9db0cc] border[1px_solid_rgba(148,163,184,0.16)] cursor-pointer transition hover:text[#eef4ff] hover:border-color[rgba(0,255,136,0.4)]" type="button">Botão gradiente</button>
+<button class="bdoc-pg-chip rounded-xl px[12px] py[7px] text-size[12px] fw[600] bg[#0d1526] text[#9db0cc] border[1px_solid_rgba(148,163,184,0.16)] cursor-pointer transition hover:text[#eef4ff] hover:border-color[rgba(0,255,136,0.4)]" type="button">Pílula glass</button>
+<button class="bdoc-pg-chip rounded-xl px[12px] py[7px] text-size[12px] fw[600] bg[#0d1526] text[#9db0cc] border[1px_solid_rgba(148,163,184,0.16)] cursor-pointer transition hover:text[#eef4ff] hover:border-color[rgba(0,255,136,0.4)]" type="button">Transform combinado</button>
+<button class="bdoc-pg-chip rounded-xl px[12px] py[7px] text-size[12px] fw[600] bg[#0d1526] text[#9db0cc] border[1px_solid_rgba(148,163,184,0.16)] cursor-pointer transition hover:text[#eef4ff] hover:border-color[rgba(0,255,136,0.4)]" type="button">Máscara</button>
+<button class="bdoc-pg-chip rounded-xl px[12px] py[7px] text-size[12px] fw[600] bg[#0d1526] text[#9db0cc] border[1px_solid_rgba(148,163,184,0.16)] cursor-pointer transition hover:text[#eef4ff] hover:border-color[rgba(0,255,136,0.4)]" type="button">Barra de progresso</button>
+<button class="bdoc-pg-chip rounded-xl px[12px] py[7px] text-size[12px] fw[600] bg[#0d1526] text[#9db0cc] border[1px_solid_rgba(148,163,184,0.16)] cursor-pointer transition hover:text[#eef4ff] hover:border-color[rgba(0,255,136,0.4)]" type="button">Scrollbar</button>
 </div>
-<div class="absolute w[150px] h[150px] rounded-full bg-gradient[135deg,#22d3ee,#ff7ab8] opacity[0.4] blur[50px] bottom[10%] right[22%]">
 </div>
+<div class="bdoc-pg-shell rounded-2xl overflow-hidden border[1px_solid_rgba(148,163,184,0.16)] bg[#09101f] shadow[0_24px_70px_rgba(0,0,0,0.42)] grid cols[1] lg:cols[2]">
+<div class="flex flex-col border-b[1px_solid_rgba(148,163,184,0.14)] lg:border-b[none] lg:border-r[1px_solid_rgba(148,163,184,0.14)] min-w[0]">
+<div class="bdoc-pg-bar flex items-center justify-between gap[10px] px[14px] py[10px] bg[#0d1526] border-b[1px_solid_rgba(148,163,184,0.12)]">
+<div class="flex items-center gap[8px]">
+<span class="size[10px] rounded-full bg[#ff5f57] inline-block"></span>
+<span class="size[10px] rounded-full bg[#febc2e] inline-block"></span>
+<span class="size[10px] rounded-full bg[#28c840] inline-block"></span>
+<label class="ml[6px] mono text-size[12px] fw[600] text[#8fa3bf] font-family['JetBrains_Mono',ui-monospace,monospace]" for="pg-input">classes.breeze</label>
+</div>
+<div class="flex items-center gap[6px]">
+<button class="bdoc-pg-action inline-flex items-center gap[5px] px[9px] py[5px] rounded-lg text-size[11.5px] fw[600] bg[rgba(255,255,255,0.04)] border[1px_solid_rgba(148,163,184,0.16)] text[#8fa3bf] cursor-pointer transition hover:text[#eef4ff] hover:border-color[rgba(148,163,184,0.35)]" id="pg-reset" type="button">Repor</button>
+<button class="bdoc-pg-action-accent inline-flex items-center gap[5px] px[9px] py[5px] rounded-lg text-size[11.5px] fw[600] bg[rgba(0,255,136,0.08)] border[1px_solid_rgba(0,255,136,0.22)] text[#00ff88] cursor-pointer transition hover:bg[rgba(0,255,136,0.16)]" id="pg-copy-classes" type="button">
+<svg aria-hidden="true" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="12"><rect height="12" rx="2" width="12" x="9" y="9"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+<span>Copiar</span>
+</button>
+</div>
+</div>
+<textarea aria-label="Classes do Playground" class="bdoc-pg-input w[100%] h[92px] p[14px_16px] bg[#070c18] text[#00ff88] border-none outline-none resize-none mono text-size[13px] leading[1.7] font-family['JetBrains_Mono',ui-monospace,monospace] scrollbar scrollbar-thin scrollbar-thumb[#1e2d4a]" id="pg-input" spellcheck="false">glass glass-lg rounded-2xl p[28px] rotate[-2deg] hover:scale[1.05]</textarea>
+<div class="bdoc-pg-subbar px[14px] py[9px] bg[#0b1222] border-t[1px_solid_rgba(148,163,184,0.10)] border-b[1px_solid_rgba(148,163,184,0.12)] flex flex-wrap items-center justify-between gap[8px]">
+<div class="flex flex-wrap items-center gap[6px]" id="pg-snippets">
+<span class="text-size[11px] fw[600] text[#64748b] mr[2px]">Adicionar:</span>
+<button class="bdoc-pg-snip mono text-size[11px] px[7px] py[3px] rounded-md bg[rgba(255,255,255,0.04)] border[1px_solid_rgba(148,163,184,0.14)] text[#7ee787] cursor-pointer transition hover:border-color[rgba(0,255,136,0.45)] font-family['JetBrains_Mono',ui-monospace,monospace]" data-add="hover:scale[1.06]" type="button">hover:scale[1.06]</button>
+<button class="bdoc-pg-snip mono text-size[11px] px[7px] py[3px] rounded-md bg[rgba(255,255,255,0.04)] border[1px_solid_rgba(148,163,184,0.14)] text[#d2a8ff] cursor-pointer transition hover:border-color[rgba(210,168,255,0.45)] font-family['JetBrains_Mono',ui-monospace,monospace]" data-add="rotate[3deg]" type="button">rotate[3deg]</button>
+<button class="bdoc-pg-snip mono text-size[11px] px[7px] py[3px] rounded-md bg[rgba(255,255,255,0.04)] border[1px_solid_rgba(148,163,184,0.14)] text[#7fd4ff] cursor-pointer transition hover:border-color[rgba(127,212,255,0.45)] font-family['JetBrains_Mono',ui-monospace,monospace]" data-add="rounded-full" type="button">rounded-full</button>
+<button class="bdoc-pg-snip mono text-size[11px] px[7px] py[3px] rounded-md bg[rgba(255,255,255,0.04)] border[1px_solid_rgba(148,163,184,0.14)] text[#ffb86b] cursor-pointer transition hover:border-color[rgba(255,184,107,0.45)] font-family['JetBrains_Mono',ui-monospace,monospace]" data-add="shadow-xl" type="button">shadow-xl</button>
+</div>
+<div class="flex items-center gap[4px]" id="pg-bg-modes" role="group" aria-label="Fundo da pré-visualização">
+<button class="bdoc-pg-bg-btn bdoc-pg-bg-active px[8px] py[3px] rounded-md text-size[11px] fw[600] bg[rgba(255,255,255,0.10)] text[#eef4ff] border[1px_solid_rgba(148,163,184,0.26)] cursor-pointer transition" data-bg="orbs" type="button">Aura</button>
+<button class="bdoc-pg-bg-btn px[8px] py[3px] rounded-md text-size[11px] fw[600] bg[transparent] text[#8fa3bf] border[1px_solid_transparent] cursor-pointer transition hover:text[#eef4ff]" data-bg="grid" type="button">Grelha</button>
+<button class="bdoc-pg-bg-btn px[8px] py[3px] rounded-md text-size[11px] fw[600] bg[transparent] text[#8fa3bf] border[1px_solid_transparent] cursor-pointer transition hover:text[#eef4ff]" data-bg="light" type="button">Claro</button>
+</div>
+</div>
+<div class="bdoc-pg-stage relative flex-1 min-h[310px] bg[#0c1322] overflow-hidden flex items-center justify-center p[24px]" id="pg-palco">
+<div class="pg-orb pointer-events-none absolute w[210px] h[210px] rounded-full bg-gradient[135deg,#00ff88,#0b8f5b] opacity[0.48] blur[55px] top[-50px] right[-40px]"></div>
+<div class="pg-orb pointer-events-none absolute w[190px] h[190px] rounded-full bg-gradient[135deg,#b18cff,#4f7cff] opacity[0.48] blur[55px] bottom[-60px] left[-30px]"></div>
+<div class="pg-orb pointer-events-none absolute w[150px] h[150px] rounded-full bg-gradient[135deg,#22d3ee,#ff7ab8] opacity[0.38] blur[50px] bottom[10%] right[22%]"></div>
 <div class="relative z[1] transition duration[300ms] max-w[85%] text-size[18px] fw[700] text-center pg-alvo glass glass-lg rounded-2xl p[28px] rotate[-2deg] hover:scale[1.05]" id="pg-alvo">Breeze</div>
 </div>
 </div>
-<div>
-<label class="text-size[12px] uppercase tracking[0.1em] fw[700] text[#7f92b3]">CSS gerado ao
- vivo</label>
-<pre class="relative mt[8px] h[384px] bg[#080e1c] border[1px_solid_rgba(148,163,184,0.14)] rounded-xl p[16px] overflow-auto text-size[12px] leading[1.7] text[#9db0cc] whitespace-pre-wrap break-all scrollbar scrollbar-md scrollbar-thumb[#1c2942] scrollbar-thumb-hover[#2b3f66] scrollbar-gap[2px] scrollbar-radius[8px] font-family['JetBrains_Mono',ui-monospace,monospace]" data-breeze-scrollbar="" id="pg-css">/* nenhuma regra reconhecida — experimenta classes do Breeze, ex.: p[20px] bg[#101a2e] */</pre>
+<div class="flex flex-col min-w[0]">
+<div class="bdoc-pg-bar flex items-center justify-between gap[10px] px[14px] py[10px] bg[#0d1526] border-b[1px_solid_rgba(148,163,184,0.12)]">
+<div class="flex items-center gap[8px]">
+<span class="mono text-size[12px] fw[600] text[#8fa3bf] font-family['JetBrains_Mono',ui-monospace,monospace]">css-gerado.css</span>
+<span class="bdoc-pg-stats mono text-size[11px] px[8px] py[2px] rounded-full bg[rgba(0,255,136,0.08)] border[1px_solid_rgba(0,255,136,0.20)] text[#00ff88] font-family['JetBrains_Mono',ui-monospace,monospace]" id="pg-stats">0 regras</span>
+</div>
+<button class="bdoc-pg-action inline-flex items-center gap[5px] px[9px] py[5px] rounded-lg text-size[11.5px] fw[600] bg[rgba(255,255,255,0.04)] border[1px_solid_rgba(148,163,184,0.16)] text[#8fa3bf] cursor-pointer transition hover:text[#eef4ff] hover:border-color[rgba(0,255,136,0.4)]" id="pg-copy-css" type="button">
+<svg aria-hidden="true" fill="none" height="12" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="12"><rect height="12" rx="2" width="12" x="9" y="9"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+<span>Copiar CSS</span>
+</button>
+</div>
+<pre class="bdoc-pg-css relative m[0] flex-1 min-h[448px] max-h[520px] bg[#070c18] p[18px] overflow-auto text-size[12.5px] leading[1.75] text[#a5d6ff] whitespace-pre-wrap break-all scrollbar scrollbar-md scrollbar-thumb[#1c2942] scrollbar-thumb-hover[#2b3f66] scrollbar-gap[2px] scrollbar-radius[8px] font-family['JetBrains_Mono',ui-monospace,monospace]" data-breeze-scrollbar="" id="pg-css">/* nenhuma regra reconhecida — experimenta classes do Breeze, ex.: p[20px] bg[#101a2e] */</pre>
 </div>
 </div>
 </div>
@@ -3706,7 +3746,6 @@ const css <span class="text[#64748b]">=</span> BreezeCSS<span class="text[#64748
     }, true)
   }
 
-  /* ---------------------------------------------------------- playground */
   var BASE = 'relative z[1] transition duration[300ms] max-w[85%] text-size[18px] fw[700] text-center pg-alvo'
   var PRESETS = {
     'Cartão glass': 'glass glass-lg rounded-2xl p[28px] rotate[-2deg] hover:scale[1.05]',
@@ -3718,7 +3757,6 @@ const css <span class="text[#64748b]">=</span> BreezeCSS<span class="text[#64748
     'Scrollbar': 'scrollbar scrollbar-md overflow-auto h[80px] w[220px] bg[#101a2e] p[16px] rounded-xl'
   }
 
-  // CSS que o Breeze gera para as classes do elemento (build() não faz download)
   function regrasDo(el) {
     if (!window.BreezeCSS) return Promise.resolve('')
     var css = window.BreezeCSS.build('<div class="' + el.className.replace(/"/g, '') + '"></div>')
@@ -3729,32 +3767,192 @@ const css <span class="text[#64748b]">=</span> BreezeCSS<span class="text[#64748
         if (r[i] === '{') d++
         else if (r[i] === '}') { d--; if (d === 0) { blocos.push(r.slice(ini, i + 1).trim()); ini = i + 1 } }
       }
-      // só as regras das classes do elemento (sem reset global nem @keyframes)
       return blocos.filter(function (b) { return /^[.\[]/.test(b) || (/^@(media|container|supports)/.test(b) && b.indexOf('.') !== -1) }).join('\n\n')
     })
   }
 
+  function copiarTexto(texto, btn, labelOriginal) {
+    var span = btn && btn.querySelector('span')
+    var ok = function () {
+      if (span) {
+        span.textContent = 'Copiado'
+        setTimeout(function () { span.textContent = labelOriginal }, 1200)
+      }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(ok, function () {})
+    else {
+      var ta = document.createElement('textarea'); ta.value = texto; document.body.appendChild(ta); ta.select()
+      try { document.execCommand('copy'); ok() } catch (_) {}
+      ta.remove()
+    }
+  }
+
   function playground() {
     var inp = $('#pg-input'), alvo = $('#pg-alvo'), css = $('#pg-css'), chips = $('#pg-chips')
+    var stats = $('#pg-stats'), palco = $('#pg-palco'), bgModes = $('#pg-bg-modes')
+    var snippets = $('#pg-snippets'), btnReset = $('#pg-reset')
+    var btnCopyCls = $('#pg-copy-classes'), btnCopyCss = $('#pg-copy-css')
     if (!inp || !alvo || !css) return
     var t = null
+    var presetAtual = 'Cartão glass'
+    var CHIP_ON = 'bdoc-pg-chip bdoc-pg-chip-active rounded-xl px[12px] py[7px] text-size[12px] fw[700] bg-gradient[135deg,#00ff88,#22d3ee] text[#04121f] border-none cursor-pointer transition'
+    var CHIP_OFF = 'bdoc-pg-chip rounded-xl px[12px] py[7px] text-size[12px] fw[600] bg[#0d1526] text[#9db0cc] border[1px_solid_rgba(148,163,184,0.16)] cursor-pointer transition hover:text[#eef4ff] hover:border-color[rgba(0,255,136,0.4)]'
+    var BG_ON = 'bdoc-pg-bg-btn bdoc-pg-bg-active px[8px] py[3px] rounded-md text-size[11px] fw[600] bg[rgba(255,255,255,0.10)] text[#eef4ff] border[1px_solid_rgba(148,163,184,0.26)] cursor-pointer transition'
+    var BG_OFF = 'bdoc-pg-bg-btn px[8px] py[3px] rounded-md text-size[11px] fw[600] bg[transparent] text[#8fa3bf] border[1px_solid_transparent] cursor-pointer transition hover:text[#eef4ff]'
+
     function aplicar() {
-      alvo.className = BASE + ' ' + inp.value.trim()
+      var val = inp.value.replace(/\s+/g, ' ').trim()
+      alvo.className = BASE + (val ? ' ' + val : '')
+      if (window.BreezeCSS && window.BreezeCSS.processar) window.BreezeCSS.processar()
       clearTimeout(t)
       t = setTimeout(function () {
         regrasDo(alvo).then(function (r) {
           css.textContent = r || '/* nenhuma regra reconhecida — experimenta classes do Breeze, ex.: p[20px] bg[#101a2e] */'
+          if (stats) {
+            var n = r ? (r.match(/\{/g) || []).length : 0
+            var bytes = r ? new Blob([r]).size : 0
+            stats.textContent = n + (n === 1 ? ' regra' : ' regras') + (bytes ? ' · ' + bytes + ' B' : '')
+          }
         })
-      }, 120)
+      }, 100)
     }
+
     inp.addEventListener('input', aplicar)
+
     if (chips) chips.addEventListener('click', function (e) {
       var b = e.target.closest('button')
       if (!b) return
-      var v = PRESETS[b.textContent.replace(/\s+/g, ' ').trim()]
-      if (v) { inp.value = v; aplicar() }
+      var nome = b.textContent.replace(/\s+/g, ' ').trim()
+      var v = PRESETS[nome]
+      if (!v) return
+      presetAtual = nome
+      $$('button', chips).forEach(function (x) { x.className = x === b ? CHIP_ON : CHIP_OFF })
+      inp.value = v
+      aplicar()
+      window.dispatchEvent(new Event('breeze:docs:navigate'))
     })
+
+    if (snippets) snippets.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-add]')
+      if (!b) return
+      var cls = b.getAttribute('data-add')
+      var atual = inp.value.trim()
+      if (atual.split(/\s+/).indexOf(cls) === -1) {
+        inp.value = atual ? atual + ' ' + cls : cls
+        aplicar()
+      }
+      inp.focus()
+    })
+
+    if (bgModes && palco) bgModes.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-bg]')
+      if (!b) return
+      var modo = b.getAttribute('data-bg')
+      $$('button[data-bg]', bgModes).forEach(function (x) { x.className = x === b ? BG_ON : BG_OFF })
+      $$('.pg-orb', palco).forEach(function (o) { o.style.display = modo === 'orbs' ? '' : 'none' })
+      if (modo === 'orbs') {
+        palco.className = 'bdoc-pg-stage relative flex-1 min-h[310px] bg[#0c1322] overflow-hidden flex items-center justify-center p[24px]'
+      } else if (modo === 'grid') {
+        palco.className = 'bdoc-pg-stage relative flex-1 min-h[310px] bg[#09101f] bg-image[radial-gradient(rgba(148,163,184,0.24)_1px,transparent_1px)] bg-size[20px_20px] overflow-hidden flex items-center justify-center p[24px]'
+      } else {
+        palco.className = 'relative flex-1 min-h[310px] bg[#eef3fa] text[#0f172a] overflow-hidden flex items-center justify-center p[24px]'
+      }
+      if (window.BreezeCSS && window.BreezeCSS.processar) window.BreezeCSS.processar()
+      window.dispatchEvent(new Event('breeze:docs:navigate'))
+    })
+
+    if (btnReset) btnReset.addEventListener('click', function () {
+      inp.value = PRESETS[presetAtual] || PRESETS['Cartão glass']
+      aplicar()
+    })
+    if (btnCopyCls) btnCopyCls.addEventListener('click', function () {
+      copiarTexto(inp.value.trim(), btnCopyCls, 'Copiar')
+    })
+    if (btnCopyCss) btnCopyCss.addEventListener('click', function () {
+      copiarTexto(css.textContent, btnCopyCss, 'Copiar CSS')
+    })
+
     aplicar()
+  }
+
+  function melhorarTabelas() {
+    var wraps = $$('.bdoc-table-wrap')
+    if (!wraps.length) return
+    var checkSvg = '<svg aria-hidden="true" fill="none" height="11" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" viewBox="0 0 24 24" width="11"><path d="M20 6L9 17l-5-5"></path></svg>'
+
+    wraps.forEach(function (wrap) {
+      var keepMt = wrap.className.indexOf('mt[24px]') !== -1 ? ' mt[24px]' : ''
+      wrap.className = 'bdoc-table-wrap rounded-2xl border[1px_solid_rgba(148,163,184,0.16)] bg[rgba(11,18,34,0.88)] shadow[0_12px_36px_rgba(0,0,0,0.28)] overflow-x-auto scrollbar scrollbar-thin scrollbar-thumb[#1e2d4a] scrollbar-thumb-hover[#2f4673]' + keepMt
+
+      var table = wrap.querySelector('table')
+      if (!table) return
+      table.className = 'w[100%] text-left border-collapse'
+
+      var thead = table.querySelector('thead')
+      if (thead) {
+        thead.className = 'bdoc-thead bg[rgba(255,255,255,0.035)]'
+        $$('th', thead).forEach(function (th) {
+          th.className = 'px[16px] py[12px] text-size[11px] uppercase tracking[0.12em] fw[700] text[#7f92b3] border-b[1px_solid_rgba(148,163,184,0.14)] whitespace-nowrap'
+        })
+      }
+
+      var rows = $$('tbody tr', table)
+      rows.forEach(function (tr, idx) {
+        var isLast = idx === rows.length - 1
+        var isAlt = idx % 2 === 1
+        var isUtil = tr.classList.contains('u-row') ? 'u-row ' : ''
+        var altCls = isAlt ? 'bdoc-row-alt bg[rgba(255,255,255,0.016)] ' : ''
+        tr.className = isUtil + altCls + 'transition duration[150ms] hover:bg[rgba(0,255,136,0.045)]'
+
+        var cells = $$('td', tr)
+        cells.forEach(function (td, colIdx) {
+          var borderCls = isLast ? '' : ' border-b[1px_solid_rgba(148,163,184,0.08)]'
+          if (colIdx === 0) {
+            td.className = 'px[16px] py[11px]' + borderCls + ' align-top mono text-size[12.8px] leading[1.6] text[#7ee787] font-family[\'JetBrains_Mono\',ui-monospace,monospace]'
+            if (!td.getAttribute('data-bdoc-chips') && !td.querySelector('br') && td.children.length === 0) {
+              var parts = td.textContent.replace(/\s+/g, ' ').trim().split(/\s*·\s*/).filter(Boolean)
+              if (parts.length) {
+                td.textContent = ''
+                var box = document.createElement('div')
+                box.className = 'flex flex-wrap gap[6px]'
+                parts.forEach(function (tok) {
+                  var chip = document.createElement('button')
+                  chip.type = 'button'
+                  chip.title = 'Clicar para copiar'
+                  chip.className = 'bdoc-table-chip inline-flex items-center gap[5px] px[8px] py[3px] rounded-lg bg[rgba(0,255,136,0.07)] border[1px_solid_rgba(0,255,136,0.16)] text[#7ee787] text-size[12px] mono font-family[\'JetBrains_Mono\',ui-monospace,monospace] cursor-pointer transition duration[150ms] hover:bg[rgba(0,255,136,0.16)] hover:border-color[rgba(0,255,136,0.42)] hover:text[#eef4ff]'
+                  chip.textContent = tok
+                  chip.addEventListener('click', function () {
+                    var done = function () {
+                      chip.innerHTML = checkSvg + '<span>' + tok + '</span>'
+                      setTimeout(function () { chip.textContent = tok }, 900)
+                    }
+                    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(tok).then(done, function () {})
+                  })
+                  box.appendChild(chip)
+                })
+                td.appendChild(box)
+                td.setAttribute('data-bdoc-chips', '1')
+              }
+            }
+          } else {
+            var badge = cells.length === 3 && colIdx === 1 ? td.querySelector('span') : null
+            if (badge) {
+              var letra = badge.textContent.trim()
+              td.className = 'px[12px] py[11px]' + borderCls + ' align-top whitespace-nowrap'
+              if (letra === 'F') {
+                badge.className = 'bdoc-badge-f inline-flex items-center justify-center min-w[24px] px[7px] py[2px] rounded-md text-size[10.5px] fw[700] text[#38bdf8] bg[rgba(56,189,248,0.12)] border[1px_solid_rgba(56,189,248,0.28)]'
+              } else if (letra === 'A') {
+                badge.className = 'bdoc-badge-a inline-flex items-center justify-center min-w[24px] px[7px] py[2px] rounded-md text-size[10.5px] fw[700] text[#ffb86b] bg[rgba(255,184,107,0.12)] border[1px_solid_rgba(255,184,107,0.28)]'
+              }
+            } else {
+              td.className = 'px[16px] py[11px]' + borderCls + ' align-top text-size[13px] leading[1.6] text[#9db0cc]'
+            }
+          }
+        })
+      })
+    })
+    if (window.BreezeCSS && window.BreezeCSS.processar) window.BreezeCSS.processar()
+    window.dispatchEvent(new Event('breeze:docs:navigate'))
   }
 
   /* ---------------------------------------------------------- aviso de CDN */
@@ -3853,7 +4051,7 @@ const css <span class="text[#64748b]">=</span> BreezeCSS<span class="text[#64748
   }
 
   function iniciar() {
-    [utilitarios, nav, copiar, demos, playground, aviso, comando].forEach(function (f) {
+    [utilitarios, nav, copiar, demos, playground, aviso, comando, melhorarTabelas].forEach(function (f) {
       try { f() } catch (err) { if (window.console) console.error('[doc]', f.name, err) }
     })
   }
@@ -3893,7 +4091,7 @@ const css <span class="text[#64748b]">=</span> BreezeCSS<span class="text[#64748
   })
 })()
 </script>
-<script>(function(){const rules=[[".bg-gradient\\[135deg\\,\\#1a2540\\,\\#101a2e\\]",["bg-image[linear-gradient(135deg,#ffffff,#e9eef6)!]"]],[".bg\\[\\#0a0e16\\]",["bg[#eef2f8!]"]],[".bg\\[\\#0b111ee6\\]",["bg[#ffffffee!]"]],[".bg\\[\\#0b1120\\]",["bg[#f6f8fa!]"]],[".bg\\[\\#0b1120d9\\]",["bg[#ffffffd9!]"]],[".bg\\[\\#0c1322\\]",["bg[#ffffff!]"]],[".bg\\[\\#0c1a22\\]",["bg[#eaf3f6!]"]],[".bg\\[\\#0d1526\\]",["bg[#eef1f6!]"]],[".bg\\[\\#0e1c30\\]",["bg[#eaf3f6!]"]],[".bg\\[\\#0e2118\\]",["bg[#e7f6ee!]"]],[".bg\\[\\#0e2418\\]",["bg[#e7f6ee!]"]],[".bg\\[\\#0f1e33\\]",["bg[#e9eff7!]"]],[".bg\\[\\#0f2f1e\\]",["bg[#d7f0e2!]"]],[".bg\\[\\#101a2e\\]",["bg[#e9eef6!]"]],[".bg\\[\\#101c31\\]",["bg[#edf1f8!]"]],[".bg\\[\\#131a2e\\]",["bg[#edf1f8!]"]],[".bg\\[\\#13203a\\]",["bg[#e9eef6!]"]],[".bg\\[\\#14203a\\]",["bg[#e9eef6!]"]],[".bg\\[\\#170d13\\]",["bg[#fdeef0!]"]],[".bg\\[\\#211a0e\\]",["bg[#fdf3dd!]"]],[".bg\\[\\#231a10\\]",["bg[#fdf3dd!]"]],[".bg\\[\\#2f1219\\]",["bg[#fbe4e9!]"]],[".bg\\[\\#3a1520\\]",["bg[#fbe3e9!]"]],[".bg\\[rgb\\(255_255_255_\\/_0\\.08\\)\\]",["bg[rgb(16_40_80_/_0.10)!]"]],[".bg\\[rgba\\(2\\,6\\,14\\,0\\.6\\)\\]",["bg[rgba(15,23,42,0.45)!]"]],[".border-b\\[1px_solid_\\#101a2c\\]",["border-bottom-color[#e3e8f0!]"]],[".border-b\\[1px_solid_\\#16203a\\]",["border-bottom-color[#e0e6ef!]"]],[".border-b\\[1px_solid_\\#18233c\\]",["border-bottom-color[#e0e6ef!]"]],[".border-r\\[1px_solid_\\#16203a\\]",["border-right-color[#e0e6ef!]"]],[".border-t\\[1px_solid_\\#101a2c\\]",["border-top-color[#e3e8f0!]"]],[".border-t\\[1px_solid_\\#18233c\\]",["border-top-color[#e0e6ef!]"]],[".border-t\\[1px_solid_rgb\\(255_255_255_\\/_0\\.08\\)\\]",["border-top-color[rgb(16_40_80_/_0.10)!]"]],[".border\\[1px_solid_\\#153829\\]",["border-color[#b9dcc8!]"]],[".border\\[1px_solid_\\#16203a\\]",["border-color[#e0e6ef!]"]],[".border\\[1px_solid_\\#18233c\\]",["border-color[#e0e6ef!]"]],[".border\\[1px_solid_\\#1c2942\\]",["border-color[#dbe2ee!]"]],[".border\\[1px_solid_\\#1c4a30\\]",["border-color[#b3dcc4!]"]],[".border\\[1px_solid_\\#1d3a55\\]",["border-color[#c5d5ea!]"]],[".border\\[1px_solid_\\#1d5c3a\\]",["border-color[#93cfae!]"]],[".border\\[1px_solid_\\#1e2a44\\]",["border-color[#d6deeb!]"]],[".border\\[1px_solid_\\#223454\\]",["border-color[#bcc9de!]"]],[".border\\[1px_solid_\\#24365c\\]",["border-color[#c2d0e4!]"]],[".border\\[1px_solid_\\#2a3a5c\\]",["border-color[#b8c7dd!]"]],[".border\\[1px_solid_\\#3a1520\\]",["border-color[#f2bcc7!]"]],[".border\\[1px_solid_\\#4a3418\\]",["border-color[#e6cf9a!]"]],[".border\\[1px_solid_\\#5c1d2c\\]",["border-color[#efb3bf!]"]],[".border\\[1px_solid_\\#5c431d\\]",["border-color[#d9b96e!]"]],[".text\\[\\#00ff88\\]",["text[#00955a!]"]],[".text\\[\\#4fc3ff\\]",["text[#0b7cc4!]"]],[".text\\[\\#7ee787\\]",["text[#0a7d43!]"]],[".text\\[\\#7f92b3\\]",["text[#647a94!]"]],[".text\\[\\#7fd4ff\\]",["text[#0772b8!]"]],[".text\\[\\#8fa3bf\\]",["text[#5d7190!]"]],[".text\\[\\#9db0cc\\]",["text[#46586f!]"]],[".text\\[\\#a5d6ff\\]",["text[#0550ae!]"]],[".text\\[\\#c9b48a\\]",["text[#8a6d2a!]"]],[".text\\[\\#c9d6e8\\]",["text[#2c3950!]"]],[".text\\[\\#d2a8ff\\]",["text[#7d3fc4!]"]],[".text\\[\\#e9f2ff\\]",["text[#16263e!]"]],[".text\\[\\#eef4ff\\]",["text[#14233c!]"]],[".text\\[\\#f2f7ff\\]",["text[#0e1a2e!]"]],[".text\\[\\#ff5f6b\\]",["text[#d12d42!]"]],[".text\\[\\#ff8f9a\\]",["text[#c22738!]"]],[".text\\[\\#ffa657\\]",["text[#953800!]"]],[".text\\[\\#ffb86b\\]",["text[#b45f0e!]"]],[".text\\[\\#ffd2dc\\]",["text[#8a2130!]"]],[".text\\[\\#ffd9a0\\]",["text[#9a6700!]"]],[".hover\\:text\\[\\#e9f2ff\\]:hover",["text[#0e1a2e!]"]],[".hover\\:text\\[\\#00ff88\\]:hover",["text[#00955a!]"]],[".hover\\:text\\[white\\]:hover",["text[#0e1a2e!]"]],[".hover\\:bg\\[rgb\\(255_255_255_\\/_0\\.07\\)\\]:hover",["bg[rgb(16_40_80_/_0.06)!]"]],[".hover\\:border-color\\[\\#00ff88\\]:hover",["border-color[#00a85d!]"]],[".focus\\:border-color\\[\\#00ff88\\]:focus",["border-color[#00a85d!]"]],[".foco-dentro\\:border-color\\[\\#00ff88\\]",["border-color[#00a85d!]"]],[".glass-dark",["v-glass-rgb[255_255_255!]","v-glass-tone-tint[0.14!]"]],["#glass .glass-dark",["v-glass-rgb[12_16_24!]","v-glass-tone-tint[0.3!]"]],[".bdoc-card",["border-color[#e2e8f2!]","bg[#ffffff!]"]],[".bdoc-stage",["bg[#f2f6fb!]"]],[".bdoc-stage[data-breeze-preloader]",["v-pl-c[#0b9e77!]","text[#0b9e77!]"]],[".bdoc-meta",["text[#1c2a40!]"]],[".bdoc-meta code",["text[#64778f!]"]],[".bdoc-bg",["border-color[#c6d2e4!]"]],[".bdoc-demo-btn",["border-color[#c6d2e4!]","bg[#ffffff!]","text[#1c2a40!]"]],[".bdoc-exit-overlay",["bg[#eef2f9!]","text[#16233a!]"]],[".bdoc-preview-note",["text[#5d6f8a!]"]],[".bdoc-demo-btn:hover",["bg[#eef3fa!]"]],["[stroke=\"#8fa3bf\"]",["stroke[#5d7190!]"]],["[stroke=\"#00ff88\"]",["stroke[#00955a!]"]],["[stroke=\"#ff5f6b\"]",["stroke[#d12d42!]"]],["[stroke=\"#7fd4ff\"]",["stroke[#0772b8!]"]],["[stroke=\"#d2a8ff\"]",["stroke[#7d3fc4!]"]],["[stroke=\"#ffb86b\"]",["stroke[#b45f0e!]"]],["[stroke=\"#c9d6e8\"]",["stroke[#2c3950!]"]],["[fill=\"#0d1526\"]",["fill[#eef1f6!]"]],[".bdoc-topbar",["bg[#ffffffee!]","text[#17243a!]","border-bottom-color[#dce3ed!]"]],[".bdoc-brand, .bdoc-brand-title",["text[#17243a!]"]],[".bdoc-brand-sub, .bdoc-top-link, .bdoc-version",["text[#64748b!]"]],[".bdoc-icon-btn",["bg[#f7f9fc!]","text[#17243a!]","border-color[#dce3ed!]"]],[".bg\\[\\#070b14\\]", ["bg[#f4f7fb!]"]],[".bg\\[\\#080e1c\\]", ["bg[#f6f8fc!]"]],[".bg\\[\\#0b1222\\]", ["bg[#ffffff!]"]],[".bdoc-sidebar", ["bg[rgba(255,255,255,0.88)!]", "border-color[#dce4f0!]", "shadow[0_12px_36px_rgba(15,23,42,0.08)!]"]],[".bdoc-drawer", ["bg[rgba(255,255,255,0.97)!]", "border-right-color[#dce4f0!]"]],[".bdoc-drawer-close", ["bg[#f1f5f9!]", "text[#0f172a!]", "border-color[#cbd5e1!]"]],[".bdoc-side-note", ["bg[#f1f5f9!]", "border-color[#e2e8f0!]", "text[#475569!]"]],[".bdoc-nav-active", ["bg[rgba(5,150,105,0.10)!]", "border-color[rgba(5,150,105,0.28)!]", "text[#047857!]"]],[".bdoc-nav-group", ["text[#64748b!]"]],[".bdoc-eyebrow", ["bg[rgba(5,150,105,0.10)!]", "border-color[rgba(5,150,105,0.25)!]", "text[#047857!]"]],[".bdoc-table-wrap", ["bg[#ffffff!]", "border-color[#dce4f0!]", "shadow[0_6px_22px_rgba(15,23,42,0.06)!]"]],[".bdoc-thead", ["bg[#f1f5f9!]"]],[".bdoc-copy-btn", ["bg[#eef2f7!]", "border-color[#cbd5e1!]"]],[".bdoc-search-trigger", ["bg[#f1f5f9!]", "border-color[#cbd5e1!]", "text[#475569!]"]],[".bdoc-kbd", ["bg[#e2e8f0!]", "border-color[#cbd5e1!]", "text[#334155!]"]],[".bdoc-cmd-box", ["bg[#ffffff!]", "border-color[#cbd5e1!]", "shadow[0_24px_60px_rgba(15,23,42,0.18)!]"]],["#cmd-input", ["text[#0f172a!]"]],[".bdoc-grid-bg", ["opacity[0.30!]"]],[".bdoc-pager-link", ["bg[#ffffff!]", "border-color[#dce4f0!]", "text[#0f172a!]"]],[".bdoc-pager-dir", ["text[#047857!]"]],["footer", ["bg[#edf2f8!]", "border-top-color[#dce4f0!]"]],[".bdoc-ctx-card", ["bg[#ffffff!]", "border-color[#dce4f0!]", "shadow[0_8px_24px_rgba(15,23,42,0.06)!]"]],[".bdoc-ctx-input", ["bg[#f8fafc!]", "border-color[#cbd5e1!]", "text[#0f172a!]"]],[".text\\[\\#cde1f5\\]", ["text[#1e293b!]"]],[".text\\[\\#00ee99\\]", ["text[#047857!]"]]];const root=document.documentElement;
+<script>(function(){const rules=[[".bg-gradient\\[135deg\\,\\#1a2540\\,\\#101a2e\\]",["bg-image[linear-gradient(135deg,#ffffff,#e9eef6)!]"]],[".bg\\[\\#0a0e16\\]",["bg[#eef2f8!]"]],[".bg\\[\\#0b111ee6\\]",["bg[#ffffffee!]"]],[".bg\\[\\#0b1120\\]",["bg[#f6f8fa!]"]],[".bg\\[\\#0b1120d9\\]",["bg[#ffffffd9!]"]],[".bg\\[\\#0c1322\\]",["bg[#ffffff!]"]],[".bg\\[\\#0c1a22\\]",["bg[#eaf3f6!]"]],[".bg\\[\\#0d1526\\]",["bg[#eef1f6!]"]],[".bg\\[\\#0e1c30\\]",["bg[#eaf3f6!]"]],[".bg\\[\\#0e2118\\]",["bg[#e7f6ee!]"]],[".bg\\[\\#0e2418\\]",["bg[#e7f6ee!]"]],[".bg\\[\\#0f1e33\\]",["bg[#e9eff7!]"]],[".bg\\[\\#0f2f1e\\]",["bg[#d7f0e2!]"]],[".bg\\[\\#101a2e\\]",["bg[#e9eef6!]"]],[".bg\\[\\#101c31\\]",["bg[#edf1f8!]"]],[".bg\\[\\#131a2e\\]",["bg[#edf1f8!]"]],[".bg\\[\\#13203a\\]",["bg[#e9eef6!]"]],[".bg\\[\\#14203a\\]",["bg[#e9eef6!]"]],[".bg\\[\\#170d13\\]",["bg[#fdeef0!]"]],[".bg\\[\\#211a0e\\]",["bg[#fdf3dd!]"]],[".bg\\[\\#231a10\\]",["bg[#fdf3dd!]"]],[".bg\\[\\#2f1219\\]",["bg[#fbe4e9!]"]],[".bg\\[\\#3a1520\\]",["bg[#fbe3e9!]"]],[".bg\\[rgb\\(255_255_255_\\/_0\\.08\\)\\]",["bg[rgb(16_40_80_/_0.10)!]"]],[".bg\\[rgba\\(2\\,6\\,14\\,0\\.6\\)\\]",["bg[rgba(15,23,42,0.45)!]"]],[".border-b\\[1px_solid_\\#101a2c\\]",["border-bottom-color[#e3e8f0!]"]],[".border-b\\[1px_solid_\\#16203a\\]",["border-bottom-color[#e0e6ef!]"]],[".border-b\\[1px_solid_\\#18233c\\]",["border-bottom-color[#e0e6ef!]"]],[".border-r\\[1px_solid_\\#16203a\\]",["border-right-color[#e0e6ef!]"]],[".border-t\\[1px_solid_\\#101a2c\\]",["border-top-color[#e3e8f0!]"]],[".border-t\\[1px_solid_\\#18233c\\]",["border-top-color[#e0e6ef!]"]],[".border-t\\[1px_solid_rgb\\(255_255_255_\\/_0\\.08\\)\\]",["border-top-color[rgb(16_40_80_/_0.10)!]"]],[".border\\[1px_solid_\\#153829\\]",["border-color[#b9dcc8!]"]],[".border\\[1px_solid_\\#16203a\\]",["border-color[#e0e6ef!]"]],[".border\\[1px_solid_\\#18233c\\]",["border-color[#e0e6ef!]"]],[".border\\[1px_solid_\\#1c2942\\]",["border-color[#dbe2ee!]"]],[".border\\[1px_solid_\\#1c4a30\\]",["border-color[#b3dcc4!]"]],[".border\\[1px_solid_\\#1d3a55\\]",["border-color[#c5d5ea!]"]],[".border\\[1px_solid_\\#1d5c3a\\]",["border-color[#93cfae!]"]],[".border\\[1px_solid_\\#1e2a44\\]",["border-color[#d6deeb!]"]],[".border\\[1px_solid_\\#223454\\]",["border-color[#bcc9de!]"]],[".border\\[1px_solid_\\#24365c\\]",["border-color[#c2d0e4!]"]],[".border\\[1px_solid_\\#2a3a5c\\]",["border-color[#b8c7dd!]"]],[".border\\[1px_solid_\\#3a1520\\]",["border-color[#f2bcc7!]"]],[".border\\[1px_solid_\\#4a3418\\]",["border-color[#e6cf9a!]"]],[".border\\[1px_solid_\\#5c1d2c\\]",["border-color[#efb3bf!]"]],[".border\\[1px_solid_\\#5c431d\\]",["border-color[#d9b96e!]"]],[".text\\[\\#00ff88\\]",["text[#00955a!]"]],[".text\\[\\#4fc3ff\\]",["text[#0b7cc4!]"]],[".text\\[\\#7ee787\\]",["text[#0a7d43!]"]],[".text\\[\\#7f92b3\\]",["text[#647a94!]"]],[".text\\[\\#7fd4ff\\]",["text[#0772b8!]"]],[".text\\[\\#8fa3bf\\]",["text[#5d7190!]"]],[".text\\[\\#9db0cc\\]",["text[#46586f!]"]],[".text\\[\\#a5d6ff\\]",["text[#0550ae!]"]],[".text\\[\\#c9b48a\\]",["text[#8a6d2a!]"]],[".text\\[\\#c9d6e8\\]",["text[#2c3950!]"]],[".text\\[\\#d2a8ff\\]",["text[#7d3fc4!]"]],[".text\\[\\#e9f2ff\\]",["text[#16263e!]"]],[".text\\[\\#eef4ff\\]",["text[#14233c!]"]],[".text\\[\\#f2f7ff\\]",["text[#0e1a2e!]"]],[".text\\[\\#ff5f6b\\]",["text[#d12d42!]"]],[".text\\[\\#ff8f9a\\]",["text[#c22738!]"]],[".text\\[\\#ffa657\\]",["text[#953800!]"]],[".text\\[\\#ffb86b\\]",["text[#b45f0e!]"]],[".text\\[\\#ffd2dc\\]",["text[#8a2130!]"]],[".text\\[\\#ffd9a0\\]",["text[#9a6700!]"]],[".hover\\:text\\[\\#e9f2ff\\]:hover",["text[#0e1a2e!]"]],[".hover\\:text\\[\\#00ff88\\]:hover",["text[#00955a!]"]],[".hover\\:text\\[white\\]:hover",["text[#0e1a2e!]"]],[".hover\\:bg\\[rgb\\(255_255_255_\\/_0\\.07\\)\\]:hover",["bg[rgb(16_40_80_/_0.06)!]"]],[".hover\\:border-color\\[\\#00ff88\\]:hover",["border-color[#00a85d!]"]],[".focus\\:border-color\\[\\#00ff88\\]:focus",["border-color[#00a85d!]"]],[".foco-dentro\\:border-color\\[\\#00ff88\\]",["border-color[#00a85d!]"]],[".glass-dark",["v-glass-rgb[255_255_255!]","v-glass-tone-tint[0.14!]"]],["#glass .glass-dark",["v-glass-rgb[12_16_24!]","v-glass-tone-tint[0.3!]"]],[".bdoc-card",["border-color[#e2e8f2!]","bg[#ffffff!]"]],[".bdoc-stage",["bg[#f2f6fb!]"]],[".bdoc-stage[data-breeze-preloader]",["v-pl-c[#0b9e77!]","text[#0b9e77!]"]],[".bdoc-meta",["text[#1c2a40!]"]],[".bdoc-meta code",["text[#64778f!]"]],[".bdoc-bg",["border-color[#c6d2e4!]"]],[".bdoc-demo-btn",["border-color[#c6d2e4!]","bg[#ffffff!]","text[#1c2a40!]"]],[".bdoc-exit-overlay",["bg[#eef2f9!]","text[#16233a!]"]],[".bdoc-preview-note",["text[#5d6f8a!]"]],[".bdoc-demo-btn:hover",["bg[#eef3fa!]"]],["[stroke=\"#8fa3bf\"]",["stroke[#5d7190!]"]],["[stroke=\"#00ff88\"]",["stroke[#00955a!]"]],["[stroke=\"#ff5f6b\"]",["stroke[#d12d42!]"]],["[stroke=\"#7fd4ff\"]",["stroke[#0772b8!]"]],["[stroke=\"#d2a8ff\"]",["stroke[#7d3fc4!]"]],["[stroke=\"#ffb86b\"]",["stroke[#b45f0e!]"]],["[stroke=\"#c9d6e8\"]",["stroke[#2c3950!]"]],["[fill=\"#0d1526\"]",["fill[#eef1f6!]"]],[".bdoc-topbar",["bg[#ffffffee!]","text[#17243a!]","border-bottom-color[#dce3ed!]"]],[".bdoc-brand, .bdoc-brand-title",["text[#17243a!]"]],[".bdoc-brand-sub, .bdoc-top-link, .bdoc-version",["text[#64748b!]"]],[".bdoc-icon-btn",["bg[#f7f9fc!]","text[#17243a!]","border-color[#dce3ed!]"]],[".bg\\[\\#070b14\\]", ["bg[#f4f7fb!]"]],[".bg\\[\\#080e1c\\]", ["bg[#f6f8fc!]"]],[".bg\\[\\#0b1222\\]", ["bg[#ffffff!]"]],[".bdoc-sidebar", ["bg[rgba(255,255,255,0.88)!]", "border-color[#dce4f0!]", "shadow[0_12px_36px_rgba(15,23,42,0.08)!]"]],[".bdoc-drawer", ["bg[rgba(255,255,255,0.97)!]", "border-right-color[#dce4f0!]"]],[".bdoc-drawer-close", ["bg[#f1f5f9!]", "text[#0f172a!]", "border-color[#cbd5e1!]"]],[".bdoc-side-note", ["bg[#f1f5f9!]", "border-color[#e2e8f0!]", "text[#475569!]"]],[".bdoc-nav-active", ["bg[rgba(5,150,105,0.10)!]", "border-color[rgba(5,150,105,0.28)!]", "text[#047857!]"]],[".bdoc-nav-group", ["text[#64748b!]"]],[".bdoc-eyebrow", ["bg[rgba(5,150,105,0.10)!]", "border-color[rgba(5,150,105,0.25)!]", "text[#047857!]"]],[".bdoc-table-wrap", ["bg[#ffffff!]", "border-color[#dce4f0!]", "shadow[0_6px_22px_rgba(15,23,42,0.06)!]"]],[".bdoc-thead", ["bg[#f1f5f9!]"]],[".bdoc-copy-btn", ["bg[#eef2f7!]", "border-color[#cbd5e1!]"]],[".bdoc-search-trigger", ["bg[#f1f5f9!]", "border-color[#cbd5e1!]", "text[#475569!]"]],[".bdoc-kbd", ["bg[#e2e8f0!]", "border-color[#cbd5e1!]", "text[#334155!]"]],[".bdoc-cmd-box", ["bg[#ffffff!]", "border-color[#cbd5e1!]", "shadow[0_24px_60px_rgba(15,23,42,0.18)!]"]],["#cmd-input", ["text[#0f172a!]"]],[".bdoc-grid-bg", ["opacity[0.30!]"]],[".bdoc-pager-link", ["bg[#ffffff!]", "border-color[#dce4f0!]", "text[#0f172a!]"]],[".bdoc-pager-dir", ["text[#047857!]"]],["footer", ["bg[#edf2f8!]", "border-top-color[#dce4f0!]"]],[".bdoc-ctx-card", ["bg[#ffffff!]", "border-color[#dce4f0!]", "shadow[0_8px_24px_rgba(15,23,42,0.06)!]"]],[".bdoc-ctx-input", ["bg[#f8fafc!]", "border-color[#cbd5e1!]", "text[#0f172a!]"]],[".text\\[\\#cde1f5\\]", ["text[#1e293b!]"]],[".text\\[\\#00ee99\\]", ["text[#047857!]"]],[".bdoc-row-alt", ["bg[#f8fafc!]"]],[".bdoc-table-chip", ["bg[rgba(5,150,105,0.08)!]", "border-color[rgba(5,150,105,0.22)!]", "text[#047857!]"]],[".bdoc-badge-f", ["bg[rgba(14,165,233,0.12)!]", "border-color[rgba(14,165,233,0.32)!]", "text[#0369a1!]"]],[".bdoc-badge-a", ["bg[rgba(217,119,6,0.12)!]", "border-color[rgba(217,119,6,0.32)!]", "text[#b45309!]"]],[".bdoc-pg-shell", ["bg[#ffffff!]", "border-color[#dce4f0!]", "shadow[0_14px_40px_rgba(15,23,42,0.08)!]"]],[".bdoc-pg-bar", ["bg[#f1f5f9!]", "border-bottom-color[#dce4f0!]"]],[".bdoc-pg-subbar", ["bg[#f8fafc!]", "border-top-color[#e2e8f0!]", "border-bottom-color[#dce4f0!]"]],[".bdoc-pg-input", ["bg[#ffffff!]", "text[#047857!]"]],[".bdoc-pg-stage", ["bg[#f1f5f9!]"]],[".bdoc-pg-css", ["bg[#f8fafc!]", "text[#1e293b!]"]],[".bdoc-pg-chip", ["bg[#ffffff!]", "border-color[#cbd5e1!]", "text[#475569!]"]],[".bdoc-pg-chip-active", ["bg-gradient[135deg,#00ff88,#22d3ee!]", "text[#04121f!]", "border-color[transparent!]"]],[".bdoc-pg-action", ["bg[#ffffff!]", "border-color[#cbd5e1!]", "text[#475569!]"]],[".bdoc-pg-action-accent", ["bg[rgba(5,150,105,0.10)!]", "border-color[rgba(5,150,105,0.28)!]", "text[#047857!]"]],[".bdoc-pg-snip", ["bg[#ffffff!]", "border-color[#cbd5e1!]"]],[".bdoc-pg-stats", ["bg[rgba(5,150,105,0.10)!]", "border-color[rgba(5,150,105,0.25)!]", "text[#047857!]"]],[".bdoc-pg-bg-active", ["bg[#e2e8f0!]", "border-color[#cbd5e1!]", "text[#0f172a!]"]]];const root=document.documentElement;
  function apply(){const light=root.classList.contains('tema-claro');for(const [selector,tokens] of rules){
  let els=[];try{els=document.querySelectorAll(selector)}catch(_){}
  for(const el of els){for(const t of tokens)el.classList.toggle(t,light)}
