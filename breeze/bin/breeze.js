@@ -1111,13 +1111,11 @@ function construir(opcoes) {
     totalRegras += regras.length + regrasTransform.length
     escritos.push({ abs: nomeFicheiro, bytes: Buffer.byteLength(css) })
 
-    for (const el of elementos) {
-      for (const t of el.classList) {
+    for (const t of tokens) {
         if (!nomesComponentes.has(t) && !cssgen.classeRelevante(t, cfgMotor)) {
           desconhecidas.add(t)
           if (coletor) coletor.desconhecidas.add(t)
         }
-      }
     }
     return regras.length + regrasTransform.length
   }
@@ -1191,7 +1189,7 @@ function construir(opcoes) {
         // o conteúdo mudou: comparar a ASSINATURA de classes — se for igual
         // (mudança só de texto), a contribuição para o CSS é a mesma
         const assin = htmlscan.assinaturaPagina(p.conteudo)
-        const classesHash = cacheJS.sha256(cacheJS.jsonEstavel([...new Set(assin.els.flat())].sort()))
+        const classesHash = cacheJS.sha256(cacheJS.jsonEstavel(assin.els))
         const sigScripts = cacheJS.sha256(cacheJS.jsonEstavel(assin.scripts))
         p._classesNovas = { classesHash, sigScripts }
         if (ent && ent.classesHash === classesHash && ent.sigScripts === sigScripts) {
@@ -1201,7 +1199,7 @@ function construir(opcoes) {
           houveMudanca = true
         }
       }
-      if (manifestAnterior && manifestAnterior.digital !== digital) houveMudanca = true
+      if (paginasRemovidas.length || (manifestAnterior && manifestAnterior.digital !== digital)) houveMudanca = true
     }
     const fantasma = fantasmaDe()
     const cssAbs = path.join(outAbs, opcoes.nome.replace(/\.css$/, '') + '.css')
@@ -1239,7 +1237,7 @@ function construir(opcoes) {
           let sigScripts = (p._classesNovas || manifest.paginas[p.rel] || {}).sigScripts
           if (!classesHash) {
             const assin = htmlscan.assinaturaPagina(p.conteudo)
-            classesHash = cacheJS.sha256(cacheJS.jsonEstavel([...new Set(assin.els.flat())].sort()))
+            classesHash = cacheJS.sha256(cacheJS.jsonEstavel(assin.els))
             sigScripts = cacheJS.sha256(cacheJS.jsonEstavel(assin.scripts))
           }
           classesHashes.push(classesHash)
@@ -1480,7 +1478,7 @@ function construir(opcoes) {
           if (opcoes.split && p.cssAbs) {
             ent.chave = cacheJS.chavePagina(p.normHash, fantasmaDe(), digital)
           }
-          ent.classesHash = cacheJS.sha256(cacheJS.jsonEstavel([...new Set(assin.els.flat())].sort()))
+          ent.classesHash = cacheJS.sha256(cacheJS.jsonEstavel(assin.els))
           ent.sigScripts = cacheJS.sha256(cacheJS.jsonEstavel(assin.scripts))
           const resDiag = diagnosticarPagina(p)
           ent.diagnostico = resDiag.itens

@@ -28,12 +28,14 @@ const htmlscan = require('./htmlscan')
 const tplscan = require('./tplscan')
 const cssgen = require('./cssgen')
 
+const { motivoInseguro } = require('./valor-seguro')
 const MEDIAS_FIXAS = new Set(['print', 'motion-reduce', 'motion-safe'])
 
 const CODIGO_SEVERIDADE = {
   'prefixo-desconhecido': 'erro',
   'variante-desconhecida': 'erro',
   'sintaxe-invalida': 'erro',
+  'valor-perigoso': 'erro',
   'modificador-opacidade-nao-suportado': 'erro',
   'estilo-tailwind': 'aviso',
   'classe-dinamica-suspeita': 'aviso',
@@ -297,6 +299,19 @@ function analisarClasse(classe, cfg) {
   }
 
   let baseLimpa = base.endsWith('!') ? base.slice(0, -1) : base
+
+  // valor arbitrário que o motor rejeita por segurança (</style>, /* sem
+  // fecho, { } ;) — antes era descartado sem qualquer aviso
+  const mVal = /^[a-zA-Z-]+\[([^\]]+)\]$/.exec(baseLimpa)
+  if (mVal) {
+    const motivo = motivoInseguro(mVal[1])
+    if (motivo) {
+      return {
+        codigo: 'valor-perigoso',
+        mensagem: 'valor arbitrário rejeitado por segurança: ' + motivo + ' — a classe é descartada',
+      }
+    }
+  }
 
   // classes fixas do motor (tabelas já prefixadas) — token TAL COMO escrito
   if ((cfg.classesFixas || {})[baseLimpa] !== undefined) return null

@@ -436,6 +436,16 @@ function criarHospedeiro({ caminhoBundle, config, verboso = false }) {
     return { regras, elementos: ultimosElementos }
   }
 
+  function buildClasses(grupos) {
+    if (typeof BreezeCSS.buildElementos !== 'function') throw new Error('Motor sem API buildElementos')
+    const elementos = Array.from(grupos, grupo => {
+      const attrs = {}; const list = Array.isArray(grupo) ? [...grupo] : String(grupo).trim().split(/\s+/).filter(Boolean)
+      return { classList: list, getAttribute: n => attrs[n] ?? null, setAttribute: (n,v) => { attrs[n]=String(v) }, removeAttribute: n => { delete attrs[n] } }
+    })
+    const css = BreezeCSS.buildElementos(elementos, { minificar: false })
+    return { regras: css ? css.split('\n') : [], elementos }
+  }
+
   function estilosPlugins() {
     const folhas = []
     for (const tag of sandbox.document.head.children) {
@@ -462,6 +472,7 @@ function criarHospedeiro({ caminhoBundle, config, verboso = false }) {
 
   return {
     build,
+    buildClasses,
     estilosPlugins,
     registarComponente,
     regrasComponentes,

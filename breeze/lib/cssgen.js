@@ -14,6 +14,7 @@
 // ─────────────────────────────────────────────────────────────────────────
 
 const { cssEscape } = require('./escape')
+const { valorSeguro } = require('./valor-seguro')
 
 const RE_ARBITRARIO = /^(?<prefixo>[a-zA-Z-]+(?:-[a-zA-Z-]+)*)\[(?<valor>[^\]]+)\]$/
 
@@ -103,26 +104,6 @@ function classeRelevante(classe, cfg) {
 }
 
 /** Analisa uma classe de transform (rotate/scale/…) e devolve os seus dados. */
-function valorSeguro(valor) {
-  if (/<\/style/i.test(valor)) return false;
-  let aspas = null, pilha = [];
-  for (let i = 0; i < valor.length; i++) {
-    const c = valor[i];
-    if (c === "\\") { if (++i >= valor.length) return false; continue; }
-    if (aspas) { if (c === aspas) aspas = null; continue; }
-    if (c === '"' || c === "'") { aspas = c; continue; }
-    if (c === '(') { pilha.push(/url$/i.test(valor.slice(0,i))); continue; }
-    if (c === ')') { if (!pilha.length) return false; pilha.pop(); continue; }
-    if (pilha.includes(true)) continue;
-    if (c === '/' && valor[i+1] === '*') {
-      const fim = valor.indexOf('*/', i+2); if (fim < 0) return false;
-      i = fim+1; continue;
-    }
-    if (c === '{' || c === '}' || (c === ';' && !pilha.length)) return false;
-  }
-  return !aspas && !pilha.length;
-}
-
 function analisarTransform(classe, cfg) {
   let importante = false
   let token = classe
@@ -155,6 +136,7 @@ function analisarTransform(classe, cfg) {
   }
   const tema = cfg.tema || {}
   valor = tema.cores?.[valor] || tema.espacamento?.[valor] || tema.fontes?.[valor] || valor
+  valor = require("./math-values").normalizarMatematica(valor)
   if (!require("./value-validation").supports("transform", fn + "(" + valor + ")")) return null
   return {
     token: classe,

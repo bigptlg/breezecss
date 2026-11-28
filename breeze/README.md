@@ -1,4 +1,4 @@
-# breeze — BreezeCLI 1.1.1
+# breeze — BreezeCLI 1.1.2
 
 Gera o **CSS estático** do BreezeCSS **e o runtime JavaScript dos plugins** a
 partir de todos os HTML do projecto — sem o `breeze.bundle.js` no cliente.
@@ -35,7 +35,7 @@ BreezeCLI 1.1.0
 
 ✓ CSS e JavaScript injetados
 ✓ Nenhuma referência duplicada
-✓ 2 páginas · 148 regras · 12,4 KB CSS · 38,1 KB runtime · 46 ms · motor 2.3.0
+✓ 2 páginas · 148 regras · 12,4 KB CSS · 38,1 KB runtime · 46 ms · motor 2.3.2
 ✓ cache: 2 hits / 0 misses (.breeze-cache/)
 ✓ Zero dependências npm externas
 ⚠ diagnóstico: 1 erro(s), 0 aviso(s) em 1 ficheiro(s)
@@ -227,6 +227,24 @@ Os `MutationObserver` dos plugins originais ficam intactos, portanto:
 - os `ResizeObserver`/`IntersectionObserver`/Canvas/SVG reais do browser
   funcionam — verificado nos testes de navegador (Chromium/playwright).
 
+#### Folha de estilos em SPAs de longa duração (runtime)
+
+- **Limpeza automática:** em SPAs que geram valores únicos (`w[${px}px]`) a
+  folha crescia sem limite, porque cada classe nova deixava uma regra. Agora,
+  quando passam `gcLimiar` regras novas desde a última limpeza (por omissão
+  **2000**), numa pausa do browser removem-se as regras das classes que já não
+  existem em nenhum elemento do documento. A safelist, as regras globais e as
+  dos plugins nunca são removidas, e uma classe removida que reapareça volta a
+  ser inserida pelo fluxo normal (no frame seguinte, como qualquer nó novo).
+  `BreezeConfig = { gcLimiar: 0 }` desactiva; `BreezeCSS.coletar()` força-a e
+  devolve quantas regras removeu; `BreezeCSS.stats().regrasActivas` mostra o
+  tamanho actual. Para valores **contínuos** (largura de um slider, posição
+  de um arrasto) continua a ser melhor `style=""` ou uma variável CSS: cada
+  valor novo é uma regra nova até à próxima limpeza.
+- **Shadow DOM:** o `<style>` do Breeze vive no `document.head`, por isso
+  elementos dentro de um `shadowRoot` **não recebem estilo**. Em web
+  components usa o modo compilado e inclui o CSS gerado no shadow root.
+
 Exemplos de integração em [`exemplo/spa/`](exemplo/spa/README.md).
 
 ## Diagnóstico — fim das falhas silenciosas
@@ -242,6 +260,7 @@ contra a configuração interna do motor e produz diagnósticos com posição:
 | `sintaxe-invalida` | erro | `p[10px` · `p[]` · `p[1]0]` | Colchetes/parênteses por fechar, valor vazio, `]` dentro do valor |
 | `estilo-tailwind` | aviso | `p-4` · `bg-blue-500` · `w-full` | Classe ao estilo Tailwind — sugere o equivalente Breeze (`p[1rem]`, `bg[#3b82f6]`, `w[100%]`) quando conhecido |
 | `modificador-opacidade-nao-suportado` | erro | `bg[#000]/50` | O Breeze não tem `/50` — sugere o alfa no valor (`bg[#00000080]`) |
+| `valor-perigoso` | erro | `p[1px</style>…]` · `bg[red/*]` · `m[1px}body{…]` · `w[1px;color:red]` | Valor arbitrário rejeitado pelo motor por segurança (fecha `<style>`, comentário sem fecho, `{` `}` ou `;` fora de parênteses). A mensagem diz o motivo |
 | `classe-dinamica-suspeita` | aviso | `` `p[${n}px]` `` | Template literal — o valor só existe em runtime; sugere `--safelist` |
 | `aviso-motor` | aviso | — | Avisos emitidos pelo próprio motor durante o build |
 | `nao-breeze` | nota | `prose`, `cartao` | Classe própria do utilizador — **só aparece com `--verbose`** |
@@ -432,7 +451,7 @@ O CLI procura o motor pela ordem:
 
 1. `--engine <caminho>`
 2. `breeze.bundle.js` (ou `breeze.min.js`) na pasta actual e **nas pastas acima**
-3. A cópia incluída no pacote (`vendor/breeze.bundle.js`, motor 2.3.0)
+3. A cópia incluída no pacote (`vendor/breeze.bundle.js`, motor 2.3.2)
 
 Assim podes actualizar o bundle do projecto sem tocar no CLI.
 
@@ -537,7 +556,7 @@ breeze/
 ├─ lib/components.js      descoberta dos addComponent(…)
 ├─ scripts/sync-engine.js copia o motor da raiz para vendor/ e valida versões
 ├─ scripts/bench.js       benchmark da cache (500 páginas × 200 elementos)
-├─ vendor/breeze.bundle.js  motor BreezeCSS 2.3.0 + plugins
+├─ vendor/breeze.bundle.js  motor BreezeCSS 2.3.2 + plugins
 └─ exemplo/               index.html + settings.html + doc.html (demonstração;
                           doc.html é a documentação viva do CLI, já com css/ gerado)
 ```
@@ -552,7 +571,7 @@ Escolhas conservadoras tomadas onde a especificação deixava margem:
   `scripts/sync-engine.js` propaga-a aos README.
 - **Severidades dos diagnósticos** — são **erro** os códigos que significam
   "a classe nunca gera CSS": `sintaxe-invalida`, `variante-desconhecida`,
-  `prefixo-desconhecido` e `modificador-opacidade-nao-suportado`; são
+  `prefixo-desconhecido`, `valor-perigoso` e `modificador-opacidade-nao-suportado`; são
   **aviso** os que significam "provavelmente não é o que queres":
   `estilo-tailwind`, `classe-dinamica-suspeita` e `aviso-motor`; `nao-breeze`
   é nota (só com `--verbose`). O `--strict` conta só os erros.
@@ -574,3 +593,7 @@ Escolhas conservadoras tomadas onde a especificação deixava margem:
 ## Validação semântica (2.3.1 / CLI 1.1.1)
 
 O bundle usa `CSS.supports(propriedade, valor)` após resolver o tema e processadores especiais. Valores inválidos são descartados com diagnóstico. A cache de validação é limitada a 4096 entradas. O CLI inclui verificações conservadoras para espaçamento, cores nomeadas e transforms comuns, sem dependências obrigatórias. Opcionalmente, instala `css-tree` no ambiente do CLI para ampliar a cobertura gramatical (integração opcional não testada nesta entrega). `--strict` devolve 1 perante diagnósticos de valor inválido. A validação não garante valores calculados de variáveis CSS nem cobertura integral no CLI.
+
+### API directa de compilação (Node)
+
+`criarHospedeiro()` em `lib/engine.js` expõe `buildClasses(grupos)`. Cada grupo representa as classes de um elemento; mantenha os transforms do mesmo elemento no mesmo grupo. Retorna `{ regras, elementos }` tal como `build(html)`, mas não analisa HTML. A compilação CLI normal mantém a leitura do HTML para diagnósticos e plugins. Valores como `w[calc(100px+20px)]` recebem espaços em torno dos operadores binários reconhecidos; underscores continuam suportados. A cache incremental foi actualizada para preservar ordem e agrupamento de classes.

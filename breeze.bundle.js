@@ -1,4 +1,4 @@
-/*! Breeze bundle — BreezeCSS 2.3.1 + BreezeGlass 1.0.0 + BreezeDividers 1.2.0 + BreezeProgress 1.0.0 + BreezeScrollbar 1.0.0 + BreezePreloader 1.6.0 + BreezeBackgrounds 1.5.0 (ficheiro único) */
+/*! Breeze bundle — BreezeCSS 2.3.2 + BreezeGlass 1.0.0 + BreezeDividers 1.2.0 + BreezeProgress 1.0.0 + BreezeScrollbar 1.0.0 + BreezePreloader 1.6.0 + BreezeBackgrounds 1.5.0 (ficheiro único) */
 /*!
  * BreezeGlass v1.0.0 — plugin "glass" para o BreezeCSS (>= 2.2)
  *
@@ -3441,9 +3441,13 @@
 ;/* Regista o plugin antes do init do Breeze, preservando a BreezeConfig do utilizador.
    Para desactivar: window.BreezeConfig = { Glass: false } */
 /**
- * BreezeCSS v2.3.1 – breeze.bundle.js
+ * BreezeCSS v2.3.2 – breeze.bundle.js
  * Bundle sem módulos ES – compatível com <script src="...">
  * Autor: Pedro de Oliveira
+ *
+ * Novidades v2.3.2:
+ *  • Limpeza automática das regras de classes que saíram do DOM (gcLimiar,
+ *    por omissão 2000; 0 desactiva), BreezeCSS.coletar() e stats().regrasActivas.
  *
  * Novidades v2.3.1:
  *  • Variantes contextuais: focus-within, group-hover, group-focus-within,
@@ -3503,6 +3507,28 @@
 
 (function (global) {
   "use strict";
+
+  function normalizarMatematica(valor) {
+    if (!/\b(?:calc|min|max|clamp|round|mod|rem|abs|sign|hypot|pow|sqrt|log|exp|sin|cos|tan|asin|acos|atan|atan2)\(/i.test(valor)) return valor;
+    const math = /^(?:calc|min|max|clamp|round|mod|rem|abs|sign|hypot|pow|sqrt|log|exp|sin|cos|tan|asin|acos|atan|atan2)$/i;
+    const stack = []; let out = "", quote = "";
+    for (let i=0;i<valor.length;i++) {
+      const c=valor[i];
+      if(c==='\\'){out+=valor.slice(i,i+2);i++;continue;}
+      if(quote){out+=c;if(c===quote)quote="";continue;}
+      if(c==='"'||c==="'"){quote=c;out+=c;continue;}
+      if(c==='('){const name=(valor.slice(0,i).match(/[a-zA-Z][a-zA-Z0-9-]*$/)||[])[0]||"";stack.push((stack.at(-1)!==false || !stack.length) && (math.test(name)||(!name&&stack.at(-1)===true)));out+=c;continue;}
+      if(c===')'){stack.pop();out+=c;continue;}
+      if(stack.at(-1) && (c==='+'||c==='-')) {
+        const left=out.trimEnd(), right=valor.slice(i+1).trimStart();
+        if (/[\d%)]$/.test(left)|| /\d(?:[a-z]+)$/i.test(left)) {
+          if (!/\d[eE]$/.test(left) && /^(?:[+\-\d.(]|(?:var|calc|min|max|clamp)\()/i.test(right)) {out=left+' '+c+' ';while(/\s/.test(valor[i+1]||''))i++;continue;}
+        }
+      }
+      out+=c;
+    }
+    return out;
+  }
 
   const cacheValidacaoCSS = new Map();
   function suportaValorCSS(prop, valor) {
@@ -3595,6 +3621,14 @@
     function registarRegra(r) {
       regrasCSS.add(r);
     }
+    // Limpeza de classes que já não estão no DOM: permite que a regra volte a
+    // ser inserida se a classe reaparecer.
+    function removerRegra(r) {
+      regrasCSS.delete(r);
+    }
+    function esquecerClasse(c) {
+      classesResolvidas.delete(c);
+    }
     function temClasse(c) {
       return classesResolvidas.has(c);
     }
@@ -3675,6 +3709,8 @@
     return {
       temRegra,
       registarRegra,
+      removerRegra,
+      esquecerClasse,
       temClasse,
       obterClasse,
       registarClasse,
@@ -3726,7 +3762,9 @@
       const globais = _regrasOffline.slice(0, _globaisOffline);
       const classes = _regrasOffline.slice(_globaisOffline);
       // sort estável (ES2019+) mantém a ordem de chegada dentro do rank.
-      return globais.concat(classes.sort((a, b) => _rankRegra(a) - _rankRegra(b)));
+      const ranks = new Map();
+      const rank = r => { if (!r.startsWith("@media")) return 0; if (!ranks.has(r)) ranks.set(r, _rankRegra(r)); return ranks.get(r); };
+      return globais.concat(classes.sort((a, b) => rank(a) - rank(b)));
     }
 
     function inicializar(config) {
@@ -3757,7 +3795,7 @@
     // Insere uma regra de classe na posição ordenada por rank (estável: depois
     // de todas as regras com rank <= ao dela). Pesquisa binária sobre os ranks
     // em cache: O(log n) comparações e nenhuma leitura de cssText.
-    function _inserirOrdenadoLive(sheet, regra, chaveTransform) {
+    function _inserirOrdenadoLive(sheet, regra, chaveTransform, classe) {
       const rank = _rankRegra(regra);
       let lo = 0;
       let hi = _entradasLive.length;
@@ -3767,12 +3805,14 @@
         else hi = meio;
       }
       sheet.insertRule(regra, _globaisLive + lo); // pode lançar: o índice só é actualizado depois
-      const entrada = { rank };
+      // classe: classe do DOM a que a regra pertence (null = nunca é limpa);
+      // chave: chave da transform, para a apagar da cache na limpeza.
+      const entrada = { rank, regra, classe: classe || null, chave: classe ? chaveTransform || null : null };
       _entradasLive.splice(lo, 0, entrada);
       if (chaveTransform) _transformLive.set(chaveTransform, entrada);
     }
 
-    function _inserirRegra(regra, global = false) {
+    function _inserirRegra(regra, global = false, classe = null) {
       if (Cache.temRegra(regra)) return;
       Cache.registarRegra(regra);
       if (_modoOffline) {
@@ -3786,7 +3826,7 @@
           sheet.insertRule(regra, _globaisLive);
           _globaisLive++;
         } else {
-          _inserirOrdenadoLive(sheet, regra, null);
+          _inserirOrdenadoLive(sheet, regra, null, classe);
         }
         Logger.debug("Regra → " + regra);
       } catch (e) {
@@ -3844,7 +3884,7 @@
         let regra = `${seletor} { ${prop}: ${r.valor}${sufixo}; }`;
         if (r.breakpoint || r.medias?.length)
           regra = _comMediaQuery(r.breakpoint, regra, r.medias);
-        _inserirRegra(regra);
+        _inserirRegra(regra, false, classeOriginal);
       });
     }
 
@@ -3912,7 +3952,9 @@
       }
       const sheet = _obterSheet();
       try {
-        _inserirOrdenadoLive(sheet, regra, chaveTransform);
+        // transforms por classe (cls:) podem ser limpas por classe; as por
+        // elemento (elem:) já são limpas quando o elemento é desmontado.
+        _inserirOrdenadoLive(sheet, regra, chaveTransform, chaveTransform.startsWith("cls:") ? classeOriginal : null);
         Logger.debug("Transform → " + regra);
       } catch (e) {
         Logger.erro("Falha transform: " + regra, e);
@@ -4068,6 +4110,39 @@
       return linhas;
     }
 
+    // Remove da folha as regras de classes que já não estão no DOM (vivas =
+    // Set de classes em uso). Devolve quantas regras removeu. Regras globais,
+    // de plugins, de safelist e transforms por elemento nunca são tocadas.
+    function coletarInativas(vivas) {
+      if (_modoOffline || !_sheet) return 0;
+      const removidas = new Set();
+      let n = 0;
+      for (let i = _entradasLive.length - 1; i >= 0; i--) {
+        const e = _entradasLive[i];
+        if (!e.classe || vivas.has(e.classe)) continue;
+        try {
+          _sheet.deleteRule(_globaisLive + i);
+        } catch (err) {
+          continue;
+        }
+        e.removida = true;
+        n++;
+        if (e.chave) {
+          _transformLive.delete(e.chave);
+          Cache.apagarTransform(e.chave);
+        } else {
+          Cache.removerRegra(e.regra);
+        }
+        removidas.add(e.classe);
+      }
+      if (n) _entradasLive = _entradasLive.filter((e) => !e.removida);
+      removidas.forEach((c) => Cache.esquecerClasse(c));
+      return n;
+    }
+    function tamanhoLive() {
+      return _entradasLive.length;
+    }
+
     function limpar() {
       if (_tagEstilo) {
         _tagEstilo.remove();
@@ -4090,6 +4165,8 @@
       obterRegrasOffline,
       gerarCSSEstatico,
       obterRegrasDOMAtual,
+      coletarInativas,
+      tamanhoLive,
       limpar,
     };
   })();
@@ -4392,7 +4469,7 @@
       }
 
       valor = _resolverValorTema(valor);
-      valor = _substituirUnderscoreFora(valor);
+      valor = normalizarMatematica(_substituirUnderscoreFora(valor));
       if (!valorSeguro(valor)) return null;
       const propriedade = _config.mapaPropriedades[prefixo];
       if (!propriedade) {
@@ -4434,6 +4511,7 @@
     const FUNCOES_LITERAIS = new Set(["url", "var", "env", "attr", "src"]);
 
     function _substituirUnderscoreFora(valor) {
+      if (!valor.includes("_")) return valor;
       let resultado = "";
       const pilha = []; // true = literal (preservar _), false = converter
       let nomeFn = "";
@@ -4751,7 +4829,8 @@
       return _mapaIdsElemento.get(elemento);
     }
 
-    function processarElementos(elementos, observar = false) {
+    function processarElementos(elementos, observar = false, offline = false) {
+      const emitidas = offline ? new Set() : null;
       for (const el of elementos) {
         const idAnterior = _mapaIdsElemento.get(el);
         if (idAnterior) {
@@ -4763,12 +4842,14 @@
         const classes = Parser.extrairClassesRelevantes(el);
         const classesTransform = [];
         for (const classe of classes) {
+          if (emitidas && emitidas.has(classe)) continue;
           const resultados = Parser.interpretarClasse(classe);
-          if (!resultados || resultados.length === 0) continue;
+          if (!resultados || resultados.length === 0) { if (emitidas) emitidas.add(classe); continue; }
           if (resultados.some((r) => r.eTransform)) {
             _obterIdElemento(el);
             classesTransform.push(classe);
           }
+          if (emitidas && !resultados.some(r => r.eTransform)) emitidas.add(classe);
           Renderer.renderizar(resultados, classe, el);
         }
         // Actualizar o mapa id → classes de transform para este elemento
@@ -4777,6 +4858,43 @@
           if (id) _mapaIdParaClasses.set(id, classesTransform);
         }
       }
+    }
+
+    // ── Limpeza de regras de classes que saíram do DOM ──────────────────
+    // Em SPAs com valores únicos (w[${px}px], p[${n}px]…) a folha cresceria
+    // sem limite. Quando passam `gcLimiar` regras novas desde a última
+    // limpeza (por omissão 2000; 0 desactiva), numa pausa do browser
+    // removem-se as regras das classes que já não existem em nenhum elemento.
+    // Safelist e regras globais/de plugins nunca são removidas. Se a classe
+    // reaparecer, a regra é inserida de novo pelo fluxo normal.
+    let _gcBase = 0;
+    let _gcAgendado = false;
+    function _classesVivas() {
+      const vivas = new Set((_config && _config.safelist) || []);
+      for (const el of document.querySelectorAll("[class]")) {
+        const c = el.getAttribute("class");
+        if (!c) continue;
+        for (const t of c.split(/\s+/)) if (t) vivas.add(t);
+      }
+      return vivas;
+    }
+    function coletar() {
+      _garantirIniciado();
+      const n = Renderer.coletarInativas(_classesVivas());
+      _gcBase = Renderer.tamanhoLive();
+      if (n) Logger.debug(`Limpeza: ${n} regra(s) de classes inactivas removidas`);
+      return n;
+    }
+    function _verificarLimpeza() {
+      const lim = _config && _config.gcLimiar !== undefined ? _config.gcLimiar : 2000;
+      if (!lim || _gcAgendado || Renderer.tamanhoLive() - _gcBase < lim) return;
+      _gcAgendado = true;
+      const f = () => {
+        _gcAgendado = false;
+        if (_iniciado) coletar();
+      };
+      if (typeof requestIdleCallback === "function") requestIdleCallback(f, { timeout: 2000 });
+      else setTimeout(f, 200);
     }
 
     function init(configUsuario = {}) {
@@ -4796,7 +4914,7 @@
             : "info",
         silencioso: _config.log === false,
       });
-      Logger.info("Inicializando BreezeCSS v2.3.1...");
+      Logger.info("Inicializando BreezeCSS v2.3.2...");
       if (_config.plugins) _config.plugins.forEach((p) => _aplicarPlugin(p));
 
       // ── prefix ───────────────────────────────────────────────────
@@ -4850,7 +4968,10 @@
 
       const elementosIniciais = Observer.coletarInicialmente();
       processarElementos(elementosIniciais);
-      Observer.iniciar((elementos) => processarElementos(elementos, true));
+      Observer.iniciar((elementos) => {
+        processarElementos(elementos, true);
+        _verificarLimpeza();
+      });
       Logger.info(`Pronto. ${elementosIniciais.length} elementos processados.`);
     }
 
@@ -4860,6 +4981,8 @@
       Cache.limpar();
       _mapaIdParaClasses.clear();
       _mapaIdsElemento = new WeakMap();
+      _gcBase = 0;
+      _gcAgendado = false;
       _config = null;
       _iniciado = false;
       _idCounter = 0;
@@ -4881,7 +5004,11 @@
       }
       Logger.info("Modo build...");
       const doc = new DOMParser().parseFromString(htmlString, "text/html");
-      const elementos = Array.from(doc.querySelectorAll("*"));
+      return buildElementos(Array.from(doc.querySelectorAll("*")), opcoes);
+    }
+
+    function buildElementos(elementos, opcoes = {}) {
+      if (!_iniciado) _garantirIniciado();
       Renderer.ativarModoOffline();
       Cache.limpar();
       Parser.inicializar(_config);
@@ -4892,7 +5019,7 @@
           html: { "scroll-behavior": "smooth" },
         },
       });
-      processarElementos(elementos);
+      processarElementos(elementos, false, true);
       const css = Renderer.gerarCSSEstatico(opcoes.minificar ?? false);
       Renderer.desativarModoOffline();
       Logger.info(`Build: ${css.length} chars`);
@@ -5145,6 +5272,7 @@
     function obterStats() {
       return {
         cache: Cache.obterStats(),
+        regrasActivas: Renderer.tamanhoLive(),
         config: {
           breakpoints: Object.keys(_config?.breakpoints || {}),
           variantes: Object.keys(_config?.variantes || {}),
@@ -5796,6 +5924,7 @@
       reiniciar,
       processar,
       build,
+      buildElementos,
       exportar,
       use,
       addMapping,
@@ -5805,6 +5934,7 @@
       addFixedClass,
       addProcessor,
       obterStats,
+      coletar,
     };
   })();
 
@@ -5816,6 +5946,7 @@
     reiniciar: () => Engine.reiniciar(),
     processar: () => Engine.processar(),
     build: (h, o) => Engine.build(h, o),
+    buildElementos: (els, o) => Engine.buildElementos(els, o),
 
     /**
      * exportar(opcoes?)
@@ -5856,7 +5987,9 @@
     addFixedClass: (n, e) => Engine.addFixedClass(n, e),
     addProcessor: (p, fn) => Engine.addProcessor(p, fn),
     stats: () => Engine.obterStats(),
-    versao: "2.3.1",
+    /** Remove as regras das classes que já não estão no DOM. Devolve quantas. */
+    coletar: () => Engine.coletar(),
+    versao: "2.3.2",
   };
 
   // Auto-init

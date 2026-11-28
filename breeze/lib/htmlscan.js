@@ -108,10 +108,11 @@ function inicioValorClass(brutoAttrs, baseAbs) {
  * Elementos dentro de <template> SÃO lidos (as classes acabam no DOM).
  * Cada elemento traz _posicoesClasses: Map<classe, {linha, coluna}>.
  */
-function parseHTML(html) {
+function parseHTML(html, { posicoesClasses = true } = {}) {
   const elementos = []
   const n = html.length
   let i = 0
+  let minus = null
   let linhas = null // tabela de linhas preguiçosa (só com atributos class)
   const linhaCol = (abs) => {
     if (!linhas) linhas = criarTabelaLinhas(html)
@@ -173,7 +174,7 @@ function parseHTML(html) {
     const attrs = analisarAtributos(brutoAttrs)
 
     if ((nome === 'script' || nome === 'style') && !autoFecho) {
-      const minus = html.toLowerCase()
+      minus ??= html.toLowerCase()
       const fecho = minus.indexOf('</' + nome, i)
       if (fecho === -1) {
         i = n
@@ -186,7 +187,7 @@ function parseHTML(html) {
     if (attrs.class && attrs.class.trim()) {
       // posições por classe: percorre o valor bruto do atributo class
       const posicoes = new Map()
-      const valAbs = inicioValorClass(brutoAttrs, k)
+      const valAbs = posicoesClasses ? inicioValorClass(brutoAttrs, k) : -1
       if (valAbs >= 0) {
         const valor = attrs.class
         let j = 0
@@ -493,14 +494,14 @@ function normalizarParaCache(html) {
  */
 function assinaturaPagina(html) {
   const els = []
-  for (const el of parseHTML(html)) els.push([...el.classList].sort())
+  for (const el of parseHTML(html, { posicoesClasses: false })) els.push([...el.classList])
   const scripts = []
   const RE_BLOCO = /<script\b[^>]*>([\s\S]*?)<\/script>/gi
   let m
   while ((m = RE_BLOCO.exec(html))) {
     const c = m[1]
     if (!c.trim()) continue // bloco vazio (ex.: <script src=…></script>)
-    scripts.push(desembrulharGuardas(c).replace(/\s+/g, ' ').trim())
+    scripts.push(desembrulharGuardas(c).trim())
   }
   return { els, scripts }
 }
@@ -524,7 +525,7 @@ function referenciasBundle(html) {
 /** Tokens de classe de todos os elementos (com duplicados já removidos). */
 function tokensClasses(html) {
   const set = new Set()
-  for (const el of parseHTML(html)) {
+  for (const el of parseHTML(html, { posicoesClasses: false })) {
     for (const t of el.classList) set.add(t)
   }
   return [...set]

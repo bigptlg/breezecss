@@ -33,7 +33,7 @@ const crypto = require('crypto')
 // diagnósticos por página e repete-os em hits; sem isto uma cache antiga
 // continuaria a mostrar diagnósticos errados depois de uma correcção.
 // 2: correcção dos falsos positivos de print:/motion-*:/max-<bp>:
-const ESQUEMA = 2
+const ESQUEMA = 4 // 4: diagnóstico valor-perigoso
 const NOME_MANIFEST = 'manifest.json'
 
 function sha256(texto) {
